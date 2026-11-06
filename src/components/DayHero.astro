@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
-import { readdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { withBase } from '../lib/path';
 import { greetingBank } from '../lib/greetings';
 import { aospBook, chapterCount, nextBook } from '../lib/books';
@@ -23,10 +23,12 @@ const previewPages = Array.from({ length: Math.ceil(chapters.length / pageSize) 
 	chapters.slice(index * pageSize, (index + 1) * pageSize),
 );
 
-const backgroundDir = fileURLToPath(new URL('../../public/backgrounds', import.meta.url));
-const backgrounds = readdirSync(backgroundDir)
-	.filter((name) => /\.(jpe?g|png|webp)$/i.test(name))
-	.sort();
+const backgroundDir = join(process.cwd(), 'public', 'backgrounds');
+const backgrounds = existsSync(backgroundDir)
+	? readdirSync(backgroundDir)
+			.filter((name) => /\.(jpe?g|png|webp)$/i.test(name))
+			.sort()
+	: [];
 const backgroundBase = withBase('/backgrounds/');
 ---
 
