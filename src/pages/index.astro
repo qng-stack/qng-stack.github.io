@@ -1,0 +1,37 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import DayHero from '../components/DayHero.astro';
+import Header from '../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<script is:inline>
+			(function () {
+				const now = new Date();
+				const key = now.getMonth() + 1 + '-' + now.getDate();
+				const holidays = {
+					'1-1': 'newyear',
+					'5-1': 'labor',
+					'10-1': 'national',
+					'10-2': 'national',
+					'10-3': 'national',
+					'10-24': 'programmer',
+					'12-31': 'eve',
+				};
+				const hour = now.getHours();
+				document.documentElement.dataset.weekday = String(now.getDay());
+				document.documentElement.dataset.daypart =
+					hour < 5 ? 'night' : hour < 11 ? 'morning' : hour < 14 ? 'noon' : hour < 18 ? 'afternoon' : 'evening';
+				if (holidays[key]) document.documentElement.dataset.holiday = holidays[key];
+			})();
+		</script>
+	</head>
+	<body class="home">
+		<Header />
+		<DayHero />
+	</body>
+</html>

@@ -1,0 +1,22 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import { nextBook } from '../../lib/books';
+import { SITE_TITLE } from '../../consts';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`${nextBook.title} · ${SITE_TITLE}`} description="这一本还没有开始写。" />
+	</head>
+	<body class="book-page">
+		<Header />
+		<main>
+			<h1 class="page-title">{nextBook.title}</h1>
+			<p class="book-empty">这一本还没有开始写。写下章节之后，目录会排在这里。</p>
+		</main>
+		<Footer />
+	</body>
+</html>

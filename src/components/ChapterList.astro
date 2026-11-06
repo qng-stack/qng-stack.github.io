@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import { withBase } from '../lib/path';
+
+const posts = (await getCollection('blog')).sort((a, b) => {
+	const na = Number.parseInt(a.id, 10);
+	const nb = Number.parseInt(b.id, 10);
+	if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+	return a.data.title.localeCompare(b.data.title, 'zh');
+});
+---
+
+<ol
+	class="chapters"
+	style={`--rows-3:${Math.ceil(posts.length / 3)};--rows-2:${Math.ceil(posts.length / 2)}`}
+>
+	{
+		posts.map((post) => {
+			const num = post.id.match(/^\d+/)?.[0] ?? '—';
+			return (
+				<li>
+					<a href={withBase(`/blog/${post.id}/`)}>
+						<span class="num">{num}</span>
+						<span>
+							<span class="chapter-title">{post.data.title}</span>
+							<span class="chapter-desc">{post.data.description}</span>
+						</span>
+					</a>
+				</li>
+			);
+		})
+	}
+</ol>

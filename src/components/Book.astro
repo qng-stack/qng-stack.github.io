@@ -1,0 +1,81 @@
+---
+import { withBase } from '../lib/path';
+
+const { href, label, cta, cover, meta = '', sheets = [[], [], [], []], tone = '' } = Astro.props;
+const [top, second, third, bottom] = sheets;
+---
+
+<a class:list={['book-link', tone]} href={withBase(href)} aria-label={label}>
+	<span class="book-shadow" aria-hidden="true"></span>
+	<span class="book-bob">
+		<span class="book-tilt">
+			<span class="book">
+				<span class="board board-left">
+					<span class="cover-name">qng-stack</span>
+					<span class="cover-title">
+						{cover.map((line) => <span>{line}</span>)}
+					</span>
+					{meta && <span class="cover-meta">{meta}</span>}
+				</span>
+				<span class="board board-pages">
+					<span class="page-base" aria-hidden="true">
+						<span class="page-sheet">
+							{bottom?.map((chapter) => (
+								<span class="page-row"><b>{chapter.num}</b><span>{chapter.title}</span></span>
+							))}
+						</span>
+					</span>
+					<span class="leaf leaf-1">
+						<span class="face front" aria-hidden="true">
+							<span class="page-sheet">
+								{third?.map((chapter) => (
+									<span class="page-row"><b>{chapter.num}</b><span>{chapter.title}</span></span>
+								))}
+							</span>
+						</span>
+						<span class="face back" aria-hidden="true">
+							<span class="page-sheet">
+								{bottom?.map((chapter) => (
+									<span class="page-row"><b>{chapter.num}</b><span>{chapter.title}</span></span>
+								))}
+							</span>
+						</span>
+					</span>
+					<span class="leaf leaf-2">
+						<span class="face front" aria-hidden="true">
+							<span class="page-sheet">
+								{second?.map((chapter) => (
+									<span class="page-row"><b>{chapter.num}</b><span>{chapter.title}</span></span>
+								))}
+							</span>
+						</span>
+						<span class="face back" aria-hidden="true">
+							<span class="page-sheet">
+								{third?.map((chapter) => (
+									<span class="page-row"><b>{chapter.num}</b><span>{chapter.title}</span></span>
+								))}
+							</span>
+						</span>
+					</span>
+					<span class="leaf leaf-3">
+						<span class="face front" aria-hidden="true">
+							<span class="page-sheet">
+								{top?.map((chapter) => (
+									<span class="page-row"><b>{chapter.num}</b><span>{chapter.title}</span></span>
+								))}
+							</span>
+						</span>
+						<span class="face back" aria-hidden="true">
+							<span class="page-sheet">
+								{second?.map((chapter) => (
+									<span class="page-row"><b>{chapter.num}</b><span>{chapter.title}</span></span>
+								))}
+							</span>
+						</span>
+					</span>
+				</span>
+			</span>
+		</span>
+	</span>
+	<span class="book-cta">{cta}</span>
+</a>

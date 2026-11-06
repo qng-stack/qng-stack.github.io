@@ -1,0 +1,23 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import ChapterList from '../../components/ChapterList.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import { aospBook } from '../../lib/books';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`${aospBook.title} · ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+	</head>
+	<body class="book-page">
+		<Header />
+		<main>
+			<h1 class="page-title">{aospBook.title}</h1>
+			<ChapterList />
+		</main>
+		<Footer />
+	</body>
+</html>

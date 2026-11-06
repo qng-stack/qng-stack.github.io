@@ -1,0 +1,198 @@
+---
+import { getCollection } from 'astro:content';
+import { readdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { withBase } from '../lib/path';
+import { greetingBank } from '../lib/greetings';
+import { aospBook, chapterCount, nextBook } from '../lib/books';
+import Book from './Book.astro';
+
+const chapters = (await getCollection('blog'))
+	.sort((a, b) => {
+		const na = Number.parseInt(a.id, 10);
+		const nb = Number.parseInt(b.id, 10);
+		if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+		return a.data.title.localeCompare(b.data.title, 'zh');
+	})
+	.map((post) => ({
+		num: (post.id.match(/^\d+/)?.[0] ?? '').padStart(2, '0'),
+		title: post.data.title.replace(/^第\s*\d+\s*章[：:]\s*/, ''),
+	}));
+const pageSize = 8;
+const previewPages = Array.from({ length: Math.ceil(chapters.length / pageSize) }, (_, index) =>
+	chapters.slice(index * pageSize, (index + 1) * pageSize),
+);
+
+const backgroundDir = fileURLToPath(new URL('../../public/backgrounds', import.meta.url));
+const backgrounds = readdirSync(backgroundDir)
+	.filter((name) => /\.(jpe?g|png|webp)$/i.test(name))
+	.sort();
+const backgroundBase = withBase('/backgrounds/');
+---
+
+<section class="day-hero" id="day-hero">
+	<div class="coast" aria-hidden="true">
+		<img class="coast-photo" id="hero-bg" alt="" />
+		<div class="coast-shade"></div>
+	</div>
+	<script is:inline define:vars={{ backgrounds, backgroundBase }}>
+		(function () {
+			const photo = document.getElementById('hero-bg');
+			if (!(photo instanceof HTMLImageElement) || backgrounds.length === 0) return;
+			const key = 'site-bg';
+			let stored = '';
+			try {
+				stored = sessionStorage.getItem(key) || '';
+			} catch (error) {
+				stored = '';
+			}
+			const storedName = stored.split('/').pop();
+			const name = backgrounds.includes(storedName)
+				? storedName
+				: backgrounds[Math.floor(Math.random() * backgrounds.length)];
+			try {
+				sessionStorage.setItem(key, backgroundBase + name);
+			} catch (error) {
+				/* private mode can block storage */
+			}
+			photo.addEventListener('load', () => {
+				const hero = document.getElementById('day-hero');
+				if (!(hero instanceof HTMLElement)) return;
+				const reveal = () => hero.classList.add('book-ready');
+				// 这张 40×24 的画布不放进页面，只用来取样背景色，给书封配色。
+				const canvas = document.createElement('canvas');
+				const width = 40;
+				const height = 24;
+				canvas.width = width;
+				canvas.height = height;
+				const context = canvas.getContext('2d', { willReadFrequently: true });
+				if (!context) {
+					reveal();
+					return;
+				}
+				context.drawImage(photo, 0, 0, width, height);
+				const pixels = context.getImageData(0, 0, width, height).data;
+				const toHsl = (r, g, b) => {
+					r /= 255;
+					g /= 255;
+					b /= 255;
+					const max = Math.max(r, g, b);
+					const min = Math.min(r, g, b);
+					const l = (max + min) / 2;
+					const d = max - min;
+					if (d === 0) return [0, 0, l];
+					const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+					const h = (max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4) / 6;
+					return [h, s, l];
+				};
+				const buckets = Array.from({ length: 12 }, () => ({ score: 0, r: 0, g: 0, b: 0 }));
+				for (let i = 0; i < pixels.length; i += 4) {
+					const r = pixels[i];
+					const g = pixels[i + 1];
+					const b = pixels[i + 2];
+					const [hue, sat, light] = toHsl(r, g, b);
+					if (sat < 0.08 || light < 0.08 || light > 0.92) continue;
+					const index = Math.min(11, Math.floor(hue * 12));
+					const weight = sat * (1 - Math.abs(light - 0.45));
+					buckets[index].score += weight;
+					buckets[index].r += r * weight;
+					buckets[index].g += g * weight;
+					buckets[index].b += b * weight;
+				}
+				const best = buckets.reduce((picked, bucket) => (bucket.score > picked.score ? bucket : picked));
+				if (best.score > 0) {
+					const [hue, sat] = toHsl(best.r / best.score, best.g / best.score, best.b / best.score);
+					const tone = (lightness, saturation) =>
+						'hsl(' + Math.round(hue * 360) + ' ' + Math.round(Math.max(sat, saturation) * 100) + '% ' + lightness + '%)';
+					hero.style.setProperty('--hero-glow', tone(64, 0.42));
+					hero.style.setProperty('--book-cover', tone(34, 0.32));
+				}
+				reveal();
+			});
+			photo.src = backgroundBase + name;
+		})();
+	</script>
+	<div class="hero-layout">
+	<div class="hero-copy">
+		<p class="hero-kicker" id="hero-kicker"></p>
+		<h1 class="hero-slogan" id="hero-line"></h1>
+	</div>
+	<script is:inline define:vars={{ greetingBank }}>
+		(function () {
+			const kicker = document.getElementById('hero-kicker');
+			const line = document.getElementById('hero-line');
+			if (!kicker || !line) return;
+			const now = new Date();
+			const hour = now.getHours();
+			const hello = hour < 5 || hour >= 18 ? '晚安' : hour < 11 ? '早安' : '午安';
+			const weeks = ['日', '一', '二', '三', '四', '五', '六'];
+			const ordinals = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+			const stamp = (date) =>
+				date.getFullYear() +
+				'-' +
+				String(date.getMonth() + 1).padStart(2, '0') +
+				'-' +
+				String(date.getDate()).padStart(2, '0');
+			const today = stamp(now);
+			const holiday = greetingBank.holidays.find((item) => today >= item.start && today <= item.end);
+			const solar = greetingBank.solarTerms.find((item) => item.date === today);
+			const pick = (list) => list[Math.floor(Math.random() * list.length)];
+			let when = '今天是' + now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日';
+			if (holiday) {
+				const start = new Date(holiday.start + 'T00:00:00');
+				const day = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+				const index = Math.round((day - start) / 86400000);
+				when += holiday.name + '第' + ordinals[index] + '天';
+			}
+			if (solar) when += (holiday ? '，也是' : '，') + solar.name;
+			when += '，星期' + weeks[now.getDay()];
+			const lines = [];
+			if (holiday) lines.push(pick(holiday.lines));
+			if (solar) lines.push(pick(solar.lines));
+			if (!lines.length) {
+				const pool = now.getDay() === 6 ? greetingBank.saturday : now.getDay() === 0 ? greetingBank.sunday : greetingBank.work;
+				lines.push(pick(pool));
+			}
+			kicker.textContent = hello + '，' + when + '。';
+			line.replaceChildren();
+			for (const text of lines) {
+				const span = document.createElement('span');
+				span.textContent = text;
+				line.appendChild(span);
+			}
+		})();
+	</script>
+	<div class="book-shelf">
+		<Book
+			href={aospBook.href}
+			label={`打开${aospBook.title}`}
+			cta={aospBook.cta}
+			cover={aospBook.cover}
+			meta={chapterCount(chapters.length)}
+			sheets={previewPages}
+		/>
+		<Book
+			href={nextBook.href}
+			label={`打开${nextBook.title}`}
+			cta={nextBook.cta}
+			cover={nextBook.cover}
+			tone="book-next"
+		/>
+	</div>
+	</div>
+</section>
+
+<script>
+	const hero = document.getElementById('day-hero');
+	const tilts = hero instanceof HTMLElement ? [...hero.querySelectorAll('.book-tilt')] : [];
+	if (hero instanceof HTMLElement && tilts.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		hero.addEventListener('pointermove', (event) => {
+			const rect = hero.getBoundingClientRect();
+			const x = (event.clientX - rect.left) / rect.width - 0.5;
+			const y = (event.clientY - rect.top) / rect.height - 0.5;
+			tilts.forEach((tilt, index) => {
+				tilt.style.transform = `rotateX(${14 - y * 10}deg) rotateY(${-22 + index * 10 + x * 18}deg)`;
+			});
+		});
+	}
+</script>
