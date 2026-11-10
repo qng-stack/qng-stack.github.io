@@ -1,0 +1,478 @@
+<!DOCTYPE html><html lang="zh-CN"><head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><script type="module" src="/_astro/BaseHead.astro_astro_type_script_index_0_lang.CIKiyBwV.js"></script><link rel="icon" href="/favicon.ico"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="qng-stack" href="https://qng-stack.github.io/rss.xml"><meta name="generator" content="Astro v7.4.5"><!-- Canonical URL --><link rel="canonical" href="https://qng-stack.github.io/blog/53-npu-manager/"><!-- Primary Meta Tags --><title>第 53 章：NPU 管理器</title><meta name="description" content="现代手机都配备 NPU（neural processing unit，神经网络处理单元）。NPU 是一种固定功能加速器，它以远高于 CPU 或 GPU 的效率，运行为端侧语音、视觉与生成式模型提供支撑的矩阵乘法。"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://qng-stack.github.io/blog/53-npu-manager/"><meta property="og:title" content="第 53 章：NPU 管理器"><meta property="og:description" content="现代手机都配备 NPU（neural processing unit，神经网络处理单元）。NPU 是一种固定功能加速器，它以远高于 CPU 或 GPU 的效率，运行为端侧语音、视觉与生成式模型提供支撑的矩阵乘法。"><meta property="og:image" content="https://qng-stack.github.io/_astro/blog-placeholder-1.Bx0Zcyzv.jpg"><!-- Twitter --><meta name="twitter:card" content="summary_large_image"><link rel="stylesheet" href="/_astro/Header.BiL--6dQ.css"></head><body class="chapter-page"><header class="site-header"><div class="shell header-inner"><div class="header-start"><button class="outline-toggle" type="button" aria-expanded="false" aria-controls="chapter-outline"><span class="sr-only">本章目录</span><span class="outline-toggle-icon" aria-hidden="true"></span></button><a class="brand" href="/">qng-stack</a></div><div class="nav-links"><a href="/">首页</a><a href="/about">关于</a><a class="github-link" href="https://github.com/qng-stack" target="_blank"><span class="sr-only">qng-stack 的 GitHub</span><svg viewBox="0 0 16 16" aria-hidden="true" width="18" height="18"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg></a></div></div><div class="outline-backdrop"></div></header><div class="chapter-spread"><nav class="chapter-outline" id="chapter-outline" aria-label="本章标题"><p>本章</p><a href="#531-为什么需要管理器为什么做成模块" data-depth="2">53.1 为什么需要管理器，为什么做成模块</a><a href="#5311-问题所在一台无人管理的共享加速器" data-depth="3">53.1.1 问题所在：一台无人管理的共享加速器</a><a href="#5312-为什么以主线模块形式交付" data-depth="3">53.1.2 为什么以主线模块形式交付</a><a href="#5313-自带的模块-sdk" data-depth="3">53.1.3 自带的模块 SDK</a><a href="#5314-各部件及其连接方式" data-depth="3">53.1.4 各部件及其连接方式</a><a href="#532-框架侧界面" data-depth="2">53.2 框架侧界面</a><a href="#5321-npumanager-系统服务" data-depth="3">53.2.1 NpuManager 系统服务</a><a href="#5322-请求尺寸与优先级" data-depth="3">53.2.2 请求、尺寸与优先级</a><a href="#5323-异步准入协议" data-depth="3">53.2.3 异步准入协议</a><a href="#533-准入控制与三种策略" data-depth="2">53.3 准入控制与三种策略</a><a href="#5331-statusquo不做仲裁" data-depth="3">53.3.1 StatusQuo：不做仲裁</a><a href="#5332-budget在加权上限内允许多个模型" data-depth="3">53.3.2 Budget：在加权上限内允许多个模型</a><a href="#5333-turntaking一次只允许一个模型" data-depth="3">53.3.3 TurnTaking：一次只允许一个模型</a><a href="#534-优先级与-hal-桥接" data-depth="2">53.4 优先级与 HAL 桥接</a><a href="#5341-prioritymanager-与-0-1000-刻度" data-depth="3">53.4.1 PriorityManager 与 0-1000 刻度</a><a href="#5342-按特性为应用把关" data-depth="3">53.4.2 按特性为应用把关</a><a href="#5343-androidhardwarenpu-hal-v1-契约" data-depth="3">53.4.3 android.hardware.npu HAL v1 契约</a><a href="#535-rust-ndk-与-anpubuffer" data-depth="2">53.5 Rust NDK 与 ANpuBuffer</a><a href="#5351-原生分配接口" data-depth="3">53.5.1 原生分配接口</a><a href="#5352-缓冲区状态机" data-depth="3">53.5.2 缓冲区状态机</a><a href="#5353-分配器的-binder-路径" data-depth="3">53.5.3 分配器的 binder 路径</a><a href="#536-libwrapfd-与缓冲区保护" data-depth="2">53.6 libwrapfd 与缓冲区保护</a><a href="#5361-devwrapfd-原语" data-depth="3">53.6.1 /dev/wrapfd 原语</a><a href="#5362-分配包装加载" data-depth="3">53.6.2 分配、包装、加载</a><a href="#537-动手试试" data-depth="2">53.7 动手试试</a><a href="#本章小结" data-depth="2">本章小结</a><a href="#关键源文件参考" data-depth="3">关键源文件参考</a></nav><main><article><p class="article-kicker"><time datetime="2026-11-09T10:13:50.000Z">2026年11月9日</time></p><h1 class="article-title">第 53 章：NPU 管理器</h1><div class="prose"><h1 id="第-53-章npu-管理器">第 53 章：NPU 管理器</h1>
+<p>现代手机都配备 NPU（neural processing unit，神经网络处理单元）。NPU 是一种固定功能加速器，它以远高于 CPU 或 GPU 的效率，运行为端侧语音、视觉与生成式模型提供支撑的矩阵乘法。</p>
+<p>直到 Android 17，平台并不管控哪些应用可以使用 NPU。应用自行加载模型、映射权重，并把工作直接交给厂商的 NPU 驱动。如果两个应用都想在同一时刻驻留一个数 GB 的模型，它们会在同一个固定内存池里相互冲突：输的一方要么得到内存不足错误，要么被静默驱逐。这里没有优先级，没有准入控制，也没有“这段缓冲区装的是模型权重，应当保护起来”这种共识。</p>
+<p>Android 17 引入 <strong>NPU 管理器</strong>（NPU Manager）：一个新的主线 APEX 模块（<code>com.android.npumanager</code>），外加一个配套的厂商 HAL（<code>android.hardware.npu</code>）。二者合力把 NPU 变成一项受管理的多租户资源。应用不再想加载模型就直接加载，而是向 NPU 管理器<em>询问</em>自己是否可以加载。服务依据可插拔的策略、发起请求的应用的优先级以及内存预算给出答复。</p>
+<p>新增的 Rust NDK 让原生 AI 运行时得以分配受保护的 NPU 缓冲区。新增的内核原语 <code>/dev/wrapfd</code> 为这些缓冲区提供底层支撑：即便文件描述符在进程之间流转，内核仍可强制这些缓冲区的内存保护状态。</p>
+<p>本章自上而下讲解该模块：先说明它为何是 Android 17 的新增内容，并描述 APEX 与其模块 SDK 的结构；然后讲模型加载的准入控制状态机及其三种策略；接着讲服务与 HAL 共享的优先级模型、Rust NDK 的缓冲区接口，以及 <code>android.hardware.npu</code> v1 契约；最后讲 <code>libwrapfd</code> 如何实施缓冲区保护。</p>
+<hr>
+<h2 id="531-为什么需要管理器为什么做成模块">53.1 为什么需要管理器，为什么做成模块</h2>
+<h3 id="5311-问题所在一台无人管理的共享加速器">53.1.1 问题所在：一台无人管理的共享加速器</h3>
+<p>NPU 拥有少量专用（或划出）内存和一条命令队列。仅一个大语言模型的权重就可能有 1-2 GB。若一个前台助手应用和一个后台照片分类应用都想常驻各自的模型，设备就会耗尽 NPU 可访问的内存。厂商驱动随后会按请求到达的先后顺序把其中一个弄失败。平台没有任何机制规定前台助手应当胜出，也没有机制规定平台应当先礼貌地请后台任务释放它的模型。</p>
+<p>NPU 管理器补上的正是这一缺失的层次。它<strong>不</strong>亲自执行推理，也不取代厂商的 NPU 驱动。它是一个仲裁与记账服务，位于应用与硬件之间：它决定应用<em>何时</em>可以加载模型、在压力下驱逐<em>谁的</em>模型，还决定<em>如何</em>分配并保护存放这些模型的缓冲区。</p>
+<h3 id="5312-为什么以主线模块形式交付">53.1.2 为什么以主线模块形式交付</h3>
+<p>该管理器是一个可更新的 APEX，而不属于平台镜像的一部分。这让 Google 得以脱离年度 OS 发布节奏，独立迭代准入控制策略——加载策略、预算启发式与 NDK 都可以通过模块更新改变。文件 <code>packages/modules/NpuManager/apex/Android.bp</code> 把该 APEX 定义为 <code>com.android.npumanager</code>，并设置 <code>min_sdk_version: "36"</code>。有两个标志为其把关：</p>
+<ul>
+<li>一个构建期发布标志 <code>RELEASE_NPUMANAGER_MODULE</code>，决定构建系统是否构建该 APEX、其 bootclasspath 与 systemserver 片段，以及它的模块 SDK。APEX 中每个 Soong 模块都把自己的 <code>enabled:</code> 字段包在 <code>select(release_flag("RELEASE_NPUMANAGER_MODULE"), ...)</code> 里。</li>
+<li>一个运行期 aconfig 标志 <code>npumanager_enabled</code>，通过 <code>@FlaggedApi</code> 为框架 API 界面把关，还决定服务是否连接 HAL。文件 <code>packages/modules/NpuManager/flags/npumanager_flags.aconfig</code> 在命名空间 <code>machine_learning</code> 中声明该标志。</li>
+</ul>
+<p>该 APEX 在两个 classpath 层级贡献代码，二者都可在 <code>apex/Android.bp</code> 中看到。第一层是一个 <code>bootclasspath_fragment</code>（<code>com.android.npumanager-bootclasspath-fragment</code>），承载框架库 <code>framework-npumanager</code>；第二层是一个 <code>systemserverclasspath_fragment</code>，承载服务 <code>service-npumanager</code>。对于一个既对外暴露框架侧 <code>@SystemApi</code>、<em>又</em>在 <code>system_server</code> 内运行逻辑的模块，这是标准拆分方式。</p>
+<h3 id="5313-自带的模块-sdk">53.1.3 自带的模块 SDK</h3>
+<p>由于厂商代码与其他模块代码需要针对该管理器的接口进行构建，同一个 <code>apex/Android.bp</code> 还定义了一个模块 SDK：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>// Source: packages/modules/NpuManager/apex/Android.bp</span></span>
+<span class="line"><span>sdk {</span></span>
+<span class="line"><span>    enabled: select(release_flag("RELEASE_NPUMANAGER_MODULE"), {</span></span>
+<span class="line"><span>        true: true,</span></span>
+<span class="line"><span>        false: false,</span></span>
+<span class="line"><span>    }),</span></span>
+<span class="line"><span>    name: "npumanager-module-sdk",</span></span>
+<span class="line"><span>    apexes: [</span></span>
+<span class="line"><span>        "com.android.npumanager",</span></span>
+<span class="line"><span>    ],</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>该模块交付 <code>npumanager-module-sdk</code>，这使 <code>com.android.npumanager</code> 成为一个自包含、可独立构建的模块。使用方对 SDK 做快照，并针对导出的 classpath 片段编译，而不是针对活动源码树编译。</p>
+<h3 id="5314-各部件及其连接方式">53.1.4 各部件及其连接方式</h3>
+<p>下图展示 NPU 管理器的主要组件，以及每个组件所处的边界。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">flowchart</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> App</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"应用进程"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        API</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"NpuManager&lt;br/&gt;(@SystemApi 框架类)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        NDK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Rust NDK&lt;br/&gt;(ANpuBuffer / ANpuManager_AllocRequest)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> SS</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">system_server</span><span style="color:#E1E4E8">（</span><span style="color:#FFAB70">service-npumanager</span><span style="color:#E1E4E8">）"]</span></span>
+<span class="line"><span style="color:#FFAB70">        Svc</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"NpuManagerServiceImpl&lt;br/&gt;(INpuManagerService.Stub)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Policy</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"NpuModelLoadingPolicy&lt;br/&gt;(StatusQuo | TurnTaking | Budget)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Prio</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"PriorityManager"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Alloc</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"NpuAllocator&lt;br/&gt;(INpuAllocator.Stub)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Kern</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"内核"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Wrap</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"/dev/wrapfd 驱动"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Heap</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"/dev/dma_heap"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Vendor</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"厂商进程"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        HAL</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"android.hardware.npu&lt;br/&gt;(IScheduling HAL v1)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">    API </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"canLoadModel() / setPolicy()"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> Svc</span></span>
+<span class="line"><span style="color:#FFAB70">    NDK </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"getBuffers() / loadFileSegmentToBuffer()"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> Alloc</span></span>
+<span class="line"><span style="color:#FFAB70">    Svc </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Policy</span></span>
+<span class="line"><span style="color:#FFAB70">    Policy </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Prio</span></span>
+<span class="line"><span style="color:#FFAB70">    Svc </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Alloc</span></span>
+<span class="line"><span style="color:#FFAB70">    Prio </span><span style="color:#F97583">&lt;--&gt;</span><span style="color:#E1E4E8">|"</span><span style="color:#FFAB70">SchedulingConfig </span><span style="color:#E1E4E8">/ </span><span style="color:#FFAB70">WorkInfo 回调</span><span style="color:#E1E4E8">"| </span><span style="color:#FFAB70">HAL</span></span>
+<span class="line"><span style="color:#FFAB70">    Alloc </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"dmabuf_heap_alloc2()"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> Heap</span></span>
+<span class="line"><span style="color:#FFAB70">    Alloc </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"wrapfd_wrap() / wrapfd_load()"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> Wrap</span></span></code></pre>
+<h2 id="532-框架侧界面">53.2 框架侧界面</h2>
+<h3 id="5321-npumanager-系统服务">53.2.1 NpuManager 系统服务</h3>
+<p>应用通过 <code>NpuManager</code> 类访问该管理器
+（<code>packages/modules/NpuManager/framework/java/android/npumanager/NpuManager.java</code>）。
+框架把该 <code>@SystemApi</code> 类注册在 <code>Context.NPU_SERVICE</code>（字符串 <code>"npu"</code>）下。
+注解 <code>@FlaggedApi(Flags.FLAG_NPUMANAGER_ENABLED)</code> 为整个类把关。该类是 binder 接口
+<code>INpuManagerService</code> 之上的薄客户端。注册发生在
+<code>NpuManagerFrameworkInitializer.registerServiceWrappers()</code> 中，经
+<code>SystemServiceRegistry.registerContextAwareService(Context.NPU_SERVICE, ...)</code> 完成。</p>
+<p>binder 契约很小，且刻意<em>不是</em>一个“跑我的模型”式的接口。以下取自
+<code>packages/modules/NpuManager/framework/java/android/npumanager/INpuManagerService.aidl</code>：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D">// Source: framework/java/android/npumanager/INpuManagerService.aidl</span></span>
+<span class="line"><span style="color:#F97583">interface</span><span style="color:#B392F0"> INpuManagerService</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    void</span><span style="color:#B392F0"> canLoadModel</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">in</span><span style="color:#E1E4E8"> ModelLoadRequestParcelable </span><span style="color:#FFAB70">request</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">in</span><span style="color:#E1E4E8"> IModelLoadCallback </span><span style="color:#FFAB70">callback</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#F97583">    void</span><span style="color:#B392F0"> cancelModelLoad</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">in</span><span style="color:#E1E4E8"> ModelLoadRequestParcelable </span><span style="color:#FFAB70">request</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#F97583">    void</span><span style="color:#B392F0"> notifyModelLoaded</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">in</span><span style="color:#E1E4E8"> ModelLoadRequestParcelable </span><span style="color:#FFAB70">request</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#F97583">    void</span><span style="color:#B392F0"> notifyModelUnloaded</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">in</span><span style="color:#E1E4E8"> ModelLoadRequestParcelable </span><span style="color:#FFAB70">request</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#F97583">    void</span><span style="color:#B392F0"> setPolicy</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">int</span><span style="color:#FFAB70"> policy</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">in</span><span style="color:#E1E4E8"> PersistableBundle </span><span style="color:#FFAB70">policyParams</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    /** For memory management. */</span></span>
+<span class="line"><span style="color:#E1E4E8">    INpuAllocator </span><span style="color:#B392F0">createAllocator</span><span style="color:#E1E4E8">(INpuAllocatorCallback </span><span style="color:#FFAB70">callback</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>其中三个属于<em>准入控制</em>（<code>canLoadModel</code>、<code>cancelModelLoad</code>、
+<code>setPolicy</code>）。两个是<em>诚实性</em>通知，应用必须回传（<code>notifyModelLoaded</code>、<code>notifyModelUnloaded</code>）。一个返回<em>内存管理</em>分配器（<code>createAllocator</code>）。</p>
+<p>模型管理相关调用需要
+<code>android.Manifest.permission.ACCESS_NPU_MODEL_MANAGER_API</code> 权限。框架侧的 <code>NpuManager</code> 方法带有注解
+<code>@RequiresPermission(ACCESS_NPU_MODEL_MANAGER_API)</code>。在服务侧，目前只有
+<code>setPolicy()</code> 会调用
+<code>NpuManagerServiceImpl.enforceModelManagerPermissions()</code>。其他入口点虽带
+<code>@PermissionManuallyEnforced</code> 注解，但目前自身尚未做任何校验。</p>
+<h3 id="5322-请求尺寸与优先级">53.2.2 请求、尺寸与优先级</h3>
+<p>应用用 <code>ModelLoadRequest</code> 描述一个模型
+（<code>framework/java/android/npumanager/ModelLoadRequest.java</code>）。应用在请求中给出一个 id、一个粗粒度尺寸档和一个优先级。尺寸不是字节数，而是三档之一。<code>NpuModelSize</code> 枚举
+（<code>framework/java/android/npumanager/NpuModelSize.aidl</code>）用无前缀的裸名定义这些档位（<code>LESS_THAN_1GB</code>、<code>BETWEEN_1GB_AND_2GB</code>、<code>GREATER_THAN_2G</code>）。
+<code>NpuManager</code> 把它们重新导出为带前缀的常量：</p>
+<ul>
+<li><code>NPU_MODEL_SIZE_LESS_THAN_1GB</code>（<code>NpuModelSize.LESS_THAN_1GB</code>）</li>
+<li><code>NPU_MODEL_SIZE_BETWEEN_1GB_AND_2GB</code>（<code>NpuModelSize.BETWEEN_1GB_AND_2GB</code>）</li>
+<li><code>NPU_MODEL_SIZE_GREATER_THAN_2G</code>（<code>NpuModelSize.GREATER_THAN_2G</code>）</li>
+</ul>
+<p>模型优先级是请求自身上一个两值档位：
+<code>NPU_MODEL_PRIORITY_NORMAL</code> 与 <code>NPU_MODEL_PRIORITY_BACKGROUND</code>。这个模型优先级不同于服务从 <code>ActivityManager</code> 重要性导出的 0-1000 细粒度 UID 优先级（见 53.4 节），也不同于 NDK 侧的缓冲区优先级。本模块中存在三种不同的优先级概念，阅读代码时请把它们区分开。</p>
+<h3 id="5323-异步准入协议">53.2.3 异步准入协议</h3>
+<p><code>canLoadModel()</code> 不返回“是”或“否”的答复。应用传入一个回调，服务稍后再作答，且可能作答不止一次，通道是
+<code>IModelLoadCallback</code>。框架侧由
+<code>NpuManager.ModelLoadCallbackWrapper</code> 包装该回调。<code>NpuManager</code> 定义了这些状态值：</p>
+<ul>
+<li><code>NPU_MODEL_LOAD_STATUS_CAN_LOAD_NOW</code>（0）：现在可以加载。</li>
+<li><code>NPU_MODEL_LOAD_STATUS_WAIT_FOR_UNLOAD</code>（1）：服务正在为你腾出内存。
+等待后续通知。</li>
+<li><code>NPU_MODEL_LOAD_STATUS_NOT_PRIORITIZED</code>（2）：另一个应用优先级高于你，
+不要加载。</li>
+</ul>
+<p>应用加载模型之后必须调用 <code>notifyModelLoaded()</code>。当应用用完模型，或服务经回调的
+<code>onRequestUnloadModel()</code> 提出要求时，它必须调用 <code>notifyModelUnloaded()</code>。服务信任应用会做这两件事。终结性回调 <code>onModelLoadRequestComplete()</code> 会投递
+<code>NPU_MODEL_LOAD_REQUEST_STATUS_CANCELLED</code>（3）或
+<code>NPU_MODEL_LOAD_REQUEST_STATUS_COMPLETE</code>（4），此后该请求不再有任何更新。</p>
+<p>策略驱动应用请求所经历的状态机：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">stateDiagram-v2</span></span>
+<span class="line"><span style="color:#F97583">    [*]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> PendingLoad</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> canLoadModel</span></span>
+<span class="line"><span style="color:#FFAB70">    PendingLoad</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Loaded</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> CAN_LOAD_NOW 后 notifyModelLoaded</span></span>
+<span class="line"><span style="color:#FFAB70">    PendingLoad</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> NotPrioritized</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> NOT_PRIORITIZED</span></span>
+<span class="line"><span style="color:#FFAB70">    PendingLoad</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> WaitForUnload</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> WAIT_FOR_UNLOAD</span></span>
+<span class="line"><span style="color:#FFAB70">    WaitForUnload</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Loaded</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> CAN_LOAD_NOW 后 notifyModelLoaded</span></span>
+<span class="line"><span style="color:#FFAB70">    NotPrioritized</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> PendingLoad</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> 更高优先级的槽位腾出</span></span>
+<span class="line"><span style="color:#FFAB70">    Loaded</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Unloading</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> onRequestUnloadModel</span></span>
+<span class="line"><span style="color:#FFAB70">    Unloading</span><span style="color:#F97583"> --&gt;</span><span style="color:#F97583"> [*]</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> notifyModelUnloaded 后 COMPLETE</span></span>
+<span class="line"><span style="color:#FFAB70">    PendingLoad</span><span style="color:#F97583"> --&gt;</span><span style="color:#F97583"> [*]</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> cancelModelLoad 后 CANCELLED</span></span>
+<span class="line"><span style="color:#FFAB70">    NotPrioritized</span><span style="color:#F97583"> --&gt;</span><span style="color:#F97583"> [*]</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> cancelModelLoad 后 CANCELLED</span></span></code></pre>
+<h2 id="533-准入控制与三种策略">53.3 准入控制与三种策略</h2>
+<p>服务实现
+（<code>packages/modules/NpuManager/service/java/com/android/server/npumanager/NpuManagerServiceImpl.java</code>）
+持有单个 <code>NpuModelLoadingPolicy</code>，并把每次 <code>canLoadModel</code>、
+<code>notifyModelLoaded</code>、<code>notifyModelUnloaded</code> 与 <code>cancelModelLoad</code> 直接转发给它。
+<code>setPolicy()</code> 通过在三个策略常量上做 switch，在运行期替换策略对象。<code>NpuModelLoadingPolicy</code> 是抽象基类，另有三个具体实现。</p>
+<h3 id="5331-statusquo不做仲裁">53.3.1 StatusQuo：不做仲裁</h3>
+<p><code>StatusQuoModelLoadingPolicy</code>
+（<code>service/java/com/android/server/npumanager/StatusQuoModelLoadingPolicy.java</code>）
+是默认策略。它的 <code>canLoadModel()</code> 对所有人都立即答复 <code>CAN_LOAD_NOW</code>，只为在取消或卸载时能触发 <code>onModelLoadRequestComplete()</code> 而跟踪回调。它是一条旁路，用于在无人改动策略时保持 17 之前的行为。该策略“模仿 NpuModelManager 引入之前的行为”。</p>
+<h3 id="5332-budget在加权上限内允许多个模型">53.3.2 Budget：在加权上限内允许多个模型</h3>
+<p><code>BudgetModelLoadingPolicy</code>
+（<code>service/java/com/android/server/npumanager/BudgetModelLoadingPolicy.java</code>）
+是真正的仲裁者。它给每个模型尺寸分配一个<strong>权重</strong>，只要已加载与待决模型的权重之和不超过最大预算，就允许并发加载。默认权重把小块模型映射为 1、中块为 2、大块为 4：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D">// Source: service/java/com/android/server/npumanager/BudgetModelLoadingPolicy.java</span></span>
+<span class="line"><span style="color:#F97583">private</span><span style="color:#F97583"> static</span><span style="color:#F97583"> final</span><span style="color:#E1E4E8"> Map&lt;</span><span style="color:#F97583">Integer</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">Integer</span><span style="color:#E1E4E8">&gt; DEFAULT_MODEL_WEIGHTS </span><span style="color:#F97583">=</span></span>
+<span class="line"><span style="color:#E1E4E8">        Map.</span><span style="color:#B392F0">of</span><span style="color:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#E1E4E8">                NPU_MODEL_SIZE_LESS_THAN_1GB, </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">                NPU_MODEL_SIZE_BETWEEN_1GB_AND_2GB, </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">                NPU_MODEL_SIZE_GREATER_THAN_2G, </span><span style="color:#79B8FF">4</span><span style="color:#E1E4E8">);</span></span></code></pre>
+<p>各尺寸权重与上限都可通过调用方传给 <code>setPolicy()</code> 的
+<code>PersistableBundle</code> 配置，使用的键为
+<code>NpuManager.KEY_MODEL_SIZE_WEIGHTS</code> 与 <code>NpuManager.KEY_MAX_BUDGET</code>。</p>
+<p>当新请求超出预算时，策略<em>最先</em>从最不重要的 UID 开始遍历（<code>getLeastImportantUids()</code>）。对于重要性不高于调用方的任何 UID，若其模型已加载，策略请其卸载；若仍处于待决，则取消之。策略持续这一过程，直到腾出足够预算。</p>
+<p>若调用方在这场竞争中无法胜出，它得到 <code>NOT_PRIORITIZED</code>；若策略确为调用方要求了模型卸载，调用方得到 <code>WAIT_FOR_UNLOAD</code>。当某个模型终于卸载时，<code>evaluateAndLoadHighestPriorityModels()</code> 会重跑整轮排序，并通知下一批胜出者。</p>
+<p>有两个决胜规则值得注意，因为它们塑造了公平性。当两个 UID 重要性相同时，策略偏向<em>最近没有</em>完成工作的那个 UID；它把这一点记录在 <code>mTimeUidLastCompleted</code> 中，由 <code>handleWorkEnded()</code> 打时间戳。策略还为每个发起调用的 UID 注册 binder 死亡接收器，从而能回收崩溃客户端的模型并重新评估预算。</p>
+<h3 id="5333-turntaking一次只允许一个模型">53.3.3 TurnTaking：一次只允许一个模型</h3>
+<p><code>TurnTakingModelLoadingPolicy</code>
+（<code>service/java/com/android/server/npumanager/TurnTakingModelLoadingPolicy.java</code>）
+是预算策略的薄子类：它把每个尺寸权重都设为 1，最大预算设为 1。这个子类是预算机制有多通用的最清晰示范。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D">// Source: service/java/com/android/server/npumanager/TurnTakingModelLoadingPolicy.java</span></span>
+<span class="line"><span style="color:#79B8FF">super</span><span style="color:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#E1E4E8">        priorityManager,</span></span>
+<span class="line"><span style="color:#E1E4E8">        Map.</span><span style="color:#B392F0">of</span><span style="color:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#E1E4E8">                NPU_MODEL_SIZE_LESS_THAN_1GB, </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">                NPU_MODEL_SIZE_BETWEEN_1GB_AND_2GB, </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">                NPU_MODEL_SIZE_GREATER_THAN_2G, </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">),</span></span>
+<span class="line"><span style="color:#79B8FF">        1</span><span style="color:#E1E4E8">);</span></span></code></pre>
+<p>因为预算为 1 且每个模型都花费 1，所以同一时刻只能有一个模型驻留。优先级最高的 UID 占用该槽位，重要性更高的 UID 可以抢占它。全部工作都由预算策略的驱逐与重评估逻辑完成。</p>
+<p>下图端到端展示预算策略与轮流策略的准入决策：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">flowchart</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#FFAB70">    Req</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"canLoadModel(request)"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Fit</span><span style="color:#F97583">{</span><span style="color:#9ECBFF">"权重是否落在&lt;br/&gt;可用预算内？"</span><span style="color:#F97583">}</span></span>
+<span class="line"><span style="color:#FFAB70">    Fit </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"是"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> Now</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"CAN_LOAD_NOW"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Fit </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"否"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> Scan</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"遍历最不重要的 UID"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Scan </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Win</span><span style="color:#F97583">{</span><span style="color:#9ECBFF">"能否从更低或&lt;br/&gt;同级 UID 腾出&lt;br/&gt;足够预算？"</span><span style="color:#F97583">}</span></span>
+<span class="line"><span style="color:#FFAB70">    Win </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"否"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> NotPrio</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"NOT_PRIORITIZED"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Win </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"是，相关模型已加载"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> Unload</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"要求这些模型卸载"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Unload </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Wait</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"WAIT_FOR_UNLOAD"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Wait </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Eval</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"卸载时：evaluateAndLoadHighestPriorityModels()"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Eval </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Now</span></span></code></pre>
+<h2 id="534-优先级与-hal-桥接">53.4 优先级与 HAL 桥接</h2>
+<h3 id="5341-prioritymanager-与-0-1000-刻度">53.4.1 PriorityManager 与 0-1000 刻度</h3>
+<p>各策略给 UID 排序，但原始优先级数值来自 <code>PriorityManager</code>
+（<code>service/java/com/android/server/npumanager/PriorityManager.java</code>）。它监听
+<code>ActivityManager.OnUidImportanceListener</code>，把进程重要性映射为按 UID 的优先级。HAL 的 parcelable <code>SchedulingConfig</code> 定义了该优先级的刻度。在这个刻度上，<code>MIN_PRIORITY = 0</code> 是<strong>最高</strong>优先级，<code>MAX_PRIORITY = 1000</code> 是最低。该类把系统与 root UID 固定为静态优先级 100，把未知 UID 视为 <code>MAX_PRIORITY</code>。</p>
+<p>NDK 缓冲区优先级（0-1000，默认 500）与 HAL 的 <code>WorkInfo.jobPriority</code> 使用同一刻度。因此整个模块遵循同一种优先级约定：0 意味着“最重要”。</p>
+<h3 id="5342-按特性为应用把关">53.4.2 按特性为应用把关</h3>
+<p><code>PriorityManager</code> 还强制一项新的平台要求：应用必须声明
+<code>PackageManager.FEATURE_NEURAL_PROCESSING_UNIT</code> 特性才能获得 NPU 访问权限。一个
+<code>NpuPackageMonitor</code> 按包跟踪这一点，对安装、移除与修改事件做出反应。</p>
+<p>对目标版本为 Android 17（<code>Build.VERSION_CODES.CINNAMON_BUN</code>）却未声明该特性的应用，当
+<code>npumanager_block_missing_feature</code> 标志开启时，管理器会把 <code>SchedulingConfig.hasDirectAccess</code> 设为 <code>false</code>；标志关闭时，管理器只记一条警告，说明该访问“很快会被阻断”。</p>
+<h3 id="5343-androidhardwarenpu-hal-v1-契约">53.4.3 android.hardware.npu HAL v1 契约</h3>
+<p>厂商侧是一个位于
+<code>hardware/interfaces/npu/aidl/android/hardware/npu/</code> 的新 AIDL HAL，版本号为 v1（冻结快照位于 <code>aidl_api/android.hardware.npu/1/</code>）。它刻意不是一个“执行推理”的接口。该 HAL 的 <code>README.md</code> 指出，实际工作仍通过厂商 SDK 运行；该 HAL 只管<em>优先级与观测</em>。</p>
+<p><code>NpuManagerServiceImpl</code> 经
+<code>ServiceManager.waitForDeclaredService(IScheduling.DESCRIPTOR + "/default")</code> 连接
+<code>IScheduling</code>（<code>IScheduling.aidl</code>）。该接口有三个方法：</p>
+<ul>
+<li><code>setSchedulingConfigs(SchedulingConfig[])</code> 整体替换优先级表。</li>
+<li><code>updateSchedulingConfigs(SchedulingConfig[])</code> 增量添加或更新条目。</li>
+<li><code>setCallback(ISchedulingCallback)</code> 注册管理器的观察者。</li>
+</ul>
+<p><code>SchedulingConfig</code>（<code>SchedulingConfig.aidl</code>）携带 <code>uid</code>、其 <code>priority</code>、
+<code>hasDirectAccess</code>，以及 <code>canAttributeOtherUid</code>（即某个中介服务能否代表另一个应用提交工作）。NPU 应<em>尽力</em>先运行数值更小的优先级。</p>
+<p>反方向是 <code>ISchedulingCallback</code>（<code>ISchedulingCallback.aidl</code>），一个由 HAL 调用来上报 NPU 活动的 <code>oneway</code> 接口：</p>
+<ul>
+<li><code>onWorkRequested(WorkInfo)</code></li>
+<li><code>onWorkStarted(WorkInfo, StartReason)</code>，其中 <code>StartReason</code> 为 <code>INITIAL</code> 或
+<code>RESUMED</code></li>
+<li><code>onWorkEnded(WorkInfo, EndReason)</code>，其中 <code>EndReason</code> 为
+<code>CANCELLED_USER</code>、<code>CANCELLED_SYSTEM</code>、<code>PAUSED</code>、<code>FAILED</code>、<code>COMPLETED</code> 之一</li>
+</ul>
+<p>HAL 用 <code>DEBOUNCE_DURATION_MS = 50</code> 对这些事件做去抖。</p>
+<p><code>WorkInfo</code>（<code>WorkInfo.aidl</code>）描述一个 NPU 工作单元。它有一个单调递增的 <code>id</code>；一个可选的 <code>groupId</code>（<code>Uuid</code>）把属于同一件更大工作的多次推理关联起来。该 parcelable 还含请求方的 <code>uid</code>、用于归因工作的 <code>originalUid</code>，以及 <code>jobPriority</code>。合成的
+<code>effectivePriority</code> 是 UID 优先级加作业优先级，最大可达 <code>MAX_PRIORITY * 2</code>。</p>
+<p>在 <code>NpuManagerServiceImpl</code> 中，<code>onWorkRequested</code> 流入
+<code>PriorityManager.handleWorkRequested()</code>，为新出现的 UID 赋予优先级；
+<code>onWorkEnded</code> 流入当前活动策略的 <code>handleWorkEnded()</code>，让预算策略打上公平性时间戳。当同级优先级的对端在等待时，策略还可以要求刚完成的 UID 卸载。真正的重评估稍后发生，即卸载经
+<code>notifyModelUnloaded</code> 到达之时。</p>
+<p>该连接具备自愈能力：服务对 HAL binder 调用 <code>linkToDeath</code>，若厂商进程死亡则在
+<code>ensureHalService()</code> 中重连。</p>
+<p>下图展示服务与 HAL 之间的控制与观测回路：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">sequenceDiagram</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> AM</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> ActivityManager</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> PM</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> PriorityManager</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> HAL</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> IScheduling</span><span style="color:#E1E4E8">（厂商侧）</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> CB</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> ISchedulingCallback</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> Pol</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> NpuModelLoadingPolicy</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">    AM</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">PM</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> onUidImportance(uid, importance)</span></span>
+<span class="line"><span style="color:#FFAB70">    PM</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">HAL</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> updateSchedulingConfigs([SchedulingConfig])</span></span>
+<span class="line"><span style="color:#FFAB70">    HAL</span><span style="color:#F97583">--&gt;&gt;</span><span style="color:#FFAB70">CB</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> onWorkRequested(WorkInfo)</span></span>
+<span class="line"><span style="color:#FFAB70">    CB</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">PM</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> handleWorkRequested(WorkInfo)</span></span>
+<span class="line"><span style="color:#FFAB70">    HAL</span><span style="color:#F97583">--&gt;&gt;</span><span style="color:#FFAB70">CB</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> onWorkStarted(WorkInfo, INITIAL)</span></span>
+<span class="line"><span style="color:#FFAB70">    HAL</span><span style="color:#F97583">--&gt;&gt;</span><span style="color:#FFAB70">CB</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> onWorkEnded(WorkInfo, COMPLETED)</span></span>
+<span class="line"><span style="color:#FFAB70">    CB</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Pol</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> handleWorkEnded(WorkInfo, COMPLETED)</span></span>
+<span class="line"><span style="color:#FFAB70">    Pol</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Pol</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 打 mTimeUidLastCompleted，&lt;br/&gt;可能 requestUnloadModel()</span></span></code></pre>
+<h2 id="535-rust-ndk-与-anpubuffer">53.5 Rust NDK 与 ANpuBuffer</h2>
+<h3 id="5351-原生分配接口">53.5.1 原生分配接口</h3>
+<p>原生 AI 运行时（真正映射模型权重的那类）使用 C NDK。头文件
+<code>packages/modules/NpuManager/ndk/include/android/npumanager/buffer.h</code>
+声明它。不透明句柄是 <code>ANpuBuffer</code>。运行时用 <code>ANpuManager_AllocRequest</code> 构建分配一个缓冲区的请求。</p>
+<p>这一头文件背后的实现是 <strong>Rust</strong>。文件 <code>ndk/Android.bp</code>
+构建 <code>libnpumanager_rust</code>（crate 根为 <code>buffer_impl.rs</code>），并把它包装成共享库
+<code>libcom.android.npumanager.so</code>。该共享库随 APEX 一起交付。由于 <code>libandroid.so</code> 可能在 APEX 就绪之前即被加载，调用方经一个惰性 <code>dlopen()</code> 垫片
+（<code>ndk/npumanager_dlopen.h</code> / <code>.cpp</code>）抵达公开入口点。</p>
+<p>运行时用这些函数配置请求：</p>
+<ul>
+<li><code>ANpuManager_AllocRequest_setDeviceNumber()</code> —— 指定哪个 NPU（对厂商不透明，必须非负）。</li>
+<li><code>ANpuManager_AllocRequest_setBufferType()</code> —— 取 <code>ANPUBUFFER_TYPE_*</code> 之一：
+<code>MODEL_EXECUTABLE</code>、<code>MODEL_WEIGHTS</code>、<code>CACHE</code>、<code>AUXILIARY</code>（输入／输出缓冲区改用 <code>AHardwareBuffer</code>）。</li>
+<li><code>ANpuManager_AllocRequest_setSize()</code>、<code>setBufferPriority()</code>（0-1000 刻度，默认
+<code>ANPUBUFFER_PRIORITY_DEFAULT = 500</code>）与
+<code>setProtectionFlags()</code>（默认 <code>PROT_READ</code>）。</li>
+<li><code>ANpuManager_AllocRequest_setFileSegmentToLoad()</code> —— 可选地给一个文件 fd 加偏移，好让管理器把权重直接加载进缓冲区。</li>
+<li><code>setCookie()</code>、<code>setOnAlloc()</code>、<code>setOnPreempt()</code> —— 回调接线。</li>
+</ul>
+<p>所有入口点都标有 <code>__INTRODUCED_IN(37)</code>。分配是异步的：
+<code>ANpuManager_allocAsync()</code> 接收一批请求，结果经每个请求自己的
+<code>ANpuManager_AllocCallback</code> 抵达。</p>
+<p>分配之后，运行时用 <code>ANpuBuffer_map()</code> 与 <code>ANpuBuffer_unmap()</code> 映射与取消映射缓冲区。这些函数类同 mmap，但 <code>prot</code> 必须是分配后即固定的保护标志的子集。运行时可以调用 <code>ANpuBuffer_setPriority()</code> 调整缓冲区优先级，也可以调用
+<code>ANpuBuffer_loadAsync()</code> 在分配之后流式装入一段文件。运行时必须用 <code>ANpuBuffer_free()</code> 释放每一个缓冲区，即使是已被抢占的缓冲区。</p>
+<h3 id="5352-缓冲区状态机">53.5.2 缓冲区状态机</h3>
+<p>Rust 客户端（<code>ndk/npu_buffer_state.rs</code>）用一个小的状态机跟踪每个缓冲区，镜像服务的异步响应。缓冲区起始于
+<strong>Allocating</strong>；服务返回其 fd 时变为 <strong>Allocated</strong>；分配失败则变为 <strong>Gone</strong>。</p>
+<p>在 <code>ANpuBuffer_loadAsync()</code> 期间缓冲区转入 <strong>Loading</strong>，完成时回到
+<strong>Allocated</strong>。抢占可以在任何时点把缓冲区强制变为 <strong>Gone</strong>。<code>NpuBufferState</code> 直接编码这些转移：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">stateDiagram-v2</span></span>
+<span class="line"><span style="color:#F97583">    [*]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Allocating</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> allocAsync</span></span>
+<span class="line"><span style="color:#FFAB70">    Allocating</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Allocated</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> onGetBuffer 返回 fd</span></span>
+<span class="line"><span style="color:#FFAB70">    Allocating</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Gone</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> onGetBuffer 出错或被抢占</span></span>
+<span class="line"><span style="color:#FFAB70">    Allocated</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Loading</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> loadAsync</span></span>
+<span class="line"><span style="color:#FFAB70">    Loading</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Allocated</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> onLoad</span></span>
+<span class="line"><span style="color:#FFAB70">    Allocated</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Gone</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> onNotifyPreempted</span></span>
+<span class="line"><span style="color:#FFAB70">    Loading</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Gone</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> onNotifyPreempted</span></span>
+<span class="line"><span style="color:#FFAB70">    Gone</span><span style="color:#F97583"> --&gt;</span><span style="color:#F97583"> [*]</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> ANpuBuffer_free</span></span></code></pre>
+<p>抢占是 NDK 的驱逐信号：服务调用
+<code>INpuAllocatorCallback.onNotifyPreempted()</code>，客户端把缓冲区推进到
+<code>Gone</code>，可选的 <code>ANpuManager_PreemptCallback</code> 随之触发。此后任何
+<code>ANpuBuffer_map()</code> 都会以 <code>errno == ENOENT</code> 失败，因为内核已清空底层缓冲区（见 53.6 节）。</p>
+<h3 id="5353-分配器的-binder-路径">53.5.3 分配器的 binder 路径</h3>
+<p>在 C API 之下，Rust 客户端经
+<code>INpuAllocator</code>（<code>framework/java/android/npumanager/INpuAllocator.aidl</code>）与服务对话。客户端从 <code>INpuManagerService.createAllocator()</code> 取得该接口。客户端一侧（<code>ndk/npu_allocator_client.rs</code>）把请求批进 <code>getBuffers()</code>、检查 <code>isSupported()</code>，并用 <code>putBuffers()</code> 归还缓冲区。Rust 客户端经
+<code>ndk/npu_manager_delegate.rs</code> 中的 <code>setPriority()</code> 调整缓冲区优先级，经
+<code>ndk/npu_buffer_impl.rs</code> 中的 <code>loadFileSegmentToBuffer()</code> 流式传输数据；调用走
+<code>NpuAllocatorClient::load_async</code>。</p>
+<p>回复经 <code>INpuAllocatorCallback</code> 异步返回（<code>onGetBuffer</code>、
+<code>onLoad</code>、<code>onNotifyPreempted</code>）。分配器的服务实现是
+<code>NpuAllocator</code>（<code>service/java/com/android/server/npumanager/NpuAllocator.java</code>），
+是一个 <code>INpuAllocator.Stub</code>，在后台线程池上完成真正的堆分配与包装。</p>
+<h2 id="536-libwrapfd-与缓冲区保护">53.6 libwrapfd 与缓冲区保护</h2>
+<h3 id="5361-devwrapfd-原语">53.6.1 /dev/wrapfd 原语</h3>
+<p>NPU 管理器提供的缓冲区不是单纯的 <code>dma_heap</code> 分配。管理器把它们<em>包装</em>起来，使内核能够强制规定进程可以如何映射它们、以及它们归谁所有。这是 <code>libwrapfd</code>
+（<code>system/memory/libwrapfd</code>）的职责——一个新的 Rust 库兼 LLNDK 共享库，建立在新的 <code>/dev/wrapfd</code> 内核驱动之上。构建文件
+<code>system/memory/libwrapfd/rust/Android.bp</code> 把该库同时定义为
+<code>rust_library</code>（<code>libwrapfd_rust</code>）与 <code>cc_library_shared</code>（<code>libwrapfd</code>）。该库还对 <code>com.android.npumanager</code> 设置 <code>apex_available</code>。</p>
+<p><code>libwrapfd</code> 接收一个既有 fd（此处为 dma-buf），返回一个新的
+<em>wrapfd</em>：它委托给原 fd，但附加了保护状态。核心操作是
+<code>WrapfdDriver::wrap(fd, prot)</code>（<code>system/memory/libwrapfd/rust/lib.rs</code>）。它把被包装的 fd 钉在 <code>PROT_NONE</code> 或
+<code>PROT_READ</code> 与 <code>PROT_WRITE</code> 组合的保护掩码上；自此内核便约束进程如何映射该缓冲区。更多操作包括：</p>
+<ul>
+<li><code>acquire_ownership()</code> / <code>release_ownership()</code> —— 拥有者修改缓冲区期间的独占所有权；RAII 守卫 <code>WrapfdOwnershipGuard</code> 在 drop 时释放。</li>
+<li><code>load(wrapfd, file, file_offset, buf_offset, len)</code> —— 以 DMA 方式把一段文件复制进缓冲区；需要所有权，且偏移须页对齐。</li>
+<li><code>rewrap(prot)</code> —— 把底层缓冲区迁入一个保护掩码不同的新 wrap。</li>
+<li><code>allow_guests()</code> / <code>prohibit_guests()</code> —— 控制非拥有者进程能否映射该缓冲区。</li>
+<li><code>empty()</code> —— 释放被包装的缓冲区；正是它使被抢占缓冲区其后的映射失败。</li>
+</ul>
+<p>头文件 <code>system/memory/libwrapfd/rust/include/wrapfd.h</code> 记录了 C 接口，以及
+<code>wrapfd_get_state()</code> 上报的 <code>WrapfdState</code> 枚举（<code>EMPTY</code>、<code>RDONLY</code>、<code>RDWR</code>）。</p>
+<h3 id="5362-分配包装加载">53.6.2 分配、包装、加载</h3>
+<p><code>NpuAllocator</code> 在其 JNI 层
+（<code>service/jni/com_android_server_npumanager_NpuAllocator.rs</code>，crate 为
+<code>libnpumanager_service_jni</code>）把 dma-buf 堆、<code>libwrapfd</code> 与缓冲区类型串起来。单个缓冲区的处理序列在 Java 侧名为
+<code>allocWrapLoad</code>，步骤为：</p>
+<ol>
+<li>依据每台设备各自的 DMA-buf 堆配置，按 <code>(deviceNumber, bufferType)</code> 选择一个 DMA-buf 堆
+（<code>nativeGetHeapName</code>）。这让不同的 NPU 与缓冲区类型映射到不同的堆。</li>
+<li>用 <code>BufferAllocator::alloc()</code> 在该堆上分配。为便于调试给缓冲区命名
+（<code>npubuf-&lt;pid&gt;-&lt;appReqId&gt;</code>）。</li>
+<li>用请求中的保护标志对该 dma-buf 调用 <code>WrapfdDriver::wrap()</code>。</li>
+<li>若应用请求了文件段，则用
+<code>WrapfdOwnershipGuard</code> 获取所有权，调用 <code>wrapfd::load()</code> 以 DMA 方式把权重复制进来，
+然后释放所有权。</li>
+<li>把 <em>wrapfd</em>（而非裸 dma-buf）返回给客户端，客户端经
+<code>onGetBuffer</code> 收到它。</li>
+</ol>
+<p>由于 wrapfd 在内核中携带保护状态，应用可以只读地映射权重；而管理器仍可撤销它们：发生抢占时，它会把该 wrap 置空。应用与服务无需信任彼此的用户态。</p>
+<p>分配器在构造时探测驱动
+（<code>nativeInitWrapfdDriver()</code>）。在没有 <code>/dev/wrapfd</code> 的设备上，分配器抛出
+<code>UnsupportedOperationException</code>。管理器就是这样在不支持被包装缓冲区的硬件上优雅降级。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">flowchart</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#FFAB70">    Get</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"getBuffers(request)"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Heap</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"nativeGetHeapName(deviceNumber, bufferType)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Heap </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> AllocBuf</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"在 /dev/dma_heap 上 BufferAllocator.alloc()"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    AllocBuf </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> WrapBuf</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"WrapfdDriver.wrap(dmabuf, protectionFlags)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    WrapBuf </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> LoadQ</span><span style="color:#F97583">{</span><span style="color:#9ECBFF">"是否设置了 fileSegmentToLoad？"</span><span style="color:#F97583">}</span></span>
+<span class="line"><span style="color:#FFAB70">    LoadQ </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"是"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> Own</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"WrapfdOwnershipGuard，随后 wrapfd::load()"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    LoadQ </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"否"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> Reply</span></span>
+<span class="line"><span style="color:#FFAB70">    Own </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Reply</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"onGetBuffer(appReqId, wrapfd)"</span><span style="color:#F97583">]</span></span></code></pre>
+<h2 id="537-动手试试">53.7 动手试试</h2>
+<p>以下命令可在设备或模拟器上演练该模块。开始前，请确认构建标志
+<code>RELEASE_NPUMANAGER_MODULE</code> 与 aconfig 标志 <code>npumanager_enabled</code> 都已开启。该服务以 <code>npu</code> 之名可访问。</p>
+<ul>
+<li>
+<p>先确认服务出现在服务列表中，再确认 APEX 存在：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> service</span><span style="color:#9ECBFF"> list</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> grep</span><span style="color:#9ECBFF"> npu</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> ls</span><span style="color:#9ECBFF"> /apex/com.android.npumanager</span></span></code></pre>
+</li>
+<li>
+<p>用 <code>info</code> 子命令查看当前策略、请求与优先级表（该子命令由
+<code>NpuManagerServiceImpl.handleShellCommand</code> 实现）：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> cmd</span><span style="color:#9ECBFF"> npu</span><span style="color:#9ECBFF"> info</span></span></code></pre>
+</li>
+<li>
+<p>在运行期切换准入控制策略，然后重新查看 <code>info</code>：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> cmd</span><span style="color:#9ECBFF"> npu</span><span style="color:#9ECBFF"> set-turn-taking-policy</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> cmd</span><span style="color:#9ECBFF"> npu</span><span style="color:#9ECBFF"> set-budget-policy</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> cmd</span><span style="color:#9ECBFF"> npu</span><span style="color:#9ECBFF"> set-status-quo-policy</span></span></code></pre>
+</li>
+<li>
+<p>临时停止服务向 HAL 推送优先级更新，随后重新开启。只有 root 可以这样做：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> root</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> cmd</span><span style="color:#9ECBFF"> npu</span><span style="color:#9ECBFF"> disable</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> cmd</span><span style="color:#9ECBFF"> npu</span><span style="color:#9ECBFF"> enable</span></span></code></pre>
+</li>
+<li>
+<p>检查某设备是否通告 NPU HAL 与特性：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> package</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> grep</span><span style="color:#9ECBFF"> android.hardware.npu</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> pm</span><span style="color:#9ECBFF"> list</span><span style="color:#9ECBFF"> features</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> grep</span><span style="color:#9ECBFF"> android.hardware.npu</span></span></code></pre>
+</li>
+<li>
+<p>阅读冻结的 v1 HAL 接口，看清厂商必须实现什么：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">ls</span><span style="color:#9ECBFF"> hardware/interfaces/npu/aidl/aidl_api/android.hardware.npu/1/</span></span></code></pre>
+</li>
+</ul>
+<h2 id="本章小结">本章小结</h2>
+<ul>
+<li>Android 17 新增了 <strong>NPU 管理器</strong>，一个主线 APEX
+（<code>com.android.npumanager</code>），负责仲裁对端侧神经加速器的访问。它由两个标志把关：构建标志 <code>RELEASE_NPUMANAGER_MODULE</code> 与 aconfig 标志
+<code>npumanager_enabled</code>。它自带模块 SDK
+（<code>npumanager-module-sdk</code>），外加 bootclasspath 与 systemserver 片段。</li>
+<li>应用使用 <code>@SystemApi</code> 的 <code>NpuManager</code>（<code>Context.NPU_SERVICE</code>）来<em>询问</em>某个模型是否可以加载，
+而不是直接加载模型。异步协议答复 <code>CAN_LOAD_NOW</code>、<code>WAIT_FOR_UNLOAD</code> 或 <code>NOT_PRIORITIZED</code>，应用必须如实上报
+<code>notifyModelLoaded</code> 与 <code>notifyModelUnloaded</code>。</li>
+<li>准入控制可插拔。<code>StatusQuo</code> 为默认且不做仲裁；<code>Budget</code> 允许在上限内按权重并发加载，
+并按优先级驱逐模型；<code>TurnTaking</code> 即权重为 1、预算为 1 的预算策略，一次只允许一个模型。</li>
+<li><code>PriorityManager</code> 把 <code>ActivityManager</code> 的重要性映射到共享的 0-1000 优先级刻度（0 = 最高），
+把这些优先级下发给厂商 HAL，并阻断未声明 <code>FEATURE_NEURAL_PROCESSING_UNIT</code> 的 Android 17 应用。</li>
+<li>配套的 <code>android.hardware.npu</code> HAL v1（<code>IScheduling</code> 与
+<code>ISchedulingCallback</code>）向下传递按 UID 的 <code>SchedulingConfig</code> 优先级，向上回传
+<code>WorkInfo</code> 的起止回调（<code>StartReason</code>、<code>EndReason</code>）。它本身不执行推理。</li>
+<li>一个 Rust NDK（<code>ANpuBuffer</code>、<code>ANpuManager_AllocRequest</code>，位于
+<code>libcom.android.npumanager.so</code> 之后）让原生运行时得以分配、映射、加载与
+释放受保护的 NPU 缓冲区，并提供用于驱逐的抢占回调。</li>
+<li>建立在新 <code>/dev/wrapfd</code> 内核驱动之上的 <code>libwrapfd</code> 为这些缓冲区提供支撑。服务在 DMA-buf 堆上分配，
+以保护掩码对 fd 调用 <code>wrap()</code>，可调用 <code>load()</code> 复制权重进来；发生抢占时，它可对 wrap 调用
+<code>empty()</code>，使被撤销缓冲区的映射以 <code>ENOENT</code> 失败。</li>
+</ul>
+<h3 id="关键源文件参考">关键源文件参考</h3>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>packages/modules/NpuManager/apex/Android.bp</code></td>
+<td>APEX <code>com.android.npumanager</code>、classpath 片段与 <code>npumanager-module-sdk</code></td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/flags/npumanager_flags.aconfig</code></td>
+<td><code>npumanager_enabled</code> 与 <code>npumanager_block_missing_feature</code> 标志</td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/framework/java/android/npumanager/NpuManager.java</code></td>
+<td><code>@SystemApi</code> 客户端，以及状态、尺寸、优先级与策略常量</td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/framework/java/android/npumanager/INpuManagerService.aidl</code></td>
+<td>准入控制与 <code>createAllocator</code> 的 Binder 契约</td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/framework/java/android/npumanager/INpuAllocator.aidl</code></td>
+<td>缓冲区分配器的 Binder 接口</td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/service/java/com/android/server/npumanager/NpuManagerServiceImpl.java</code></td>
+<td>服务实现、HAL 连接与 shell 命令</td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/service/java/com/android/server/npumanager/BudgetModelLoadingPolicy.java</code></td>
+<td>加权预算准入与驱逐</td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/service/java/com/android/server/npumanager/TurnTakingModelLoadingPolicy.java</code></td>
+<td>一次一个模型的策略（预算为 1）</td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/service/java/com/android/server/npumanager/PriorityManager.java</code></td>
+<td>UID 优先级映射与特性把关</td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/service/java/com/android/server/npumanager/NpuAllocator.java</code></td>
+<td>服务侧的堆分配、包装与加载</td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/service/jni/com_android_server_npumanager_NpuAllocator.rs</code></td>
+<td>Rust JNI：dma-buf 分配、<code>wrapfd::wrap</code>、<code>wrapfd::load</code></td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/ndk/include/android/npumanager/buffer.h</code></td>
+<td>C NDK：<code>ANpuBuffer</code>、<code>ANpuManager_AllocRequest</code></td>
+</tr>
+<tr>
+<td><code>packages/modules/NpuManager/ndk/npu_buffer_state.rs</code></td>
+<td>NDK 缓冲区的状态机</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/npu/aidl/android/hardware/npu/IScheduling.aidl</code></td>
+<td>NPU HAL v1：优先级下发与回调注册</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/npu/aidl/android/hardware/npu/WorkInfo.aidl</code></td>
+<td>HAL 工作描述符（优先级、归因）</td>
+</tr>
+<tr>
+<td><code>system/memory/libwrapfd/rust/lib.rs</code></td>
+<td><code>/dev/wrapfd</code> 包装器：<code>wrap</code>、所有权、<code>load</code>、<code>empty</code></td>
+</tr>
+<tr>
+<td><code>system/memory/libwrapfd/rust/include/wrapfd.h</code></td>
+<td><code>libwrapfd</code> 的 C 与 LLNDK 接口，以及 <code>WrapfdState</code></td>
+</tr>
+</tbody>
+</table>
+</div></article></main></div><footer class="site-footer">&copy; 2026 qng-stack</footer><script type="module" src="/_astro/BlogPost.astro_astro_type_script_index_0_lang.Cz6GC1N3.js"></script></body></html>

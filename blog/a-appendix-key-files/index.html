@@ -1,0 +1,1708 @@
+<!DOCTYPE html><html lang="zh-CN"><head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><script type="module" src="/_astro/BaseHead.astro_astro_type_script_index_0_lang.CIKiyBwV.js"></script><link rel="icon" href="/favicon.ico"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="qng-stack" href="https://qng-stack.github.io/rss.xml"><meta name="generator" content="Astro v7.4.5"><!-- Canonical URL --><link rel="canonical" href="https://qng-stack.github.io/blog/a-appendix-key-files/"><!-- Primary Meta Tags --><title>附录 A：关键文件参考</title><meta name="description" content="本附录是 AOSP 中最重要源文件的速查表。各表按子系统分组，每个小标题都给出讨论这些文件的章号。路径均相对于 AOSP 根目录（`$AOSP/`）。"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://qng-stack.github.io/blog/a-appendix-key-files/"><meta property="og:title" content="附录 A：关键文件参考"><meta property="og:description" content="本附录是 AOSP 中最重要源文件的速查表。各表按子系统分组，每个小标题都给出讨论这些文件的章号。路径均相对于 AOSP 根目录（`$AOSP/`）。"><meta property="og:image" content="https://qng-stack.github.io/_astro/blog-placeholder-1.Bx0Zcyzv.jpg"><!-- Twitter --><meta name="twitter:card" content="summary_large_image"><link rel="stylesheet" href="/_astro/Header.BiL--6dQ.css"></head><body class="chapter-page"><header class="site-header"><div class="shell header-inner"><div class="header-start"><button class="outline-toggle" type="button" aria-expanded="false" aria-controls="chapter-outline"><span class="sr-only">本章目录</span><span class="outline-toggle-icon" aria-hidden="true"></span></button><a class="brand" href="/">qng-stack</a></div><div class="nav-links"><a href="/">首页</a><a href="/about">关于</a><a class="github-link" href="https://github.com/qng-stack" target="_blank"><span class="sr-only">qng-stack 的 GitHub</span><svg viewBox="0 0 16 16" aria-hidden="true" width="18" height="18"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg></a></div></div><div class="outline-backdrop"></div></header><div class="chapter-spread"><nav class="chapter-outline" id="chapter-outline" aria-label="本章标题"><p>本章</p><a href="#构建系统第-2-章" data-depth="2">构建系统（第 2 章）</a><a href="#启动与-init第-4-章" data-depth="2">启动与 init（第 4 章）</a><a href="#内核第-5-章" data-depth="2">内核（第 5 章）</a><a href="#bionic-与动态链接器第-7-章" data-depth="2">Bionic 与动态链接器（第 7 章）</a><a href="#binder-ipc第-9-章" data-depth="2">Binder IPC（第 9 章）</a><a href="#hal--硬件抽象层第-10-章" data-depth="2">HAL —— 硬件抽象层（第 10 章）</a><a href="#ndk--原生开发工具包第-11-章" data-depth="2">NDK —— 原生开发工具包（第 11 章）</a><a href="#原生服务第-12-章" data-depth="2">原生服务（第 12 章）</a><a href="#图形与渲染管线第-13-章" data-depth="2">图形与渲染管线（第 13 章）</a><a href="#动画系统第-14-章" data-depth="2">动画系统（第 14 章）</a><a href="#音频系统第-15-章" data-depth="2">音频系统（第 15 章）</a><a href="#媒体与视频管线第-16-章" data-depth="2">媒体与视频管线（第 16 章）</a><a href="#art-运行时第-18-章" data-depth="2">ART 运行时（第 18 章）</a><a href="#native-bridge-与二进制翻译第-19-章" data-depth="2">Native Bridge 与二进制翻译（第 19 章）</a><a href="#system_server第-20-章" data-depth="2">system_server（第 20 章）</a><a href="#activity-与窗口管理第-22-章" data-depth="2">Activity 与窗口管理（第 22 章）</a><a href="#窗口系统第-23-章" data-depth="2">窗口系统（第 23 章）</a><a href="#显示系统第-24-章" data-depth="2">显示系统（第 24 章）</a><a href="#packagemanagerservice第-26-章" data-depth="2">PackageManagerService（第 26 章）</a><a href="#安全第-40-章" data-depth="2">安全（第 40 章）</a><a href="#systemui第-48-章" data-depth="2">SystemUI（第 48 章）</a><a href="#launcher3第-49-章" data-depth="2">Launcher3（第 49 章）</a><a href="#设置应用第-50-章" data-depth="2">设置应用（第 50 章）</a><a href="#companiondevicemanager-与虚拟设备第-52-章" data-depth="2">CompanionDeviceManager 与虚拟设备（第 52 章）</a><a href="#mainline-模块第-54-章" data-depth="2">Mainline 模块（第 54 章）</a><a href="#虚拟化框架第-56-章" data-depth="2">虚拟化框架（第 56 章）</a><a href="#测试第-57-章" data-depth="2">测试（第 57 章）</a><a href="#架构支持第-59-章" data-depth="2">架构支持（第 59 章）</a><a href="#模拟器第-60-章" data-depth="2">模拟器（第 60 章）</a><a href="#设备形态第-62-章" data-depth="2">设备形态（第 62 章）</a></nav><main><article><p class="article-kicker"><time datetime="2026-11-09T17:27:39.000Z">2026年11月10日</time></p><h1 class="article-title">附录 A：关键文件参考</h1><div class="prose"><h1 id="附录-a关键文件参考">附录 A：关键文件参考</h1>
+<p>本附录是 AOSP 中最重要源文件的速查表。各表按子系统分组，每个小标题都给出讨论这些文件的章号。路径均相对于 AOSP 根目录（<code>$AOSP/</code>）。</p>
+<hr>
+<h2 id="构建系统第-2-章">构建系统（第 2 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>build/make/core/main.mk</code></td>
+<td>顶层构建入口；包含其余所有 makefile</td>
+</tr>
+<tr>
+<td><code>build/make/core/Makefile</code></td>
+<td>用于镜像、OTA、打包的旧式构建规则</td>
+</tr>
+<tr>
+<td><code>build/make/core/definitions.mk</code></td>
+<td>全构建通用的宏定义</td>
+</tr>
+<tr>
+<td><code>build/make/core/envsetup.mk</code></td>
+<td>构建配置的环境变量设置</td>
+</tr>
+<tr>
+<td><code>build/make/core/product.mk</code></td>
+<td>产品级构建变量定义</td>
+</tr>
+<tr>
+<td><code>build/make/core/product_config.mk</code></td>
+<td>产品配置的加载与校验</td>
+</tr>
+<tr>
+<td><code>build/make/core/board_config.mk</code></td>
+<td>板级硬件配置</td>
+</tr>
+<tr>
+<td><code>build/make/core/binary.mk</code></td>
+<td>构建原生二进制的共享规则</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/berberis_config.mk</code></td>
+<td>Berberis（riscv64 到 x86_64）给 native bridge 用的产品打包配置</td>
+</tr>
+<tr>
+<td><code>build/make/envsetup.sh</code></td>
+<td>Shell 环境设置；定义 <code>lunch</code>（以及 <code>tapas</code>、<code>banchan</code>、<code>croot</code>），并把 <code>build/soong/bin</code>（独立 <code>m</code>、<code>mm</code>、<code>mmm</code> 脚本所在处）加入 PATH</td>
+</tr>
+<tr>
+<td><code>build/soong/cmd/soong_build/main.go</code></td>
+<td>Soong 构建系统入口</td>
+</tr>
+<tr>
+<td><code>build/soong/android/module.go</code></td>
+<td>Soong 的基础模块类型定义</td>
+</tr>
+<tr>
+<td><code>build/soong/android/androidmk.go</code></td>
+<td>为 Soong 模块生成 Android.mk 条目，供 Kati 消费（Make-Soong 互操作）</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/cc.go</code></td>
+<td>Soong 的 C/C++ 模块构建规则</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/library.go</code></td>
+<td>共享库/静态库构建规则</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/binary.go</code></td>
+<td>原生二进制构建规则</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/config/riscv64_device.go</code></td>
+<td>RISC-V 64 位设备配置</td>
+</tr>
+<tr>
+<td><code>build/soong/java/java.go</code></td>
+<td>Soong 的 Java 模块构建规则</td>
+</tr>
+<tr>
+<td><code>build/soong/java/app.go</code></td>
+<td>Android 应用构建规则</td>
+</tr>
+<tr>
+<td><code>build/soong/apex/apex.go</code></td>
+<td>APEX 模块构建规则</td>
+</tr>
+<tr>
+<td><code>build/blueprint/context.go</code></td>
+<td>Blueprint 核心上下文与依赖解析</td>
+</tr>
+<tr>
+<td><code>build/blueprint/module_ctx.go</code></td>
+<td>Blueprint 的模块上下文接口</td>
+</tr>
+<tr>
+<td><code>device/generic/goldfish/board/BoardConfigCommon.mk</code></td>
+<td>模拟器板级配置（公共部分）</td>
+</tr>
+<tr>
+<td><code>device/google/cuttlefish/vsoc_x86_64/BoardConfig.mk</code></td>
+<td>Cuttlefish 虚拟设备板级配置（x86_64）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="启动与-init第-4-章">启动与 init（第 4 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>system/core/init/init.cpp</code></td>
+<td>PID 1 的 init 进程主入口</td>
+</tr>
+<tr>
+<td><code>system/core/init/service.cpp</code></td>
+<td>服务生命周期管理（启动/停止/重启）</td>
+</tr>
+<tr>
+<td><code>system/core/init/service_parser.cpp</code></td>
+<td>.rc 文件中服务定义的解析</td>
+</tr>
+<tr>
+<td><code>system/core/init/action.cpp</code></td>
+<td>action 与 trigger 的执行引擎</td>
+</tr>
+<tr>
+<td><code>system/core/init/action_parser.cpp</code></td>
+<td>.rc 文件中 action 块的解析</td>
+</tr>
+<tr>
+<td><code>system/core/init/property_service.cpp</code></td>
+<td>系统属性守护进程与持久化</td>
+</tr>
+<tr>
+<td><code>system/core/init/first_stage_init.cpp</code></td>
+<td>挂载分区之前的第一阶段 init</td>
+</tr>
+<tr>
+<td><code>system/core/init/first_stage_mount.cpp</code></td>
+<td>早期分区挂载逻辑</td>
+</tr>
+<tr>
+<td><code>system/core/init/selinux.cpp</code></td>
+<td>init 期间的 SELinux 策略加载</td>
+</tr>
+<tr>
+<td><code>system/core/init/ueventd.cpp</code></td>
+<td>设备节点创建守护进程</td>
+</tr>
+<tr>
+<td><code>system/core/init/reboot.cpp</code></td>
+<td>关机与重启的时序编排</td>
+</tr>
+<tr>
+<td><code>system/core/rootdir/init.rc</code></td>
+<td>根 init 脚本；定义核心服务与触发器</td>
+</tr>
+<tr>
+<td><code>system/core/rootdir/init.zygote64_32.rc</code></td>
+<td>Zygote 启动配置（64+32 位）</td>
+</tr>
+<tr>
+<td><code>system/core/fastboot/fastboot.cpp</code></td>
+<td>Fastboot 协议的宿主侧实现</td>
+</tr>
+<tr>
+<td><code>bootable/recovery/recovery.cpp</code></td>
+<td>Recovery 模式主入口</td>
+</tr>
+</tbody>
+</table>
+<h2 id="内核第-5-章">内核（第 5 章）</h2>
+<p>与本附录其余部分不同，这些路径相对于一份独立的 Android Common Kernel 检出（有它自己的 <code>repo init</code>）。在该检出中，内核源码树是 <code>common/</code>，构建工具在 <code>build/</code>；平台检出里的 <code>kernel/</code> 目录只放配置、预置产物与测试。</p>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>common/Makefile</code></td>
+<td>顶层内核 Makefile</td>
+</tr>
+<tr>
+<td><code>common/arch/arm64/configs/gki_defconfig</code></td>
+<td>GKI 默认内核配置</td>
+</tr>
+<tr>
+<td><code>common/drivers/android/binder.c</code></td>
+<td>Binder 内核驱动实现</td>
+</tr>
+<tr>
+<td><code>common/drivers/android/binder_alloc.c</code></td>
+<td>Binder 内存分配</td>
+</tr>
+<tr>
+<td><code>common/drivers/staging/android/ion/</code></td>
+<td>ION 内存分配器（旧式）</td>
+</tr>
+<tr>
+<td><code>common/drivers/dma-buf/</code></td>
+<td>用于缓冲共享的 DMA-BUF 框架</td>
+</tr>
+<tr>
+<td><code>common/drivers/gpu/drm/</code></td>
+<td>DRM/KMS 图形驱动框架</td>
+</tr>
+<tr>
+<td><code>common/include/uapi/linux/android/binder.h</code></td>
+<td>Binder UAPI 头文件</td>
+</tr>
+<tr>
+<td><code>common/fs/fuse/dev.c</code></td>
+<td>FUSE 设备实现（用于分区存储）</td>
+</tr>
+<tr>
+<td><code>build/build.sh</code></td>
+<td>内核构建包装脚本（旧式）</td>
+</tr>
+<tr>
+<td><code>build/kleaf/</code></td>
+<td>Kleaf（基于 Bazel）内核构建系统</td>
+</tr>
+</tbody>
+</table>
+<h2 id="bionic-与动态链接器第-7-章">Bionic 与动态链接器（第 7 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bionic/libc/bionic/malloc_common.cpp</code></td>
+<td>malloc 分派（jemalloc/scudo 选择）</td>
+</tr>
+<tr>
+<td><code>bionic/libc/bionic/pthread_create.cpp</code></td>
+<td>POSIX 线程创建</td>
+</tr>
+<tr>
+<td><code>bionic/libc/bionic/libc_init_dynamic.cpp</code></td>
+<td>动态链接进程的启动</td>
+</tr>
+<tr>
+<td><code>bionic/libc/bionic/libc_init_static.cpp</code></td>
+<td>静态链接进程的启动</td>
+</tr>
+<tr>
+<td><code>bionic/libc/bionic/system_property_api.cpp</code></td>
+<td>系统属性客户端 API</td>
+</tr>
+<tr>
+<td><code>bionic/libc/arch-arm64/</code></td>
+<td>ARM64 架构相关代码</td>
+</tr>
+<tr>
+<td><code>bionic/libc/include/</code></td>
+<td>C 库公开头文件</td>
+</tr>
+<tr>
+<td><code>bionic/linker/linker.cpp</code></td>
+<td>动态链接器主逻辑</td>
+</tr>
+<tr>
+<td><code>bionic/linker/linker_phdr.cpp</code></td>
+<td>ELF program header 解析与加载</td>
+</tr>
+<tr>
+<td><code>bionic/linker/linker_namespaces.cpp</code></td>
+<td>链接器命名空间实现</td>
+</tr>
+<tr>
+<td><code>bionic/linker/linker_soinfo.cpp</code></td>
+<td>共享对象信息管理</td>
+</tr>
+<tr>
+<td><code>bionic/linker/linker_config.cpp</code></td>
+<td>链接器配置文件解析</td>
+</tr>
+<tr>
+<td><code>system/core/rootdir/etc/ld.config.txt</code></td>
+<td>默认链接器命名空间配置</td>
+</tr>
+<tr>
+<td><code>bionic/libm/</code></td>
+<td>数学库实现</td>
+</tr>
+<tr>
+<td><code>bionic/libdl/libdl.cpp</code></td>
+<td>dlopen/dlsym 实现</td>
+</tr>
+</tbody>
+</table>
+<h2 id="binder-ipc第-9-章">Binder IPC（第 9 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/native/libs/binder/IPCThreadState.cpp</code></td>
+<td>逐线程的 Binder 事务处理</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/binder/ProcessState.cpp</code></td>
+<td>逐进程的 Binder 驱动状态</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/binder/Binder.cpp</code></td>
+<td>BBinder（本地）基类</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/binder/BpBinder.cpp</code></td>
+<td>BpBinder（代理）基类</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/binder/Parcel.cpp</code></td>
+<td>Binder 事务的数据序列化</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/binder/IServiceManager.cpp</code></td>
+<td>服务管理器客户端接口</td>
+</tr>
+<tr>
+<td><code>frameworks/native/cmds/servicemanager/ServiceManager.cpp</code></td>
+<td>服务管理器守护进程</td>
+</tr>
+<tr>
+<td><code>frameworks/native/cmds/servicemanager/main.cpp</code></td>
+<td>服务管理器入口</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/os/Binder.java</code></td>
+<td>Java 侧 Binder 基类</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/os/BinderProxy.java</code></td>
+<td>Java 侧 Binder 代理</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/os/Parcel.java</code></td>
+<td>Java 侧 Parcel</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/os/ServiceManager.java</code></td>
+<td>Java 服务管理器客户端</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/jni/android_util_Binder.cpp</code></td>
+<td>Binder 的 JNI 桥</td>
+</tr>
+</tbody>
+</table>
+<h2 id="hal--硬件抽象层第-10-章">HAL —— 硬件抽象层（第 10 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hardware/interfaces/</code></td>
+<td>HIDL/AIDL HAL 接口顶层目录</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/audio/aidl/</code></td>
+<td>Audio HAL 的 AIDL 接口定义</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/camera/provider/aidl/</code></td>
+<td>Camera provider HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/graphics/composer/aidl/</code></td>
+<td>HWC（Hardware Composer）HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/graphics/allocator/aidl/</code></td>
+<td>Gralloc 分配器 HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/graphics/mapper/stable-c/</code></td>
+<td>Gralloc mapper stable-C HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/health/aidl/</code></td>
+<td>电池/健康 HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/sensors/aidl/</code></td>
+<td>传感器 HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/neuralnetworks/aidl/</code></td>
+<td>NNAPI HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/power/aidl/</code></td>
+<td>Power HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/thermal/aidl/</code></td>
+<td>Thermal HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/bluetooth/aidl/</code></td>
+<td>蓝牙 HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/wifi/aidl/</code></td>
+<td>Wi-Fi HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/interfaces/vibrator/aidl/</code></td>
+<td>振动器 HAL 接口</td>
+</tr>
+<tr>
+<td><code>hardware/libhardware/include/hardware/hardware.h</code></td>
+<td>旧式 HAL 模块接口（hw_module_t）</td>
+</tr>
+<tr>
+<td><code>system/libhidl/transport/HidlTransportSupport.cpp</code></td>
+<td>HIDL 传输初始化</td>
+</tr>
+<tr>
+<td><code>system/tools/hidl/</code></td>
+<td>HIDL 编译器（hidl-gen）</td>
+</tr>
+<tr>
+<td><code>system/tools/aidl/</code></td>
+<td>用于 HAL 接口的 AIDL 编译器</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ndk--原生开发工具包第-11-章">NDK —— 原生开发工具包（第 11 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/native/include/android/</code></td>
+<td>公开的 NDK 原生头文件</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/nativewindow/include/android/native_window.h</code></td>
+<td>ANativeWindow API</td>
+</tr>
+<tr>
+<td><code>frameworks/native/include/android/native_activity.h</code></td>
+<td>NativeActivity API</td>
+</tr>
+<tr>
+<td><code>frameworks/native/include/android/sensor.h</code></td>
+<td>传感器 NDK API</td>
+</tr>
+<tr>
+<td><code>frameworks/native/include/android/asset_manager.h</code></td>
+<td>Asset manager NDK API</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/ndk/</code></td>
+<td>媒体 NDK 实现（AMediaCodec 等）</td>
+</tr>
+<tr>
+<td><code>packages/modules/NeuralNetworks/runtime/</code></td>
+<td>NNAPI 运行时实现</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/nativewindow/</code></td>
+<td>ANativeWindow 实现</td>
+</tr>
+</tbody>
+</table>
+<h2 id="原生服务第-12-章">原生服务（第 12 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/native/services/inputflinger/dispatcher/InputDispatcher.cpp</code></td>
+<td>向窗口派发输入事件</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/inputflinger/reader/InputReader.cpp</code></td>
+<td>读取输入设备事件</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/inputflinger/InputManager.cpp</code></td>
+<td>输入子系统协调器</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/sensorservice/SensorService.cpp</code></td>
+<td>传感器事件多路复用</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/main_surfaceflinger.cpp</code></td>
+<td>SurfaceFlinger 进程入口</td>
+</tr>
+<tr>
+<td><code>system/logging/logd/SerializedLogBuffer.cpp</code></td>
+<td>系统日志环形缓冲</td>
+</tr>
+<tr>
+<td><code>system/memory/lmkd/lmkd.cpp</code></td>
+<td>低内存杀手守护进程</td>
+</tr>
+<tr>
+<td><code>system/memory/lmkd/</code></td>
+<td>现代 LMKD 实现</td>
+</tr>
+<tr>
+<td><code>system/core/healthd/</code></td>
+<td>电池/健康守护进程</td>
+</tr>
+<tr>
+<td><code>system/netd/server/NetdNativeService.cpp</code></td>
+<td>网络守护进程的原生服务</td>
+</tr>
+</tbody>
+</table>
+<h2 id="图形与渲染管线第-13-章">图形与渲染管线（第 13 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp</code></td>
+<td>合成器主类</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/SurfaceFlinger.h</code></td>
+<td>SurfaceFlinger 声明</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/Scheduler/Scheduler.cpp</code></td>
+<td>VSYNC 调度与帧节奏</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/Scheduler/VSyncReactor.cpp</code></td>
+<td>VSYNC 控制器实现（<code>VsyncController</code> 接口在 <code>VsyncController.h</code>）</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/CompositionEngine/</code></td>
+<td>合成策略引擎</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/DisplayHardware/HWComposer.cpp</code></td>
+<td>HWC 抽象层</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/PowerAdvisor/PowerAdvisor.cpp</code></td>
+<td>功耗提示集成</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/Layer.cpp</code></td>
+<td>单个表面/图层管理</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/FrontEnd/LayerSnapshot.cpp</code></td>
+<td>由缓冲支撑的图层状态快照（前端）</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/FrontEnd/LayerLifecycleManager.cpp</code></td>
+<td>图层生命周期跟踪</td>
+</tr>
+<tr>
+<td><code>frameworks/native/services/surfaceflinger/Tracing/TransactionTracing.cpp</code></td>
+<td>事务跟踪抓取</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/gui/Surface.cpp</code></td>
+<td>客户端 Surface 实现</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/gui/BufferQueue.cpp</code></td>
+<td>生产者-消费者缓冲队列</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/gui/BufferQueueProducer.cpp</code></td>
+<td>缓冲队列生产者侧</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/gui/BufferQueueConsumer.cpp</code></td>
+<td>缓冲队列消费者侧</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/gui/SurfaceComposerClient.cpp</code></td>
+<td>SurfaceFlinger 客户端接口</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/gui/BLASTBufferQueue.cpp</code></td>
+<td>BLAST 缓冲队列（现代路径）</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/renderengine/skia/SkiaGLRenderEngine.cpp</code></td>
+<td>基于 Skia 的 GPU 合成</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/renderengine/skia/SkiaVkRenderEngine.cpp</code></td>
+<td>Skia Vulkan 渲染引擎</td>
+</tr>
+<tr>
+<td><code>frameworks/native/opengl/libs/EGL/eglApi.cpp</code></td>
+<td>EGL API 入口点</td>
+</tr>
+<tr>
+<td><code>frameworks/native/opengl/libs/EGL/Loader.cpp</code></td>
+<td>EGL 驱动加载器</td>
+</tr>
+<tr>
+<td><code>frameworks/native/vulkan/libvulkan/driver.cpp</code></td>
+<td>Vulkan loader/驱动接口</td>
+</tr>
+<tr>
+<td><code>frameworks/native/vulkan/libvulkan/api.cpp</code></td>
+<td>Vulkan API 分派</td>
+</tr>
+<tr>
+<td><code>external/skia/src/gpu/ganesh/GrDirectContext.cpp</code></td>
+<td>Skia GPU 上下文</td>
+</tr>
+<tr>
+<td><code>external/skia/src/gpu/graphite/</code></td>
+<td>Skia Graphite（下一代 GPU 后端）</td>
+</tr>
+<tr>
+<td><code>frameworks/base/libs/hwui/renderthread/RenderThread.cpp</code></td>
+<td>HWUI 渲染线程</td>
+</tr>
+<tr>
+<td><code>frameworks/base/libs/hwui/renderthread/CanvasContext.cpp</code></td>
+<td>逐窗口渲染上下文</td>
+</tr>
+<tr>
+<td><code>frameworks/base/libs/hwui/pipeline/skia/SkiaOpenGLPipeline.cpp</code></td>
+<td>Skia GL 渲染管线</td>
+</tr>
+<tr>
+<td><code>frameworks/base/libs/hwui/pipeline/skia/SkiaVulkanPipeline.cpp</code></td>
+<td>Skia Vulkan 渲染管线</td>
+</tr>
+<tr>
+<td><code>frameworks/base/libs/hwui/RenderNode.cpp</code></td>
+<td>显示列表渲染节点</td>
+</tr>
+<tr>
+<td><code>frameworks/base/libs/hwui/RecordingCanvas.cpp</code></td>
+<td>显示列表录制画布</td>
+</tr>
+<tr>
+<td><code>frameworks/base/libs/hwui/DamageAccumulator.cpp</code></td>
+<td>脏区域跟踪</td>
+</tr>
+<tr>
+<td><code>frameworks/base/libs/hwui/JankTracker.cpp</code></td>
+<td>掉帧检测与上报</td>
+</tr>
+<tr>
+<td><code>frameworks/base/graphics/java/android/graphics/Canvas.java</code></td>
+<td>Java Canvas API</td>
+</tr>
+<tr>
+<td><code>frameworks/base/graphics/java/android/graphics/RenderNode.java</code></td>
+<td>Java RenderNode API</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/view/Choreographer.java</code></td>
+<td>基于 VSYNC 的回调调度器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/view/ViewRootImpl.java</code></td>
+<td>视图层级根；驱动 measure/layout/draw</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/view/ThreadedRenderer.java</code></td>
+<td>通往 HWUI RenderThread 的 Java 桥</td>
+</tr>
+</tbody>
+</table>
+<h2 id="动画系统第-14-章">动画系统（第 14 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/base/core/java/android/animation/ValueAnimator.java</code></td>
+<td>核心属性动画引擎</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/animation/ObjectAnimator.java</code></td>
+<td>面向属性目标的动画</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/animation/AnimatorSet.java</code></td>
+<td>协同编排的动画序列</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/view/animation/Animation.java</code></td>
+<td>旧式视图动画基类</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/transition/TransitionManager.java</code></td>
+<td>场景切换框架</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/window/TransitionInfo.java</code></td>
+<td>Shell 过渡元数据</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/systemui/animationlib/src/</code></td>
+<td>SystemUI 共享动画库</td>
+</tr>
+</tbody>
+</table>
+<h2 id="音频系统第-15-章">音频系统（第 15 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/av/services/audioflinger/AudioFlinger.cpp</code></td>
+<td>音频混音守护进程主类</td>
+</tr>
+<tr>
+<td><code>frameworks/av/services/audioflinger/Threads.cpp</code></td>
+<td>播放与录音线程实现</td>
+</tr>
+<tr>
+<td><code>frameworks/av/services/audioflinger/Tracks.cpp</code></td>
+<td>音频 track 管理</td>
+</tr>
+<tr>
+<td><code>frameworks/av/services/audioflinger/Effects.cpp</code></td>
+<td>音效链处理</td>
+</tr>
+<tr>
+<td><code>frameworks/av/services/audiopolicy/managerdefault/AudioPolicyManager.cpp</code></td>
+<td>音频路由策略</td>
+</tr>
+<tr>
+<td><code>frameworks/av/services/audiopolicy/common/managerdefinitions/src/PolicyAudioPort.cpp</code></td>
+<td>音频端口抽象</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/libaudioclient/AudioTrack.cpp</code></td>
+<td>客户端音频播放</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/libaudioclient/AudioRecord.cpp</code></td>
+<td>客户端音频录音</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/libaudioclient/AudioSystem.cpp</code></td>
+<td>音频系统客户端接口</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/libaudiohal/impl/DeviceHalAidl.cpp</code></td>
+<td>音频设备 HAL 的 AIDL 适配器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/media/java/android/media/AudioTrack.java</code></td>
+<td>Java 音频播放 API</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/audio/AudioService.java</code></td>
+<td>音频服务（音量、路由）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="媒体与视频管线第-16-章">媒体与视频管线（第 16 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/av/media/libmediaplayerservice/MediaPlayerService.cpp</code></td>
+<td>媒体播放器守护进程</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/codec2/sfplugin/CCodec.cpp</code></td>
+<td>Codec2 框架插件</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/codec2/sfplugin/CCodecBufferChannel.cpp</code></td>
+<td>Codec2 缓冲管理</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/codec2/components/</code></td>
+<td>软件编解码器实现</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/libstagefright/MediaCodec.cpp</code></td>
+<td>MediaCodec 原生实现</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/libstagefright/ACodec.cpp</code></td>
+<td>旧式 OMX 编解码器适配器</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayer.cpp</code></td>
+<td>媒体播放引擎</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/module/extractors/</code></td>
+<td>媒体文件格式解析器（MP4、MKV 等）</td>
+</tr>
+<tr>
+<td><code>frameworks/av/services/camera/libcameraservice/CameraService.cpp</code></td>
+<td>相机服务守护进程</td>
+</tr>
+<tr>
+<td><code>frameworks/av/drm/mediadrm/plugins/clearkey/</code></td>
+<td>ClearKey DRM 参考实现</td>
+</tr>
+<tr>
+<td><code>frameworks/base/media/java/android/media/MediaCodec.java</code></td>
+<td>Java MediaCodec API</td>
+</tr>
+<tr>
+<td><code>frameworks/base/media/java/android/media/MediaPlayer.java</code></td>
+<td>Java MediaPlayer API</td>
+</tr>
+</tbody>
+</table>
+<h2 id="art-运行时第-18-章">ART 运行时（第 18 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>art/runtime/runtime.cc</code></td>
+<td>ART 运行时初始化</td>
+</tr>
+<tr>
+<td><code>art/runtime/class_linker.cc</code></td>
+<td>类加载与链接</td>
+</tr>
+<tr>
+<td><code>art/runtime/interpreter/interpreter.cc</code></td>
+<td>字节码解释器入口</td>
+</tr>
+<tr>
+<td><code>art/runtime/jit/jit.cc</code></td>
+<td>JIT 编译器协调器</td>
+</tr>
+<tr>
+<td><code>art/runtime/jit/jit_code_cache.cc</code></td>
+<td>JIT 编译代码缓存</td>
+</tr>
+<tr>
+<td><code>art/runtime/gc/heap.cc</code></td>
+<td>垃圾回收器堆管理</td>
+</tr>
+<tr>
+<td><code>art/runtime/gc/collector/concurrent_copying.cc</code></td>
+<td>并发复制 GC</td>
+</tr>
+<tr>
+<td><code>art/runtime/thread.cc</code></td>
+<td>线程管理</td>
+</tr>
+<tr>
+<td><code>art/runtime/oat/oat_file.cc</code></td>
+<td>OAT 文件格式处理</td>
+</tr>
+<tr>
+<td><code>art/runtime/mirror/object.h</code></td>
+<td>托管堆的根对象类型</td>
+</tr>
+<tr>
+<td><code>art/runtime/mirror/class.h</code></td>
+<td>类元数据表示</td>
+</tr>
+<tr>
+<td><code>art/compiler/optimizing/optimizing_compiler.cc</code></td>
+<td>AOT/JIT 优化编译器</td>
+</tr>
+<tr>
+<td><code>art/compiler/optimizing/code_generator_arm64.cc</code></td>
+<td>ARM64 代码生成后端</td>
+</tr>
+<tr>
+<td><code>art/compiler/optimizing/register_allocator_linear_scan.cc</code></td>
+<td>寄存器分配</td>
+</tr>
+<tr>
+<td><code>art/dex2oat/dex2oat.cc</code></td>
+<td>提前编译（AOT）工具</td>
+</tr>
+<tr>
+<td><code>art/dex2oat/dex2oat_options.cc</code></td>
+<td>DEX 到 OAT 编译选项</td>
+</tr>
+<tr>
+<td><code>art/libdexfile/dex/dex_file.h</code></td>
+<td>DEX 文件格式定义</td>
+</tr>
+<tr>
+<td><code>art/runtime/native_bridge_art_interface.cc</code></td>
+<td>ART 侧 native bridge 集成</td>
+</tr>
+</tbody>
+</table>
+<h2 id="native-bridge-与二进制翻译第-19-章">Native Bridge 与二进制翻译（第 19 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/libs/binary_translation/native_bridge/native_bridge.h</code></td>
+<td>NativeBridgeCallbacks 接口（v3-v8）</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/native_bridge/native_bridge.cc</code></td>
+<td>Native bridge 框架实现</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/guest_loader/</code></td>
+<td>客户库的加载与链接</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/guest_abi/</code></td>
+<td>宿主与客户之间的 ABI 转换</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/guest_state/</code></td>
+<td>客户 CPU 状态抽象</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/jni/</code></td>
+<td>JNI trampoline 生成</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/cpu_emulation/interpreter/</code></td>
+<td>客户指令解释器</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/cpu_emulation/decoder/</code></td>
+<td>客户指令解码器</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/cpu_emulation/backend/</code></td>
+<td>宿主代码生成后端</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/cpu_emulation/assembler/</code></td>
+<td>宿主指令汇编器</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/binary_translation/android_api/</code></td>
+<td>Android 框架代理桩</td>
+</tr>
+<tr>
+<td><code>frameworks/libs/native_bridge_support/native_bridge_support.mk</code></td>
+<td>bridge 支撑的构建同步</td>
+</tr>
+<tr>
+<td><code>art/libnativebridge/native_bridge.cc</code></td>
+<td>系统侧的 native bridge 加载</td>
+</tr>
+</tbody>
+</table>
+<h2 id="system_server第-20-章">system_server（第 20 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/base/services/java/com/android/server/SystemServer.java</code></td>
+<td>system_server 启动序列</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/SystemServiceManager.java</code></td>
+<td>服务生命周期管理器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java</code></td>
+<td>Activity Manager Service</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java</code></td>
+<td>Window Manager Service</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/ActivityTaskManagerService.java</code></td>
+<td>Activity Task Manager Service</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java</code></td>
+<td>Package Manager Service</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java</code></td>
+<td>电源管理</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/display/DisplayManagerService.java</code></td>
+<td>显示管理</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/input/InputManagerService.java</code></td>
+<td>输入管理桥</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</code></td>
+<td>Zygote 进程初始化</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/com/android/internal/os/ZygoteConnection.java</code></td>
+<td>Zygote fork 请求处理</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/com/android/internal/os/Zygote.java</code></td>
+<td>Zygote fork 机制</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/com/android/internal/os/RuntimeInit.java</code></td>
+<td>应用进程运行时初始化</td>
+</tr>
+</tbody>
+</table>
+<h2 id="activity-与窗口管理第-22-章">Activity 与窗口管理（第 22 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/Task.java</code></td>
+<td>Task（返回栈）容器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/ActivityRecord.java</code></td>
+<td>逐 activity 的状态跟踪</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/ActivityStarter.java</code></td>
+<td>Intent 解析与 activity 启动</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/ActivityClientController.java</code></td>
+<td>activity 生命周期的 IPC 处理器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/RootWindowContainer.java</code></td>
+<td>窗口层级树的根</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/TaskFragment.java</code></td>
+<td>Activity embedding 容器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/app/Activity.java</code></td>
+<td>应用侧 activity 基类</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/app/ActivityThread.java</code></td>
+<td>每个 Android 应用的主线程</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/app/Instrumentation.java</code></td>
+<td>activity 生命周期的 instrumentation 钩子</td>
+</tr>
+</tbody>
+</table>
+<h2 id="窗口系统第-23-章">窗口系统（第 23 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/WindowState.java</code></td>
+<td>逐窗口的服务端状态</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/WindowToken.java</code></td>
+<td>窗口分组令牌</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/Session.java</code></td>
+<td>逐应用的 WMS 会话</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/WindowStateAnimator.java</code></td>
+<td>窗口到 Surface 的桥；创建并管理该窗口的 SurfaceControl</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/WindowAnimator.java</code></td>
+<td>窗口动画协调器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/InsetsStateController.java</code></td>
+<td>系统 inset 管理</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/InsetsPolicy.java</code></td>
+<td>inset 可见性策略</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/view/WindowManager.java</code></td>
+<td>客户端窗口管理器接口</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/view/WindowManagerImpl.java</code></td>
+<td>窗口管理器实现</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/view/View.java</code></td>
+<td>UI 组件基类（measure/layout/draw）</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/view/ViewGroup.java</code></td>
+<td>子视图的容器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/view/SurfaceView.java</code></td>
+<td>独立表面的视图组件</td>
+</tr>
+</tbody>
+</table>
+<h2 id="显示系统第-24-章">显示系统（第 24 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/DisplayContent.java</code></td>
+<td>逐显示的窗口容器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/DisplayPolicy.java</code></td>
+<td>逐显示的窗口策略（状态栏、挖孔）</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/DisplayRotation.java</code></td>
+<td>显示旋转处理</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/display/LogicalDisplay.java</code></td>
+<td>逻辑显示抽象</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/display/DisplayDeviceInfo.java</code></td>
+<td>物理显示属性</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/display/LocalDisplayAdapter.java</code></td>
+<td>内置显示适配器</td>
+</tr>
+</tbody>
+</table>
+<h2 id="packagemanagerservice第-26-章">PackageManagerService（第 26 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java</code></td>
+<td>包管理核心</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/pm/Settings.java</code></td>
+<td>包设置的持久化</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/pm/InstallPackageHelper.java</code></td>
+<td>包安装逻辑</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/pm/PackageInstallerService.java</code></td>
+<td>安装器会话管理</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/pm/permission/PermissionManagerService.java</code></td>
+<td>运行时权限管理</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/com/android/internal/pm/pkg/parsing/ParsingPackageUtils.java</code></td>
+<td>APK manifest 解析</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/pm/resolution/ComponentResolver.java</code></td>
+<td>Intent filter 解析</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/pm/dex/ArtManagerService.java</code></td>
+<td>ART profile 与 DEX 优化服务</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/content/pm/PackageManager.java</code></td>
+<td>公开的 PackageManager API</td>
+</tr>
+</tbody>
+</table>
+<h2 id="安全第-40-章">安全（第 40 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>system/sepolicy/public/</code></td>
+<td>公开 SELinux 策略定义</td>
+</tr>
+<tr>
+<td><code>system/sepolicy/private/</code></td>
+<td>私有（平台）SELinux 策略</td>
+</tr>
+<tr>
+<td><code>system/sepolicy/vendor/</code></td>
+<td>厂商 SELinux 策略</td>
+</tr>
+<tr>
+<td><code>system/security/keystore2/</code></td>
+<td>Keystore2 服务（Rust）</td>
+</tr>
+<tr>
+<td><code>system/security/identity/</code></td>
+<td>身份凭据服务</td>
+</tr>
+<tr>
+<td><code>external/selinux/</code></td>
+<td>SELinux 用户空间工具</td>
+</tr>
+<tr>
+<td><code>system/extras/verity/</code></td>
+<td>dm-verity 工具</td>
+</tr>
+<tr>
+<td><code>system/fs/fs_mgr/libfs_avb/</code></td>
+<td>AVB（Android Verified Boot）集成</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/core/java/com/android/server/biometrics/</code></td>
+<td>生物识别认证</td>
+</tr>
+<tr>
+<td><code>frameworks/base/keystore/java/android/security/keystore2/</code></td>
+<td>Keystore Java API</td>
+</tr>
+</tbody>
+</table>
+<h2 id="systemui第-48-章">SystemUI（第 48 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/base/packages/SystemUI/src/com/android/systemui/application/SystemUIApplication.kt</code></td>
+<td>SystemUI 应用入口</td>
+</tr>
+<tr>
+<td><code>frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfacesImpl.java</code></td>
+<td>状态栏 + 通知栏</td>
+</tr>
+<tr>
+<td><code>frameworks/base/packages/SystemUI/src/com/android/systemui/qs/panels/domain/startable/QSPanelsCoreStartable.kt</code></td>
+<td>快捷设置面板的启动协调器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/packages/SystemUI/src/com/android/systemui/recents/OverviewProxyRecentsImpl.java</code></td>
+<td>最近任务/概览到 Launcher 的代理</td>
+</tr>
+<tr>
+<td><code>frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java</code></td>
+<td>锁屏协调器</td>
+</tr>
+<tr>
+<td><code>frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBar.java</code></td>
+<td>导航栏</td>
+</tr>
+<tr>
+<td><code>frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogControllerImpl.java</code></td>
+<td>音量对话框逻辑</td>
+</tr>
+<tr>
+<td><code>frameworks/base/packages/SystemUI/src/com/android/systemui/shade/NotificationPanelViewController.java</code></td>
+<td>通知面板控制器</td>
+</tr>
+</tbody>
+</table>
+<h2 id="launcher3第-49-章">Launcher3（第 49 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>packages/apps/Launcher3/src/com/android/launcher3/Launcher.java</code></td>
+<td>Launcher 主 activity</td>
+</tr>
+<tr>
+<td><code>packages/apps/Launcher3/src/com/android/launcher3/Workspace.java</code></td>
+<td>主屏 workspace</td>
+</tr>
+<tr>
+<td><code>packages/apps/Launcher3/src/com/android/launcher3/allapps/ActivityAllAppsContainerView.java</code></td>
+<td>全部应用抽屉</td>
+</tr>
+<tr>
+<td><code>packages/apps/Launcher3/src/com/android/launcher3/model/LoaderTask.java</code></td>
+<td>应用列表加载</td>
+</tr>
+<tr>
+<td><code>packages/apps/Launcher3/src/com/android/launcher3/dragndrop/DragController.java</code></td>
+<td>拖放协调器</td>
+</tr>
+<tr>
+<td><code>packages/apps/Launcher3/quickstep/src/com/android/quickstep/RecentsActivity.java</code></td>
+<td>最近任务（概览）activity</td>
+</tr>
+<tr>
+<td><code>packages/apps/Launcher3/quickstep/src/com/android/quickstep/TouchInteractionService.kt</code></td>
+<td>手势导航服务</td>
+</tr>
+</tbody>
+</table>
+<h2 id="设置应用第-50-章">设置应用（第 50 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>packages/apps/Settings/src/com/android/settings/Settings.java</code></td>
+<td>设置主 activity</td>
+</tr>
+<tr>
+<td><code>packages/apps/Settings/src/com/android/settings/dashboard/DashboardFragment.java</code></td>
+<td>偏好设置仪表盘基类</td>
+</tr>
+<tr>
+<td><code>packages/apps/Settings/src/com/android/settings/search/SearchFeatureProvider.java</code></td>
+<td>设置搜索</td>
+</tr>
+<tr>
+<td><code>packages/apps/Settings/src/com/android/settings/biometrics/</code></td>
+<td>生物识别录入</td>
+</tr>
+</tbody>
+</table>
+<h2 id="companiondevicemanager-与虚拟设备第-52-章">CompanionDeviceManager 与虚拟设备（第 52 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/base/services/companion/java/com/android/server/companion/CompanionDeviceManagerService.java</code></td>
+<td>CDM 服务</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/companion/java/com/android/server/companion/virtual/VirtualDeviceManagerService.java</code></td>
+<td>VDM 服务</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mainline-模块第-54-章">Mainline 模块（第 54 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>packages/modules/Wifi/</code></td>
+<td>Wi-Fi Mainline 模块</td>
+</tr>
+<tr>
+<td><code>packages/modules/Bluetooth/</code></td>
+<td>蓝牙 Mainline 模块</td>
+</tr>
+<tr>
+<td><code>packages/modules/NetworkStack/</code></td>
+<td>网络栈 Mainline 模块</td>
+</tr>
+<tr>
+<td><code>packages/modules/Permission/</code></td>
+<td>权限控制器模块</td>
+</tr>
+<tr>
+<td><code>packages/providers/MediaProvider/</code></td>
+<td>媒体存储提供者模块</td>
+</tr>
+<tr>
+<td><code>packages/modules/adb/</code></td>
+<td>ADB Mainline 模块</td>
+</tr>
+<tr>
+<td><code>packages/modules/common/</code></td>
+<td>共享 Mainline 模块基础设施</td>
+</tr>
+<tr>
+<td><code>system/apex/apexd/</code></td>
+<td>APEX 守护进程（模块安装器）</td>
+</tr>
+<tr>
+<td><code>system/apex/apexd/apexd.cpp</code></td>
+<td>APEX 安装与激活</td>
+</tr>
+<tr>
+<td><code>system/apex/libs/libapexutil/</code></td>
+<td>APEX 工具库</td>
+</tr>
+</tbody>
+</table>
+<h2 id="虚拟化框架第-56-章">虚拟化框架（第 56 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>packages/modules/Virtualization/</code></td>
+<td>Android 虚拟化框架顶层</td>
+</tr>
+<tr>
+<td><code>packages/modules/Virtualization/android/virtualizationservice/</code></td>
+<td>VM 生命周期管理</td>
+</tr>
+<tr>
+<td><code>packages/modules/Virtualization/build/microdroid/</code></td>
+<td>最小客户操作系统（Microdroid）构建文件</td>
+</tr>
+<tr>
+<td><code>packages/modules/Virtualization/guest/pvmfw/</code></td>
+<td>受保护 VM 固件</td>
+</tr>
+<tr>
+<td><code>packages/modules/Virtualization/libs/libvm_payload/</code></td>
+<td>客户 payload 接口</td>
+</tr>
+</tbody>
+</table>
+<h2 id="测试第-57-章">测试（第 57 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test/vts/</code></td>
+<td>Vendor Test Suite 顶层</td>
+</tr>
+<tr>
+<td><code>cts/tests/</code></td>
+<td>Compatibility Test Suite 测试</td>
+</tr>
+<tr>
+<td><code>tools/tradefederation/core/</code></td>
+<td>Trade Federation 测试框架核心</td>
+</tr>
+<tr>
+<td><code>tools/tradefederation/core/src/com/android/tradefed/</code></td>
+<td>TradeFed 框架类</td>
+</tr>
+<tr>
+<td><code>platform_testing/tests/</code></td>
+<td>平台集成测试</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/tests/</code></td>
+<td>框架核心单元测试</td>
+</tr>
+<tr>
+<td><code>frameworks/base/test-runner/</code></td>
+<td>Android 测试运行器框架</td>
+</tr>
+</tbody>
+</table>
+<h2 id="架构支持第-59-章">架构支持（第 59 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>build/soong/cc/config/arm64_device.go</code></td>
+<td>ARM64 工具链：架构变体、CPU 调优、PAC/BTI</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/config/arm_device.go</code></td>
+<td>ARM 32 位工具链：Thumb/ARM、errata 规避</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/config/x86_device.go</code></td>
+<td>x86 32 位工具链：SSE、栈重对齐</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/config/x86_64_device.go</code></td>
+<td>x86_64 工具链：微架构变体</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/config/riscv64_device.go</code></td>
+<td>RISC-V 64 位工具链：ISA 扩展</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/config/toolchain.go</code></td>
+<td>工具链接口与工厂注册表</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/config/global.go</code></td>
+<td>所有架构的全局编译器/链接器标志</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/config/bionic.go</code></td>
+<td>Bionic CRT 对象与默认共享库</td>
+</tr>
+<tr>
+<td><code>build/soong/cc/config/clang.go</code></td>
+<td>Clang 未知标志过滤器</td>
+</tr>
+<tr>
+<td><code>build/soong/android/arch.go</code></td>
+<td>Arch 结构体、ArchType、multilib 解码逻辑</td>
+</tr>
+<tr>
+<td><code>bionic/libc/arch-arm64/ifuncs.cpp</code></td>
+<td>ARM64 ifunc 分派器（MTE 变体选择；SVE 变体已存在但尚未启用）</td>
+</tr>
+<tr>
+<td><code>art/runtime/arch/riscv64/instruction_set_features_riscv64.h</code></td>
+<td>ART 的 RISC-V 特性检测</td>
+</tr>
+<tr>
+<td><code>art/runtime/arch/arm64/instruction_set_features_arm64.h</code></td>
+<td>ART 的 ARM64 特性位图与 errata</td>
+</tr>
+</tbody>
+</table>
+<h2 id="模拟器第-60-章">模拟器（第 60 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>external/qemu/android-qemu2-glue/emulation/</code></td>
+<td>QEMU 与 android-emu 模拟层之间的胶合层</td>
+</tr>
+<tr>
+<td><code>external/qemu/android/android-emu/android/emulation/</code></td>
+<td>模拟器硬件模拟</td>
+</tr>
+<tr>
+<td><code>device/generic/goldfish/</code></td>
+<td>Goldfish 虚拟设备定义</td>
+</tr>
+<tr>
+<td><code>device/google/cuttlefish/</code></td>
+<td>Cuttlefish 虚拟设备定义</td>
+</tr>
+<tr>
+<td><code>device/google/cuttlefish/host/commands/run_cvd/</code></td>
+<td>Cuttlefish 启动器</td>
+</tr>
+<tr>
+<td><code>external/crosvm/</code></td>
+<td>CrosVM 虚拟机监视器</td>
+</tr>
+<tr>
+<td><code>external/qemu/android/android-grpc/</code></td>
+<td>模拟器 gRPC 控制接口</td>
+</tr>
+</tbody>
+</table>
+<h2 id="设备形态第-62-章">设备形态（第 62 章）</h2>
+<table>
+<thead>
+<tr>
+<th>文件路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>packages/services/Car/</code></td>
+<td>Android Automotive 服务层</td>
+</tr>
+<tr>
+<td><code>packages/services/Car/service/src/com/android/car/CarServiceImpl.java</code></td>
+<td>Automotive car service</td>
+</tr>
+<tr>
+<td><code>packages/apps/Car/Launcher/</code></td>
+<td>Automotive 启动器</td>
+</tr>
+<tr>
+<td><code>device/google/atv/</code></td>
+<td>Android TV 设备配置</td>
+</tr>
+<tr>
+<td><code>packages/apps/TvSettings/</code></td>
+<td>TV 设置应用</td>
+</tr>
+<tr>
+<td><code>prebuilts/sdk/opt/wear/</code></td>
+<td>Wear OS SDK 预置产物</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<blockquote>
+<p><strong>说明</strong>：路径可能在不同 AOSP 分支间发生变动。上述路径以 2026 年初的 AOSP
+<code>main</code> 为准。请用 <code>find</code> 或 <code>cs.android.com</code> 对照你检出的分支核实。</p>
+</blockquote>
+</div></article></main></div><footer class="site-footer">&copy; 2026 qng-stack</footer><script type="module" src="/_astro/BlogPost.astro_astro_type_script_index_0_lang.Cz6GC1N3.js"></script></body></html>

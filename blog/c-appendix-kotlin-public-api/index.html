@@ -1,0 +1,808 @@
+<!DOCTYPE html><html lang="zh-CN"><head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><script type="module" src="/_astro/BaseHead.astro_astro_type_script_index_0_lang.CIKiyBwV.js"></script><link rel="icon" href="/favicon.ico"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="qng-stack" href="https://qng-stack.github.io/rss.xml"><meta name="generator" content="Astro v7.4.5"><!-- Canonical URL --><link rel="canonical" href="https://qng-stack.github.io/blog/c-appendix-kotlin-public-api/"><!-- Primary Meta Tags --><title>附录 C：AOSP 为何不为公开框架 API 采用 Kotlin</title><meta name="description" content="初次接触 AOSP 的读者很快会注意到一种不对称：Kotlin 在树的上层随处可见，SystemUI、Settings、Launcher3 以及 CTS 的一部分都在用；然而应用编译时所依赖的公开框架 API，仍然由 Java 定义。本附录阐述造成这种不对称的各项约束。它不是在倡导什么，也不预测这种局面何时会改变..."><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://qng-stack.github.io/blog/c-appendix-kotlin-public-api/"><meta property="og:title" content="附录 C：AOSP 为何不为公开框架 API 采用 Kotlin"><meta property="og:description" content="初次接触 AOSP 的读者很快会注意到一种不对称：Kotlin 在树的上层随处可见，SystemUI、Settings、Launcher3 以及 CTS 的一部分都在用；然而应用编译时所依赖的公开框架 API，仍然由 Java 定义。本附录阐述造成这种不对称的各项约束。它不是在倡导什么，也不预测这种局面何时会改变..."><meta property="og:image" content="https://qng-stack.github.io/_astro/blog-placeholder-1.Bx0Zcyzv.jpg"><!-- Twitter --><meta name="twitter:card" content="summary_large_image"><link rel="stylesheet" href="/_astro/Header.BiL--6dQ.css"></head><body class="chapter-page"><header class="site-header"><div class="shell header-inner"><div class="header-start"><button class="outline-toggle" type="button" aria-expanded="false" aria-controls="chapter-outline"><span class="sr-only">本章目录</span><span class="outline-toggle-icon" aria-hidden="true"></span></button><a class="brand" href="/">qng-stack</a></div><div class="nav-links"><a href="/">首页</a><a href="/about">关于</a><a class="github-link" href="https://github.com/qng-stack" target="_blank"><span class="sr-only">qng-stack 的 GitHub</span><svg viewBox="0 0 16 16" aria-hidden="true" width="18" height="18"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg></a></div></div><div class="outline-backdrop"></div></header><div class="chapter-spread"><nav class="chapter-outline" id="chapter-outline" aria-label="本章标题"><p>本章</p><a href="#不对称" data-depth="2">不对称</a><a href="#公开-api-契约" data-depth="2">公开 API 契约</a><a href="#javakotlin-abi-差距" data-depth="2">Java/Kotlin ABI 差距</a><a href="#jvmoverloads-与默认参数重载的冻结" data-depth="3">@JvmOverloads 与默认参数重载的冻结</a><a href="#jvmstatic-与-companionfoo-还是-foofoo-的选择" data-depth="3">@JvmStatic 与 Companion.foo() 还是 Foo.foo() 的选择</a><a href="#jvmname-的名字改写" data-depth="3">@JvmName 的名字改写</a><a href="#suspend-函数与-jvm-签名中的-continuation" data-depth="3">suspend 函数与 JVM 签名中的 Continuation</a><a href="#会暴露源码字节码的-inline-函数" data-depth="3">会暴露源码字节码的 inline 函数</a><a href="#值类内联类与参数签名的改写" data-depth="3">值类/内联类与参数签名的改写</a><a href="#jvm-上的-resultt-改写" data-depth="3">JVM 上的 Result&lt;T&gt; 改写</a><a href="#伴生对象的-instance-静态字段" data-depth="3">伴生对象的 INSTANCE 静态字段</a><a href="#data-class-的合成与-componentn-访问器" data-depth="3">data class 的合成与 componentN 访问器</a><a href="#顶层函数与-kt-合成类" data-depth="3">顶层函数与 Kt 合成类</a><a href="#引导类路径共享迫使每个应用只能用同一个-stdlib-版本" data-depth="3">引导类路径共享，迫使每个应用只能用同一个 stdlib 版本</a><a href="#工具链锁定" data-depth="2">工具链锁定</a><a href="#oem厂商与-mainline-的约束" data-depth="2">OEM、厂商与 Mainline 的约束</a><a href="#kotlin-在-aosp-中已存在的位置" data-depth="2">Kotlin 在 AOSP 中已存在的位置</a><a href="#最难用于公开面的那些-kotlin-特性" data-depth="2">最难用于公开面的那些 Kotlin 特性</a><a href="#若要采用需要哪些前置条件" data-depth="2">若要采用，需要哪些前置条件</a><a href="#动手试试" data-depth="2">动手试试</a><a href="#练习-c-1清点平台树中的-kotlin" data-depth="3">练习 C-1：清点平台树中的 Kotlin</a><a href="#练习-c-2查看一个公开-api-签名文件" data-depth="3">练习 C-2：查看一个公开 API 签名文件</a><a href="#练习-c-3追踪一个-kotlin-实现的服务如何跨-binder" data-depth="3">练习 C-3：追踪一个 Kotlin 实现的服务如何跨 binder</a><a href="#练习-c-4在-aosp-中找-jvmstatic--jvmoverloads" data-depth="3">练习 C-4：在 AOSP 中找 @JvmStatic / @JvmOverloads</a><a href="#练习-c-5查看-metalava" data-depth="3">练习 C-5：查看 metalava</a><a href="#小结" data-depth="2">小结</a><a href="#关键源文件参考" data-depth="2">关键源文件参考</a></nav><main><article><p class="article-kicker"><time datetime="2026-11-09T17:58:58.000Z">2026年11月10日</time></p><h1 class="article-title">附录 C：AOSP 为何不为公开框架 API 采用 Kotlin</h1><div class="prose"><h1 id="附录-caosp-为何不为公开框架-api-采用-kotlin">附录 C：AOSP 为何不为公开框架 API 采用 Kotlin</h1>
+<p>初次接触 AOSP 的读者很快会注意到一种不对称：Kotlin 在树的上层随处可见，SystemUI、Settings、Launcher3 以及 CTS 的一部分都在用；然而应用编译时所依赖的公开框架 API，仍然由 Java 定义。本附录阐述造成这种不对称的各项约束。它不是在倡导什么，也不预测这种局面何时会改变、或者是否会改变。</p>
+<p>它汇集的是工程事实：Kotlin 在哪些地方被允许，在哪些地方不被允许。它也涵盖把这一差别卡住的二进制契约，以及执行该契约的工具链。读完之后，你应当能对着 <code>frameworks/base/</code> 中的任意一个类作出判断：那里的 Kotlin 源码是无风险的，还是会破坏某些东西。</p>
+<p>本附录要建立的规则很直接：把类向外追溯到它最近的那条 API 边界。如果边界是 <code>current.txt</code> 中的成员、<code>@SystemApi</code>、module-library 导出，或任何会被应用或厂商代码链接的东西，冻结规则就适用，那里的 Kotlin 源码就引入了 kotlinc 生成物（kotlinc-emission）的风险。如果边界是进程内、与框架同步重新编译的——<code>LocalServices</code> 接口、binder 服务端桩、SystemUI 内部件——Kotlin 就是安全的。本附录通篇所说的“公开 API”的精确定义，见“公开 API 契约”一节。</p>
+<p>本附录按从上到下的顺序读最为顺畅，但各节也可以独立查阅。工程内核是“Java/Kotlin ABI 差距”与“工具链锁定”。周边各节界定冻结范围，并把它扩展到厂商面与 Mainline 面，同时清点平台内部 Kotlin 已经安全存在的地方。</p>
+<p>一点取材说明：每一条具体文件路径与工具名都来自直接查阅 AOSP 检出。文中凡是讲到规模的地方，那些数字都是在某一时点测得的，会随着树的演进发生变化。论证所依赖的是数量级。</p>
+<h2 id="不对称">不对称</h2>
+<p>看这种不对称最干净的办法是数文件。Kotlin 与 Java 源码在树中并存，但它们的聚集位置非常不同。在 AOSP 检出上跑一遍 <code>find</code>，就得到下面这份清点表。</p>
+<table>
+<thead>
+<tr>
+<th>路径</th>
+<th>Kotlin 文件数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/base/packages/SystemUI/</code></td>
+<td>8,896</td>
+<td>采用最重的部分；系统 UI 外壳与快捷设置</td>
+</tr>
+<tr>
+<td><code>packages/apps/Settings/</code></td>
+<td>2,300</td>
+<td>设置应用，应用层代码</td>
+</tr>
+<tr>
+<td><code>cts/</code></td>
+<td>1,209</td>
+<td>兼容性测试套件</td>
+</tr>
+<tr>
+<td><code>packages/apps/Launcher3/</code></td>
+<td>1,326</td>
+<td>启动器应用</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/</code></td>
+<td>292</td>
+<td>生产用 Kotlin 全在权限子系统；多数文件是测试</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/</code></td>
+<td>45</td>
+<td>应用所调用的 API 表面层；每一个文件都是测试代码</td>
+</tr>
+<tr>
+<td><code>frameworks/base/</code>（合计）</td>
+<td>12,058</td>
+<td>所有子目录之和</td>
+</tr>
+<tr>
+<td><code>frameworks/base/</code> Java 合计</td>
+<td>18,937</td>
+<td>用作对比的参照值</td>
+</tr>
+</tbody>
+</table>
+<p>这张表里有两个数字，撑起了本附录的大半论证。</p>
+<p>第一个是 45——更准确地说，是零。公开 Android SDK 中那些 <code>android.*</code> 类就住在 <code>frameworks/base/core/</code>。该目录下 45 个 Kotlin 文件全部是 <code>frameworks/base/core/tests/</code> 下的测试代码。承载 API 的 <code>core/java/</code> 树有数以万计的 Java 文件，其中完全没有 Kotlin。这是对政策最直接的陈述：公开 API 面由 Java 定义。</p>
+<p>第二个是 292。<code>frameworks/base/services/</code> 是 <code>system_server</code> 及其承载的数十个系统服务的所在地。292 个 Kotlin 文件听上去像是有相当程度的采用，直到你看清它们的位置：绝大多数是测试，而 <code>frameworks/base/services/</code> 下所有生产（非测试）Kotlin 文件都位于权限访问子树的 <code>frameworks/base/services/permission/java/com/android/server/permission/access/</code> 之内。主要服务——<code>ActivityManagerService</code>、<code>PackageManagerService</code>、<code>WindowManagerService</code>、输入管线、显示管线——仍然是 Java。</p>
+<p>本附录所关心的“公开 API”，定义在 metalava 生成并校验的三个签名文件里：</p>
+<ul>
+<li><code>frameworks/base/core/api/current.txt</code> —— 权威的公开 Android SDK 签名。树内那份约 4 MB，采用 metalava 的“Signature format: 6.0”。</li>
+<li><code>frameworks/base/services/api/current.txt</code> —— 暴露给进程内调用方的系统服务 API 面。</li>
+<li>与之对应的 <code>system-current.txt</code> 与 <code>module-lib-current.txt</code> 两个兄弟文件位于 <code>frameworks/base/*/api/</code> 下。它们定义 <code>@SystemApi</code> 面（对以平台密钥签名的平台组件可见）与 module-library 面（对 Mainline 模块在编译期可见）。</li>
+</ul>
+<p>这些签名文件是与语言无关的文本。其中没有任何东西取决于实现源码是用 Java 还是 Kotlin 写的。但正如本附录余下部分所示，它们所描述的 JVM 签名，由这两种语言生成的稳定性并不对等。</p>
+<p>在看那张示意图之前，还有第二个值得记下的观察：这份清点表说的不是 Kotlin 在 <code>frameworks/base/</code> 中<em>不安全</em>，而是 Kotlin <em>缺席</em>于公开 API 面这一特定位置。<code>frameworks/base/core/</code> 下有 45 个 Kotlin 文件（全是测试），<code>frameworks/base/services/</code> 下有 292 个（其中的生产子集位于权限子系统，能编译、会随系统发布、并且实际运行）。安全与不安全的边界穿过的是一个个具体的类，而不是目录。<code>frameworks/base/core/</code> 里一个从未出现在 <code>current.txt</code> 中的 Kotlin 类，不过是恰好住在承载 API 的目录里的内部代码而已。分类依据是 metalava 是否收录该类，而不是它住在源码树的什么位置。</p>
+<p>第三个观察：这种不对称是有方向的。SystemUI 与设置应用在依赖图中位于框架“之下”——它们消费公开 API 面，但不向其中贡献内容。它们使用 Kotlin 的自由不受约束，因为没有东西依赖它们内部类的形状。</p>
+<p>框架则相反，位于它们“之上”。它的类正是应用与厂商代码所链接的对象，那里的自由要以二进制稳定性为代价来换。同一种 Kotlin 源码写法，在 SystemUI 里毫无风险，放到 <code>frameworks/base/core/java/android/</code> 里就带上了风险。</p>
+<p>Kotlin 在 AOSP 各 API 面层上被允许的程度。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> PublicAPI</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"公开 API 面"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        PA</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"android.* 类&lt;br/&gt;SDK 生命周期内冻结&lt;br/&gt;仅 Java"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> SystemAPI</span><span style="color:#E1E4E8">["@</span><span style="color:#FFAB70">SystemApi 面</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        SA</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"@SystemApi 类&lt;br/&gt;按 Mainline 节奏冻结&lt;br/&gt;仅 Java"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> ModuleLib</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"module_lib 面"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        ML</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"模块间 API&lt;br/&gt;仅 Java"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> Hidden</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">内部 </span><span style="color:#E1E4E8">/ @</span><span style="color:#FFAB70">hide</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        H</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"隐藏 API&lt;br/&gt;Java + Kotlin 均可"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Impl</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"实现层"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        S</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"services、系统应用、&lt;br/&gt;CTS、支持库&lt;br/&gt;Java + Kotlin 均可"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">    PA </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> H</span></span>
+<span class="line"><span style="color:#FFAB70">    SA </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> H</span></span>
+<span class="line"><span style="color:#FFAB70">    ML </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> H</span></span>
+<span class="line"><span style="color:#FFAB70">    H </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> S</span></span></code></pre>
+<p>这张图不是构建期依赖图，而是“语言自由度”地图。上面每一个盒子都把自己约束在 Java 内，使得其下方使用的语言无法穿透上来。<code>android.*</code> 中的类最终可能会调用某个服务里的 Kotlin 实现，但这次调用走的是 binder 接口，或者某个签名形状为 Java 的 manager 类门面。方法暴露给应用的那一点，正是 Kotlin 停止的那一点。</p>
+<h2 id="公开-api-契约">公开 API 契约</h2>
+<p>AOSP 内部所说的“公开 API”有精确的定义：它是列在 <code>frameworks/base/core/api/current.txt</code>（以及相邻的 <code>system-current.txt</code>、<code>module-lib-current.txt</code>、<code>test-current.txt</code>）中的类成员集合。这个文件是人可读的文本，开头几行像这样：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>// Signature format: 6.0</span></span>
+<span class="line"><span>// - style=java</span></span>
+<span class="line"><span>package android {</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  public final class Manifest {</span></span>
+<span class="line"><span>    ctor public Manifest();</span></span></code></pre>
+<p>每一条目都是一个完全解析后的 JVM 签名：包、修饰符、返回类型、参数类型、异常。文件里没有任何 Kotlin 关键字。这是因为该格式早于 Kotlin 出现，设计目的是描述运行时看到的东西，而不是源码层开发者写下的东西。</p>
+<p>条目长什么样值得细看。类声明嵌套在一个 <code>package</code> 块内，每个成员以单行声明，包含：</p>
+<ul>
+<li>可见性（<code>public</code>、<code>protected</code>）。</li>
+<li>按固定顺序排列的修饰符（<code>static</code>、<code>final</code>、<code>abstract</code>、<code>synchronized</code>、<code>native</code>、<code>default</code>）。</li>
+<li>由包限定的返回类型。</li>
+<li>成员名。</li>
+<li>对方法而言，带类型与名字的形参列表。</li>
+<li>对方法而言，可选的 <code>throws</code> 子句，列出受检异常。</li>
+</ul>
+<p>该格式在某些地方对空白敏感（每个成员以与其嵌套深度匹配的缩进空格开头），除此之外规整得像生成物。diff 工具能毫不费力地显示两个快照之间改了什么。这一点很重要，因为几乎每一次框架改动都要走 <code>m update-api</code> 流程，而该流程产出的文本差异，会由 API 委员会逐成员评审。</p>
+<p>并行的签名面有好几个：公开面（<code>current.txt</code>）、<code>@SystemApi</code> 面（<code>system-current.txt</code>）、供 Mainline 使用的 module-library 面（<code>module-lib-current.txt</code>），以及 <code>@TestApi</code> 面（<code>test-current.txt</code>）。此外还有按子系统划分的文件，例如 <code>frameworks/base/services/api/current.txt</code>。它们共享同一格式。</p>
+<p>每个面都由 <strong>metalava</strong> 生成，这是一个位于 <code>tools/metalava/</code> 的 Kotlin 工具。Metalava 通过其默认的 PSI 源码模型读取框架源码——Java 与 Kotlin 一视同仁——并输出与语言无关的签名文本。（也可以选择基于 Turbine 的 Java-only 模型，参数为 <code>--source-model-provider turbine</code>。）构建时重跑 metalava，把生成的快照与已入库的 <code>current.txt</code> 比较，一旦有漂移就让构建失败。有意的增补须走 <code>m update-api</code>，外加 API 委员会对文本差异的评审。</p>
+<p>一个框架类如何成为公开 API 契约的一部分。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">flowchart</span><span style="color:#B392F0"> LR</span></span>
+<span class="line"><span style="color:#FFAB70">    SRC</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">".java 框架类&lt;br/&gt;frameworks/base/core/java/android/..."</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    MET</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"metalava&lt;br/&gt;tools/metalava/"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    SIG</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"api/current.txt&lt;br/&gt;签名快照"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    SDK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"prebuilts/sdk/N/public/&lt;br/&gt;android.txt + android.jar"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    APP</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"应用构建&lt;br/&gt;compileSdk = N"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    OEM</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"OEM 设备&lt;br/&gt;冻结在 SDK N"</span><span style="color:#F97583">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">    SRC </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> MET</span></span>
+<span class="line"><span style="color:#FFAB70">    MET </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> SIG</span></span>
+<span class="line"><span style="color:#FFAB70">    SIG </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> SDK</span></span>
+<span class="line"><span style="color:#FFAB70">    SDK </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> APP</span></span>
+<span class="line"><span style="color:#FFAB70">    SIG </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> OEM</span></span></code></pre>
+<p>一旦 API 随某个带编号的 SDK 版本发布，它的签名就被永久冻结。每个 SDK 版本会把该面快照到 <code>prebuilts/sdk/&lt;N&gt;/public/api/android.txt</code>，并把应用编译所依赖的桩 jar 固定在 <code>prebuilts/sdk/&lt;N&gt;/public/android.jar</code>。删除某个条目、改动参数或返回类型、或者在文本条目不变的情况下改动其背后的 JVM 签名，都算破坏性变更。</p>
+<p>设备在出厂时就烘焙好一个 SDK 级别，这决定了“永久稳定”的承诺。一部以 SDK 30 上市的机型，四五年后（OEM 长寿设备更久）仍在运行 SDK 30。以 <code>compileSdk = 30</code> 为目标的应用必须能继续在该设备上安装并运行。OEM 无法通过发布一次 kotlinc 升级或一次元数据格式更新，来修复平台二进制契约中的退化，因为定义兼容性的是原设备的运行时类加载器。</p>
+<p>那个窗口——从首次上市到最后一次实际在用的漫长使用期，大致十年——就是 <code>current.txt</code> 每一个成员都必须存活的时限。API 委员会每批准一个新方法都要按这个时限衡量，而一旦发布，签名就不能收回。</p>
+<h2 id="javakotlin-abi-差距">Java/Kotlin ABI 差距</h2>
+<p>兼容性问题不在于 Kotlin 缺少特性，而在于从 Kotlin 源码到 JVM 签名的映射带有 Java 映射没有的自由度。kotlinc 编译器、Kotlin 元数据格式、Kotlin 标准库都可以演进。它们一旦演进，同一个未变的源码类其 JVM 可见签名就可能变化。对随 kotlinc 同步重编译的内部代码来说，这不可见；对一个已冻结的公开面来说，每一次变化都是一次二进制断裂。</p>
+<p>本节逐一走过映射不稳定的那些具体特性面。</p>
+<h3 id="jvmoverloads-与默认参数重载的冻结"><code>@JvmOverloads</code> 与默认参数重载的冻结</h3>
+<p>Kotlin 允许为函数的参数声明默认值。仅从一条源码声明：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#F97583">fun</span><span style="color:#B392F0"> openFile</span><span style="color:#E1E4E8">(path: </span><span style="color:#B392F0">String</span><span style="color:#E1E4E8">, mode: </span><span style="color:#B392F0">Int</span><span style="color:#F97583"> =</span><span style="color:#79B8FF"> 0</span><span style="color:#E1E4E8">, encoding: </span><span style="color:#B392F0">String</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "UTF-8"</span><span style="color:#E1E4E8">): </span><span style="color:#B392F0">File</span></span></code></pre>
+<p>不加注解时，kotlinc 只生成一个 JVM 方法：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>openFile(Ljava/lang/String;ILjava/lang/String;)Ljava/io/File;</span></span></code></pre>
+<p>Java 调用方必须传齐三个参数。加上 <code>@JvmOverloads</code> 后，编译器会额外合成若干重载——每截掉一段尾部带默认值的参数就生成一个：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>openFile(Ljava/lang/String;)Ljava/io/File;</span></span>
+<span class="line"><span>openFile(Ljava/lang/String;I)Ljava/io/File;</span></span>
+<span class="line"><span>openFile(Ljava/lang/String;ILjava/lang/String;)Ljava/io/File;</span></span></code></pre>
+<p>放到公开面上，这会带来两个各自独立的冻结问题。第一，合成出的重载集合由参数顺序决定：在源码里改动顺序就会改动合成签名。第二，默认值会以 <code>$default</code> 合成辅助方法的形式编码（例如 <code>openFile$default</code>），由编译器插入字节码。这些辅助方法的存在与形状，是 Java 调用方所看到的二进制表面的一部分。从一个公开类上去掉 <code>@JvmOverloads</code>，会悄悄删除若干 JVM 方法，弄坏任何已编译的调用方。在末尾追加一个新参数（即便带默认值）只是向重载集合追加新条目，但重排既有参数则等于给它们改名。</p>
+<p>在 <code>frameworks/base/services/</code> 中，每一处 <code>@JvmOverloads</code> 用法都在 <code>services/tests/</code> 之下——主要是 <code>displayservicetests/</code> 里的测试工具文件，如 <code>TestUtils.kt</code>、<code>PersistentDataStoreTestUtils.kt</code>、<code>DisplayDeviceConfigTestUtils.kt</code>、<code>ClamperTestUtils.kt</code>，外加 <code>servicestests/</code> 里的一个 fake。没有任何生产服务用到它。（该注解在应用层很常见：SystemUI 与 Settings 加起来在百余个文件里用了它，但那些是消费 SDK 的应用，不是承载 API 的框架代码。）</p>
+<p>它不出现在生产服务里的原因很简单：AOSP 中的生产服务 Kotlin 只向 Java 调用，从不反过来。平台服务中没有任何 Java 调用方需要这些合成重载。</p>
+<h3 id="jvmstatic-与-companionfoo-还是-foofoo-的选择"><code>@JvmStatic</code> 与 <code>Companion.foo()</code> 还是 <code>Foo.foo()</code> 的选择</h3>
+<p>Kotlin 的 <code>companion object</code> 所持有的成员，在 Kotlin 内部看起来像静态成员（<code>MyClass.foo()</code>），但实际被生成为合成内部 <code>Companion</code> 类上的实例方法。不加 <code>@JvmStatic</code> 时：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#F97583">class</span><span style="color:#B392F0"> Foo</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    companion</span><span style="color:#F97583"> object</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">        fun</span><span style="color:#B392F0"> bar</span><span style="color:#E1E4E8">() </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 42</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>Java 可见的签名是：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>public final class Foo</span></span>
+<span class="line"><span>public static final class Foo$Companion</span></span>
+<span class="line"><span>    public final int bar()</span></span>
+<span class="line"><span>public static final Foo$Companion Foo.Companion</span></span></code></pre>
+<p>Java 调用方得写 <code>Foo.Companion.bar()</code>。加上 <code>@JvmStatic</code> 后，外层类上会多出一份静态副本：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#F97583">class</span><span style="color:#B392F0"> Foo</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    companion</span><span style="color:#F97583"> object</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#B392F0">        @JvmStatic</span><span style="color:#F97583"> fun</span><span style="color:#B392F0"> bar</span><span style="color:#E1E4E8">() </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 42</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>public final class Foo</span></span>
+<span class="line"><span>    public static final int bar()</span></span>
+<span class="line"><span>public static final class Foo$Companion</span></span>
+<span class="line"><span>    public final int bar()</span></span></code></pre>
+<p>现在从 Java 写 <code>Foo.bar()</code> 也能用。这个选择在 <code>current.txt</code> 中可见，因为这两个方法都属于公开面。一经发布，两者都不能删除。</p>
+<p><code>@JvmStatic</code> 在 AOSP 中的使用模式印证了这种不对称。<code>frameworks/base/services/</code> 里的每一处命中都在 <code>services/tests/</code> 子树内。那里是 JUnit 运行器（Java）需要调用声明在 Kotlin 测试伴生对象上的 <code>@BeforeClass</code>/<code>@AfterClass</code> 方法。<code>ApexUpdateTest.kt</code> 中的具体例子：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#B392F0">@JvmStatic</span></span>
+<span class="line"><span style="color:#B392F0">@BeforeClassWithInfo</span></span>
+<span class="line"><span style="color:#F97583">fun</span><span style="color:#B392F0"> initApexHelper</span><span style="color:#E1E4E8">(testInformation: </span><span style="color:#B392F0">TestInformation</span><span style="color:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#E1E4E8">    apexInstallHelper </span><span style="color:#F97583">=</span><span style="color:#B392F0"> ApexInstallHelper</span><span style="color:#E1E4E8">(testInformation)</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>生产用 Kotlin 避开 <code>@JvmStatic</code>，因为平台里没有任何东西从 Java 调用那些 Kotlin 方法。而公开 API 代码按定义必须能被 Java 应用调用。于是公开 Kotlin 类中的每个静态工厂或常量，都将不得不在这些生成形状中选定一种并冻结它。</p>
+<h3 id="jvmname-的名字改写"><code>@JvmName</code> 的名字改写</h3>
+<p>Kotlin 允许源码层函数名与 JVM 层方法名不同：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#B392F0">@JvmName</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"safeOpen"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">fun</span><span style="color:#B392F0"> open</span><span style="color:#E1E4E8">(path: </span><span style="color:#B392F0">String</span><span style="color:#E1E4E8">): </span><span style="color:#B392F0">File</span></span></code></pre>
+<p>Kotlin 调用方写 <code>open(path)</code>，Java 调用方写 <code>safeOpen(path)</code>。在 JVM 上只存在 <code>safeOpen</code>。去掉 <code>@JvmName</code> 注解（或改动其参数）就会重命名 Java 代码所链接的符号。在公开面上，这对每个已按旧名编译过的应用都是硬断裂。</p>
+<p><code>@JvmName</code> 还会在开发者没有注解的地方隐式生效。顶层 Kotlin 函数会被编译进一个以源文件名命名的合成类（例如 <code>Utils.kt</code> 变成 <code>UtilsKt</code>），类名可用 <code>@file:JvmName("Utils")</code> 定制。框架的 API 面契约无法表达“重命名这个合成类”，除非破坏那些按旧名解析的应用。</p>
+<h3 id="suspend-函数与-jvm-签名中的-continuation"><code>suspend</code> 函数与 JVM 签名中的 <code>Continuation</code></h3>
+<p>源码中的 <code>suspend</code> 函数：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#F97583">suspend</span><span style="color:#F97583"> fun</span><span style="color:#B392F0"> load</span><span style="color:#E1E4E8">(): </span><span style="color:#B392F0">Result</span></span></code></pre>
+<p>会变成签名尾部追加一个 <code>kotlin.coroutines.Continuation</code> 参数的 JVM 方法：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>load(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;</span></span></code></pre>
+<p>返回类型被擦除为 <code>Object</code>，因为协程机制是异步交付结果的。对 Kotlin 内部调用方来说，重要的是源码层签名，编译器把这个变换藏了起来。对 Java 调用方来说，唯一可见的就是 JVM 签名——包括 <code>Continuation</code>、被擦除的返回类型，以及异常被包装进 <code>kotlin.Result</code> 装箱的方式。</p>
+<p>由此产生两个稳定性问题。第一，<code>kotlin.coroutines.Continuation</code> 是 Kotlin 标准库中的类型，它的包名、方法名以及它所期望的运行时语义，都必须在 JVM 层保持冻结。第二，把 <code>suspend</code> 降级为 <code>Continuation</code> 是 kotlinc 的一种实现选择。过去的 Kotlin 版本考虑过别的降级方案（状态机式还是 CPS 式、不同的装箱策略）。未来某个 kotlinc 若出于任何理由调整了降级方式，就可能改变一条未变源码声明的 JVM 签名。</p>
+<p>目前没有任何公开 Android API 暴露 <code>suspend</code>。AndroidX 中基于协程的 API 位于框架 SDK 之上，作为独立产物发布，那里 suspend 签名可以随 AndroidX 产物自己的版本节奏演进。</p>
+<h3 id="会暴露源码字节码的-inline-函数">会暴露源码字节码的 <code>inline</code> 函数</h3>
+<p>Kotlin 的 <code>inline</code> 函数不只是给优化器的提示，它是一份契约：函数体会在每个调用点被内联。Kotlin 用它实现 <code>reified</code> 类型参数（这类参数要求类型在调用点可见、不能被擦除），也用于性能敏感的、接收 lambda 的 API。</p>
+<p>它对二进制稳定性的影响很简单：<code>inline</code> 函数编译出的字节码会被复制进每个调用方的 class 文件，包括函数体里的每一条指令，甚至对私有辅助方法的引用。假定框架声明了一个公开的 <code>inline fun</code>：如果其源码函数体在不同 SDK 版本之间发生变化，按旧版本编译的应用里仍然内含旧函数体；反过来，若框架需要修掉某个 <code>inline</code> 函数中的缺陷，只有重新编译过的调用方才会看到修复。</p>
+<p>对于一个要向数十亿设备分发已编译应用的平台而言，“只有每个调用方都重编译，修复才生效”是不可行的。Java 没有等价物：<code>static final</code> 方法可以被重定向到实现，但 JVM 是通过运行时类加载器来解析它们的。Kotlin 的 <code>inline</code> 函数更接近 C++ 头文件中定义的模板，而不是 Java 方法。适用于 Java 方法的冻结语义，对内联的 Kotlin 函数体并不成立。</p>
+<h3 id="值类内联类与参数签名的改写">值类/内联类与参数签名的改写</h3>
+<p>Kotlin 值类（旧称内联类）在编译期包装单个底层值，并在调用边界把它解包：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#B392F0">@JvmInline</span></span>
+<span class="line"><span style="color:#F97583">value</span><span style="color:#F97583"> class</span><span style="color:#B392F0"> UserId</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">val</span><span style="color:#F97583"> value</span><span style="color:#E1E4E8">: </span><span style="color:#B392F0">Long</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">fun</span><span style="color:#B392F0"> grantAccess</span><span style="color:#E1E4E8">(user: </span><span style="color:#B392F0">UserId</span><span style="color:#E1E4E8">)</span></span></code></pre>
+<p><code>grantAccess</code> 的 JVM 生成结果不是 <code>grantAccess(LUserId;)V</code>，而是被改写过名字的版本。kotlinc 会把参数形状的哈希插入方法名，以避免与 <code>UserId</code> 和 <code>Long</code> 擦除后签名相同的那类重载冲突：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>grantAccess-{hash}(J)V</span></span></code></pre>
+<p>确切的改写方案在历次 Kotlin 版本中经过多次打磨，细节包括对什么做哈希、用哪个字符把原名与哈希分开、以及合成构造器如何参与。冻结的公开 API 无法容忍改写方案的变化，也无法容忍开发者无意中新增一个重载，从而扰动某个既有方法的哈希。</p>
+<h3 id="jvm-上的-resultt-改写">JVM 上的 <code>Result&lt;T&gt;</code> 改写</h3>
+<p><code>kotlin.Result&lt;T&gt;</code> 是值类。任何返回 <code>Result&lt;Foo&gt;</code> 的函数都要承受与其他返回值类的函数相同的改名处理：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#F97583">fun</span><span style="color:#B392F0"> fetch</span><span style="color:#E1E4E8">(): </span><span style="color:#B392F0">Result</span><span style="color:#E1E4E8">&lt;</span><span style="color:#B392F0">Data</span><span style="color:#E1E4E8">&gt;</span></span></code></pre>
+<p>在 JVM 层会变成类似 <code>fetch-{hash}()Ljava/lang/Object;</code> 的东西。由于 <code>Result</code> 要通过擦除装箱，Java 在调用边界看到的类型是 <code>Object</code>。从 Java 直接消费返回 <code>Result</code> 的 Kotlin API，充其量是别扭的。</p>
+<p>Kotlin 官方的指导是：<code>Result</code> 不应出现在 Java 可见的公开 API 中。对在 Kotlin 调用方之间互操作的内部代码而言，<code>Result</code> 很方便；对必须可被 Java 调用的公开面而言，它不可行。</p>
+<h3 id="伴生对象的-instance-静态字段">伴生对象的 <code>INSTANCE</code> 静态字段</h3>
+<p>Kotlin 的 <code>object</code>（声明在顶层，而不是伴生对象）会编译成一个带单个静态 <code>INSTANCE</code> 字段的类：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#F97583">object</span><span style="color:#B392F0"> UriRegistry</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    fun</span><span style="color:#B392F0"> lookup</span><span style="color:#E1E4E8">(scheme: </span><span style="color:#B392F0">String</span><span style="color:#E1E4E8">): </span><span style="color:#B392F0">Class</span><span style="color:#E1E4E8">&lt;*&gt;? </span><span style="color:#F97583">=</span><span style="color:#F97583"> ..</span><span style="color:#E1E4E8">.</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>变成：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>public final class UriRegistry</span></span>
+<span class="line"><span>    public static final UriRegistry INSTANCE</span></span>
+<span class="line"><span>    public final Class&lt;?&gt; lookup(String)</span></span></code></pre>
+<p>Java 调用方写 <code>UriRegistry.INSTANCE.lookup("content")</code>。<code>INSTANCE</code> 字段是二进制表面的一部分。在 Kotlin 源码中重命名这个 <code>object</code> 就是重命名这个类；重构这个单例（例如把它拆成按 user-id 索引的 map）就会删掉 <code>INSTANCE</code> 字段。两者对任何已编译的 Java 调用方都是破坏性变更，并且在 <code>current.txt</code> 中会以字段条目的形式出现，必须在整个 SDK 生命周期内存活。</p>
+<p>伴生对象的 <code>INSTANCE</code> 访问器（即 <code>class Foo { companion object { ... } }</code> 会生成的那个 <code>Foo.Companion</code> 字段）具有同样的性质：它是二进制表面必须保留的公开字段。</p>
+<h3 id="data-class-的合成与-componentn-访问器"><code>data class</code> 的合成与 <code>componentN</code> 访问器</h3>
+<p>Kotlin 的 <code>data class</code> 会让编译器在声明的字段之外合成一整套固定成员：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#F97583">data</span><span style="color:#F97583"> class</span><span style="color:#B392F0"> Point</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">val</span><span style="color:#E1E4E8"> x: </span><span style="color:#B392F0">Int</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">val</span><span style="color:#E1E4E8"> y: </span><span style="color:#B392F0">Int</span><span style="color:#E1E4E8">)</span></span></code></pre>
+<p>在 JVM 层大致变成：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>public final class Point</span></span>
+<span class="line"><span>    public Point(int x, int y)</span></span>
+<span class="line"><span>    public final int getX()</span></span>
+<span class="line"><span>    public final int getY()</span></span>
+<span class="line"><span>    public final int component1()</span></span>
+<span class="line"><span>    public final int component2()</span></span>
+<span class="line"><span>    public final Point copy(int x, int y)</span></span>
+<span class="line"><span>    public static Point copy$default(Point, int, int, int, Object)</span></span>
+<span class="line"><span>    public boolean equals(Object)</span></span>
+<span class="line"><span>    public int hashCode()</span></span>
+<span class="line"><span>    public String toString()</span></span></code></pre>
+<p>每个合成成员都是二进制表面的一部分。<code>componentN</code> 访问器支撑 Kotlin 的解构（<code>val (x, y) = point</code>），其编号对应参数位置。在源码中重排字段就会重命名这些 component：原本的 <code>component1</code> 变成 <code>component2</code>。<code>copy</code> 方法与构造器取相同参数；若在末尾新增字段，则给 <code>copy</code> 追加一个参数并保留 <code>copy$default</code> 合成辅助方法；若再次重排字段，用命名参数调用 <code>copy</code> 的已编译调用方就会断裂。</p>
+<p>公开的 <code>data class</code> 将不得不在整个 SDK 生命周期内，对其字段顺序、<code>componentN</code> 编号、<code>copy</code> 重载集合以及合成的 <code>equals</code>/<code>hashCode</code> 语义做出承诺。这比 Java <code>record</code> 所受的约束更多（record 只保证规范访问器名与 <code>equals</code>/<code>hashCode</code> 契约），也比手写的 Java 类更多（后者由开发者决定其中哪些成员存在）。</p>
+<h3 id="顶层函数与-kt-合成类">顶层函数与 <code>Kt</code> 合成类</h3>
+<p>Kotlin 允许在文件顶层、任何类之外声明函数与属性：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#6A737D">// File: PathUtils.kt</span></span>
+<span class="line"><span style="color:#F97583">package</span><span style="color:#B392F0"> android.os</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">fun</span><span style="color:#B392F0"> normalizePath</span><span style="color:#E1E4E8">(path: </span><span style="color:#B392F0">String</span><span style="color:#E1E4E8">): </span><span style="color:#B392F0">String</span><span style="color:#F97583"> =</span><span style="color:#F97583"> ..</span><span style="color:#E1E4E8">.</span></span>
+<span class="line"><span style="color:#F97583">const</span><span style="color:#F97583"> val</span><span style="color:#E1E4E8"> PATH_SEPARATOR </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "/"</span></span></code></pre>
+<p>kotlinc 会把它编译进一个合成类，类名是文件名后加 <code>Kt</code>：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>public final class PathUtilsKt</span></span>
+<span class="line"><span>    public static String normalizePath(String)</span></span>
+<span class="line"><span>    public static final String PATH_SEPARATOR</span></span></code></pre>
+<p>类名是二进制表面的一部分。重命名源文件就是重命名这个类；<code>@file:JvmName("PathUtils")</code> 可覆盖该后缀。对 Java 调用方来说，这些静态方法可通过 <code>PathUtilsKt.normalizePath(...)</code> 到达（若设置了 JvmName，则是 <code>PathUtils.normalizePath(...)</code>）。对 Kotlin 调用方来说，这个合成类不可见——它们直接导入函数。</p>
+<p>框架中一个公开的顶层函数，将不得不承诺一个源码里并不存在的类名。重命名该文件会悄悄弄坏已编译的 Java 调用方；拆分该文件会把合成类拆成两个合成类，同样弄坏调用方。Java 没有等价物：Java 中每个静态方法都挂在某个由开发者命名的类上，因此类的身份本身就是源码层决定的一部分。</p>
+<h3 id="引导类路径共享迫使每个应用只能用同一个-stdlib-版本">引导类路径共享，迫使每个应用只能用同一个 stdlib 版本</h3>
+<p>以上描述的是：一条 Kotlin 源码声明如何产生<em>一整套</em> JVM 生成物，而框架必须把这些都冻结。这些生成物是签名、辅助方法、改写过的名字以及元数据块。在签名形状之下的另一层，还有第二个二进制稳定性问题。Android 的运行时模型把公开框架 API 装进一个类加载器，而设备上每个应用都共享它。公开的 Kotlin API 将迫使 <code>kotlin-stdlib.jar</code> 也进入那个共享类加载器。</p>
+<p>框架的公开 API 以 <code>framework.jar</code>（以及相邻的 <code>framework-graphics.jar</code>、<code>framework-location.jar</code>、<code>ext.jar</code>、<code>telephony-common.jar</code>）的形式，出现在设备的<strong>引导类路径</strong>上。（<code>services.jar</code> 不在其中：它位于 SYSTEMSERVERCLASSPATH，只由 <code>system_server</code> 加载。）这一组成由 Soong 通过 <code>PRODUCT_BOOT_JARS</code> 配置，默认集合定义在 <code>build/make/target/product/default_art_config.mk:38</code>，包含 <code>framework-minus-apex</code>、<code>ext</code>、<code>telephony-common</code>、<code>framework-graphics</code>、<code>framework-location</code>，以及按 APEX 划分的各个 jar（ART、conscrypt、i18n 等）。设备启动时，ART 对这些 jar 做提前编译，产出引导镜像，随后 zygote 进程把它加载进自己的地址空间。</p>
+<p>位于 <code>frameworks/base/core/java/com/android/internal/os/ZygoteInit.java:284</code> 的 <code>com.android.internal.os.ZygoteInit.preloadClasses()</code> 会读取 <code>/system/etc/preloaded-classes</code> 文本文件，并对其中列出的每个类做预先初始化。结果是：引导镜像里的类对象、静态字段与 JIT 编译代码，在任何应用 fork 之前就已常驻于 zygote 的堆中。此后启动的每个应用进程都从该 zygote fork，直接继承这些已解析的类对象。<code>android.app.Activity</code> 在 zygote 里和在每个应用里就是字面上同一个类对象，不存在按应用加载的步骤。</p>
+<p>应用专属的代码位于下一层类加载器。已安装的 APK 由 <code>dalvik.system.PathClassLoader</code>（<code>libcore/dalvik/src/main/java/dalvik/system/PathClassLoader.java:44</code>）加载，它的父加载器是引导类加载器。<code>ClassLoader.loadClass()</code>（<code>libcore/ojluni/src/main/java/java/lang/ClassLoader.java:622</code>）遵循标准的父优先委派：它在第 630 行调用 <code>parent.loadClass(name)</code>，<em>先于</em>第 642 行对自身 dex 调用 <code>findClass()</code>。任何能在 BOOTCLASSPATH 中解析的类名，都胜过应用 APK 中的同名类。</p>
+<p>对 Java 来说这没有问题。框架对 <code>java.*</code> 与 <code>javax.*</code> 的传递依赖本身就是 JDK 中严格受版本管理的核心部分，它在 OpenJDK 下演进，带有明确的 JLS 兼容性保证。应用即便想自带一份 <code>java.util.HashMap</code> 也做不到——按设计，类加载器委派会把每一次解析都交回平台的那一份。</p>
+<p>对 Kotlin 来说，这就是核心症结。公开面上的 <code>suspend</code> 函数会拖进 <code>kotlin.coroutines.Continuation</code>；返回 <code>Result&lt;T&gt;</code> 的方法会拖进 <code>kotlin.Result</code>；即便是一个用 Kotlin 写的普通类，也会生成一条 <code>@kotlin.Metadata</code> 注解，当应用对该类调用 <code>Foo::class</code> 时，Kotlin 反射层会读取它。而这些类型全都住在 <code>kotlin-stdlib.jar</code> 里。</p>
+<p>今天已核实的状态是：AOSP 中没有任何引导类路径 jar 链接 <code>kotlin-stdlib</code>。<code>external/kotlinc/Android.bp:59</code> 把 <code>kotlin-stdlib</code> 声明为该预置 jar 的 <code>java_import</code>，但依赖它的模块都不是 boot 模块。</p>
+<p>Soong 的 <code>static_kotlin_stdlib</code> 属性（在 <code>build/soong/java/base.go</code> 中记为“If true, package the kotlin stdlib into the jar. Defaults to true.”）控制 Kotlin 模块是否自带一份 stdlib 副本。SystemUI 的 plugin 与 shared 子项目把它设为 <code>false</code>，于是 stdlib 对它们而言只是编译期依赖，由所在 APK 提供唯一那份打包副本。</p>
+<p>平台的生产用 Kotlin（权限子系统，见后文“Kotlin 在 AOSP 中已存在的位置”）运行在 SYSTEMSERVERCLASSPATH 上的 <code>services.jar</code> 里。该 jar 只由 <code>system_server</code> 加载，不在引导类路径上。它的 stdlib 是静态链接并经 jarjar 改名的，因此没有任何 <code>kotlin-stdlib</code> 引用会到达共享类加载器。</p>
+<p>加入第一个公开 Kotlin 签名就会把这套关系翻转过来。假定框架 jar 暴露了一个 <code>Result&lt;T&gt;</code> 返回类型、一个 <code>suspend</code> 参数，或者哪怕只是一个公开顶层函数合成出的、带 Kotlin 元数据的 <code>Kt</code> 类，那么它就必须链接 <code>kotlin-stdlib</code>，而这份 <code>kotlin-stdlib</code> 也就必须随引导类路径一起发布。于是每个从 zygote fork 出来的应用进程，都会从引导类路径解析 <code>kotlin.Result</code>、<code>kotlin.coroutines.Continuation</code> 以及元数据格式相关类型，而不会解析应用自身 APK 里打包的那个版本。</p>
+<p>这比 Java 的类似情形更具破坏性，原因在于 Kotlin 在版本稳定性谱系上的位置。今天的应用常常自带不同版本的 <code>kotlin-stdlib</code>，例如同一个 APK 里既有按 Kotlin 1.6 编译的库，又有跑在 Kotlin 2.0 上的应用代码。位于 <code>prebuilts/r8/r8.jar</code> 的 R8/D8 会把两者的并集压缩进 APK 的 <code>classes.dex</code>。</p>
+<p>父优先委派意味着，设备上引导类路径中的 <code>kotlin-stdlib</code> 无论如何都会胜出，与应用在 Gradle 构建里选了哪个版本无关。如果设备的 <code>kotlin-stdlib</code> 比应用的旧，应用所链接的方法可能不存在，运行时冒出 <code>NoSuchMethodError</code>；如果它更新、且收紧了可空性或泛型签名，应用已编译的调用点可能通不过字节码校验。应用开发者从 APK 内部无从补救，因为解析发生在其类加载器之上。</p>
+<p>AOSP 中目前唯一用来化解这类冲突的既有先例，是类加载器命名空间隔离。WebView 运行在独立的 zygote 中，即位于 <code>frameworks/base/core/java/android/webkit/WebViewZygote.java:32</code> 的 <code>WebViewZygote</code>，这样 WebView APK 的传递依赖不必与主 zygote 预加载的类集共存。</p>
+<p>代价是多一个 zygote 进程，以及两个进程都触及的每一个共享库都要多一份副本；此外还有一套明确的跨 zygote 契约，规定哪些类可共享。要把这种模式推广到“使用 Kotlin 的应用”，意味着二者之一：要么按 stdlib 版本各开一个 zygote，而系统在 fork 时无法预知该用哪个；要么重写运行时类加载器，让每个应用看到自己的 <code>kotlin-stdlib</code>，同时仍从引导类路径解析 <code>android.*</code>。两者今天都不存在。</p>
+<p>Java 方法签名的稳定性 vs. Kotlin 元数据的钉死。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">flowchart</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Java</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Java 公开 API"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        JS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"public void foo(int)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        JM</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"JVM 签名&lt;br/&gt;foo(I)V"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        JC</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"javac 版本&lt;br/&gt;不改变&lt;br/&gt;生成的签名"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        JS </span><span style="color:#F97583">--</span><span style="color:#9ECBFF">&gt; JM </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> JC</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Kotlin</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Kotlin 公开 API"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        KS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"public fun foo(x: Int = 0)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        KM</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"JVM 签名&lt;br/&gt;foo(I)V&lt;br/&gt;foo()V（合成）&lt;br/&gt;+ kotlin.Metadata"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        KC</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"kotlinc 版本 + Kotlin&lt;br/&gt;元数据格式必须&lt;br/&gt;双双保持冻结"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        KS </span><span style="color:#F97583">--</span><span style="color:#9ECBFF">&gt; KM </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> KC</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span></code></pre>
+<p>那张图里的对比就是工程上的关键点。对 Java 来说，一条源码声明映射为一个定义良好的 JVM 签名，且 <code>javac</code> 版本不会改变这一映射。对 Kotlin 来说，一条源码声明映射为<em>一整套</em> JVM 生成物：签名、合成辅助方法、改写过的名字、<code>Continuation</code> 参数、值类哈希，以及 <code>kotlin.Metadata</code> 注解块。Kotlin 反射与工具链层会解析这个块以重建源码层语义。</p>
+<p>这套集合的形状取决于 kotlinc 版本、元数据格式版本，以及源码使用的互操作注解。要像冻结 Java API 那样冻结一个 Kotlin 公开 API，上述机器里的每一件都必须被宣布为二进制契约，kotlinc 不能在不破坏已编译调用方的前提下演进其中任何一项。而且正如上文关于引导类路径的一节所示，这份契约会延伸到框架自身签名之外，触及设备共享类加载器强加给每个使用 Kotlin 的应用的那个 <code>kotlin-stdlib</code> 版本。</p>
+<h2 id="工具链锁定">工具链锁定</h2>
+<p>“公开 API 契约”一节所述的签名契约，由一个 Java 形状的工具链来执行。即便个别工具恰好是用 Kotlin 写的，它们的输入输出格式也是为 Java/JVM 签名模型而设计的。</p>
+<p><strong>Metalava</strong> 位于 <code>tools/metalava/</code>。它本身就是个 Kotlin 工具——各子模块合计 784 个 <code>.kt</code> 文件。metalava 用 Kotlin 编写，却在处理 Java 形状的 API，这本身就是约束的一部分，而非矛盾。Metalava 可以消费 Kotlin 源码来产出签名；签名格式（定义在 <code>tools/metalava/FORMAT.md</code>）已经能表达 Kotlin 修饰符（<code>sealed</code>、<code>inline</code>、<code>value</code>、<code>suspend</code>、<code>data</code>、<code>operator</code>、<code>infix</code>）、Kotlin 属性、参数名与默认值。</p>
+<p>但这些扩展是为 androidx 的签名文件设计的——那里的库源码就是 Kotlin——平台 SDK 面并不使用它们。<code>android.*</code> 类的 <code>current.txt</code> 标注为 <code>// - style=java</code>，且不含任何 Kotlin 构造。若某个 Kotlin 源文件在平台面上使用那些特性，它要么被压平成其 JVM 可见投影，要么被 API lint 拒绝。被压平后的形态会丢掉源码层语义。</p>
+<p>这种压平本身就说明了问题。Metalava 有统一的 <code>Item</code> 模型：类是 <code>Item</code>，方法是 <code>Item</code>，字段也是 <code>Item</code>。这个模型刻意保持语言中立。</p>
+<p>PSI 前端是默认源码模型，同时读取 Java 与 Kotlin 源码；Turbine 前端是可选的 Java-only 源码模型。两者产出形状相同的 Item。metalava 输出签名时，就遍历这些 Item，按格式规范把它们写出来。</p>
+<p>一个 Kotlin <code>data class Foo(val x: Int)</code> 会被 PSI 前端读取，然后被投影成等价的 Java 声明：一个带 final 字段式访问器 <code>getX</code> 的类、一个合成构造器，以及 <code>equals</code>/<code>hashCode</code>/<code>toString</code>/<code>copy</code>/<code>componentN</code> 那一组。签名文件展示的是投影，而不是源码。被永久冻结的契约是投影，源码是实现的细节。</p>
+<p>这也意味着，一处内部的 Kotlin 源码改动不会出现在 <code>current.txt</code> 中——比如重构 <code>data class</code> 增加字段、拆分 sealed 层级、重命名顶层函数。只要那些 Kotlin 成员不属于公开面，这一点就成立。metalava 只收录它视为 <code>public</code> 或 <code>protected</code>、且未标注 <code>@hide</code> 的成员。<code>frameworks/base/core/</code> 下的 Kotlin 文件全是 <code>core/tests/</code> 里的测试代码，API 检查从不扫描它们；承载 API 的 <code>core/java/</code> 树是纯 Java，因此在那一带连一条 Kotlin 声明都到不了 metalava。</p>
+<p>metalava 的模块布局体现了职责分离：</p>
+<ul>
+<li><code>tools/metalava/metalava/</code> —— 主工具入口。</li>
+<li><code>tools/metalava/metalava-model/</code> —— 与任何语言前端无关的抽象 API 模型。</li>
+<li><code>tools/metalava/metalava-model-psi/</code> —— Java 与 Kotlin 共用的默认源码前端（使用 JetBrains PSI）。</li>
+<li><code>tools/metalava/metalava-model-source/</code> —— 通用的基于源码的模型。</li>
+<li><code>tools/metalava/metalava-model-text/</code> —— 文本（签名文件）前端，用于 <code>current.txt</code> 的往返。</li>
+<li><code>tools/metalava/metalava-model-turbine/</code> —— 可选的、基于 Turbine 的 Java-only 前端。</li>
+<li><code>tools/metalava/metalava-reporter/</code> —— 问题上报子系统。</li>
+<li><code>tools/metalava/metalava-testing/</code> —— 测试工具。</li>
+<li><code>tools/metalava/stub-annotations/</code> —— 生成桩代码时使用的注解 jar。</li>
+</ul>
+<p>文本模型是权威的，PSI 与 Turbine 的存在是为了喂给它。未来一个能识别 Kotlin 的公开 API，将需要一种能表达并往返它允许出现在公开面上的每一种 Kotlin 构造的文本模型。</p>
+<p><strong>文档生成</strong>。树内平台参考文档管线是 metalava 加 Doclava（位于 <code>external/doclava/</code> 的历史悠久的 Javadoc 派生工具）。原始源码经 metalava 变成桩源码，再由 Doclava 把桩渲染成 API 文档。该管线在 <code>frameworks/base/api/ApiDocs.bp</code> 中有大致勾勒。Google 较新的、能识别 Kotlin 的文档工具 Dackka 用于 AndroidX 文档，但并未入库 AOSP。</p>
+<p>无论走哪条路，发布的文档描述的都是 Kotlin API 的 Java 投影。之所以如此，是因为应用开发者在 IDE 里调用平台时看到的就是那个。一个 Kotlin <code>data class</code> 在文档里会逐个列出其合成的 <code>equals</code>、<code>hashCode</code>、<code>toString</code>、<code>copy</code> 与 <code>componentN</code> 方法——这正是 Java 调用方看到的东西。只有在读者处于 Kotlin 模式时，文档才能展示源码层的 Kotlin 形态；底层契约仍然是 JVM 投影。</p>
+<p><strong>隐藏 API 执行</strong>是 Java 形状工具链的第二根支柱。黑名单以纯文本文件维护在 <code>frameworks/base/boot/hiddenapi/</code> 下：</p>
+<ul>
+<li><code>hiddenapi-unsupported.txt</code> —— <em>unsupported</em>（原 greylist）成员：从任何目标 SDK 仍可访问，但不受支持、会受到警告。</li>
+<li><code>hiddenapi-unsupported-packages.txt</code> —— 整包被归入同一个 unsupported 类别。</li>
+<li><code>hiddenapi-max-target-o.txt</code> —— 面向 SDK O 及更早的 API（旧式封锁）。</li>
+<li><code>hiddenapi-max-target-p.txt</code> —— 面向 SDK P 及更早的 API。</li>
+<li><code>hiddenapi-max-target-q.txt</code> —— 面向 SDK Q 及更早的 API。</li>
+<li><code>hiddenapi-max-target-r-loprio.txt</code> —— 面向 R 及更早、低优先级的 API。</li>
+</ul>
+<p>未被上述任何文件列名的隐藏成员，默认落入 <code>blocked</code> 类别，即硬拒绝的情形。所以这些清单是在划定豁免，而不是在声明封锁。</p>
+<p>一个被封锁的 Kotlin 扩展函数，呈现为 <code>Lcom/example/UtilsKt;-&gt;extensionMethod(Lcom/example/Receiver;)V</code>，而不是它的 Kotlin 源码签名。这些文件里每一行都是一个 <code>Lpackage/Class;-&gt;method(Lpackage/Type;)Lpackage/Return;</code> 形式的 JVM 描述符。这个格式与 <code>dexdump</code> 用的、ART 运行时检查用的、以及每个内省已编译 class 文件的工具用的都是同一套。Kotlin 源码编译为 JVM class 文件，所以 Kotlin 代码可经由这些描述符到达；但描述符用的是 kotlinc 生成的形状，不是源码层的 Kotlin 名字。</p>
+<p>构建系统把源文本文件合并为一个生成的 CSV：</p>
+<ul>
+<li><code>out/soong/hiddenapi/hiddenapi-flags.csv</code> —— 构建期产物，约 75 万行。每行是一个成员描述符加一组标记（<code>public-api</code>、<code>sdk</code>、<code>system-api</code>、<code>test-api</code>、<code>blocked</code> 等）。</li>
+<li><code>prebuilts/runtime/appcompat/hiddenapi-flags.csv</code> —— 随宿主侧 veridex/<code>appcompat.sh</code> APK 扫描器一起打包的预置副本（约 51 MB）。</li>
+</ul>
+<p>生成文件中的示例行：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Landroid/Manifest$permission;-&gt;&lt;init&gt;()V,public-api,sdk,system-api,test-api</span></span>
+<span class="line"><span>Landroid/Manifest$permission;-&gt;ACCEPT_HANDOVER:Ljava/lang/String;,public-api,sdk,system-api,test-api</span></span>
+<span class="line"><span>Landroid/Manifest$permission;-&gt;ACCESSIBILITY_MOTION_EVENT_OBSERVING:Ljava/lang/String;,blocked,test-api</span></span></code></pre>
+<p>这份 CSV 在构建时由 <code>hiddenapi</code> 工具（<code>art/tools/hiddenapi/hiddenapi.cc</code>）消费，它把标记盖进每个 dex 文件的 <code>HiddenapiClassData</code> 区段。ART 随后在运行时读取这些按成员存放的 dex 标记，从不打开该 CSV。当应用访问 <code>Manifest.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING</code> 时，运行时检查这些标记：<code>blocked</code> 触发硬异常；各种 <code>max-target-*</code> 触发较软的警告或按版本分档的封锁。粒度是逐描述符的。</p>
+<p>一个 Kotlin API 每条源码声明会生成多个描述符，例如 <code>@JvmOverloads</code> 产生的重载、<code>Companion</code> 访问器加上 <code>@JvmStatic</code> 投影、值类改写名加上未改写的擦除回退版本。这样的 API 会成倍增加为表达同一份源码层意图所需的 CSV 条目。</p>
+<p><strong>jarjar 规则</strong>。若干框架模块在构建时会重写其依赖类名，以避免与应用可见的类冲突。规则写在 <code>jarjar-rules.txt</code> 文件中，通过 Soong 的 <code>jarjar_rules:</code> 属性接入。权限子系统正是把这种重写施加到它静态链接的 stdlib 上（<code>frameworks/base/services/permission/jarjar-rules.txt</code> 把 <code>kotlin.**</code> 重命名为 <code>com.android.server.permission.jarjar.kotlin.**</code>）。之所以在那里可行，是因为该子系统不依赖对已改名类的 Kotlin 反射。</p>
+<p>Kotlin 元数据注解（<code>kotlin.Metadata</code>）内嵌了对原始类名的字符串引用。若 jarjar 把 <code>kotlin.collections.MapsKt</code> 改名为 <code>com.android.internal.kotlin.collections.MapsKt</code>，就会与元数据块不匹配，运行时的 Kotlin 反射随之失效。Java 没有等价的嵌入式元数据，对 Java 做 jarjar 只是纯粹的文本重写。</p>
+<p><strong><code>@SystemApi</code> 与 <code>@UnsupportedAppUsage</code></strong> 由 metalava 与隐藏 API 工具链处理。<code>@SystemApi</code> 为平台签名的调用方拓宽该面，与之对应的 <code>system-current.txt</code> 就是它冻结后的签名。<code>@UnsupportedAppUsage</code> 是框架代码用来标记“应落入隐藏 API CSV 并带上特定 max-target 标记”的成员的注解。要为这些注解做 Kotlin 等价物，既需要 Kotlin 源码层的注解类型，也需要一条 metalava 规则，把该注解正确投影进生成的 CSV。</p>
+<p>注解本身还带有细微的约束。<code>@SystemApi</code> 接受客户端类型参数（<code>MODULE_LIBRARIES</code>、<code>PRIVILEGED_APPS</code>、<code>SYSTEM_SERVER</code>），用来限定哪些下游消费者能看到该成员。Metalava 读取这些参数，把成员路由到相应的签名面。路由错的注解会漏进错误的 <code>current.txt</code>，而构建的 <code>m checkapi</code> 步骤会抓到这种泄漏。</p>
+<p>对 Java 源码而言，注解处理毫不含糊：注解写在声明上，metalava 读取该 AST 节点，路由就完成了。对 Kotlin 源码，metalava 必须经由 Kotlin 源码前端得出同样的结论。未来任何带源码层形态的 Kotlin 注解，都需要在 <code>tools/metalava/.../ExtractAnnotations.kt</code> 的注解提取逻辑中得到显式支持，例如文件级注解、作用于类的扩展、以及具有非平凡保留语义的可重复注解。</p>
+<p><code>out/soong/hiddenapi/hiddenapi-flags.csv</code> 这一产物，就是上述所有输入的汇合点：源 <code>.txt</code> 黑名单、<code>@SystemApi</code> 成员归属、<code>@UnsupportedAppUsage</code> 注解、公开 API 桩描述符，全部经 Soong 流入同一张以描述符为键的表。同一套机器也喂出 <code>prebuilts/runtime/appcompat/hiddenapi-flags.csv</code>——供宿主侧 veridex/<code>appcompat.sh</code> APK 扫描器使用的预置表（设备上没有运行时读它）。描述符形状、标记词汇表、以及 Kotlin 成员映射到描述符的方式，任何变化都要流过这条管线。</p>
+<h2 id="oem厂商与-mainline-的约束">OEM、厂商与 Mainline 的约束</h2>
+<p>公开 API 契约不是系统中唯一的冻结。另外两个相邻的面——厂商分区与 Mainline 模块——把“永久稳定”这一性质扩展到更多层。</p>
+<p><strong>厂商分区冻结</strong>。当 OEM 设备以 SDK 级别 N 上市时，厂商分区是针对该级别冻结的 system-API 面与 module-library 面构建的。此后同一设备上的系统升级（在 Project Treble 的框架-厂商切分范围内）必须保持与既有厂商分区的二进制兼容。system-API 面充当框架（内部允许 Java + Kotlin，对外呈 Java 形状）与厂商代码（通常是 C++，有时是 Java）之间的二进制契约。某个 <code>@SystemApi</code> 类上的一次 Kotlin 生成物变化，会弄坏每一台按先前形状编译过的设备上的厂商分区。</p>
+<p><strong>Mainline APEX 模块</strong>是第二个冻结。Mainline 模块是一种 APEX 包，其中的平台组件通过 Play 商店更新而非整包系统 OTA 发布。该架构记录在 <code>system/apex/docs/README.md</code>（配套文档见 <code>system/apex/tests/README.md</code> 与 <code>system/apex/shim/README.md</code>）。每个 Mainline 模块声明 <code>min_sdk_version</code>，并针对该 SDK 级别的 module-library 面编译。APEX 构建规则位于 <code>build/soong/apex/apex.go</code> 与 <code>build/soong/android/apex.go</code>，二者共同确保 APEX 文件不依赖其声明 SDK 下限之外的符号。</p>
+<p>Mainline 模块会随 Play 商店更新交付到一台五年前的设备上，它仍必须在那台设备冻结的 module-library 面上解析它引用的每一个符号。如果框架在 SDK N 与 SDK N+3 之间引入了一个新的 Kotlin 形状公开方法，处在 SDK N 的设备就不会有它。该 Mainline 模块要么调高 <code>min_sdk_version</code>（牺牲覆盖面），要么保持 Java 形状（不损失任何东西）。</p>
+<p><strong>kotlinc 的发布节奏 vs. AOSP 的节奏</strong>。Soong 的 Kotlin 集成硬性钉死某一个 kotlinc 版本。构建所用的预置 kotlinc 位于 <code>external/kotlinc/</code>，版本戳在 <code>external/kotlinc/build.txt</code> 中：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>2.2.0-custom-branch-22</span></span></code></pre>
+<p>钉死动作落实在 Soong 的编译标志管道里：</p>
+<ul>
+<li><code>build/soong/java/kotlin.go</code> —— 定义调用 <code>kotlinc</code>、做 kotlin-jar 快照、增量编译的 Ninja 规则。</li>
+<li><code>build/soong/java/kotlin_test.go</code> —— 上述规则的单元测试。</li>
+<li><code>build/soong/java/config/kotlin.go</code> —— 声明 Soong 用来定位 kotlinc 各组件的变量（<code>external/kotlinc/bin/kotlinc</code>、<code>external/kotlinc/lib/kotlin-stdlib.jar</code>、<code>external/kotlinc/lib/kotlin-compiler.jar</code>、kapt、jvm-abi-gen）。Compose 编译器插件另行接入，即 <code>build/soong/java/base.go</code> 所引用的 <code>kotlin-compose-compiler-plugin</code> 模块。</li>
+</ul>
+<p>同一配置文件禁止调用方覆盖 <code>-no-jdk</code>、<code>-no-stdlib</code> 或 <code>-language-version</code>。编译时使用哪个 Kotlin 语言版本由平台决定，单个模块无法自行选择更新或更旧的版本。kotlinc 的 JVM 以 <code>-J-Xmx8192M</code> 启动，以承受一次性编译平台 Kotlin 模块的堆压力。</p>
+<p>被钉死的 kotlinc 版本是耦合问题的根源。AOSP 选定一个版本，在全树范围验证，然后发布。用该 kotlinc 编译的公开 API 会生成该版本所产生的 JVM 签名。把 kotlinc 升级到更新版本，可能改变任何公开 Kotlin 类的生成签名。升级的动机可以是 Compose 更新、平台内部想用的某个 Kotlin 语言特性，或一个安全修复。</p>
+<p>目前应对这一风险的办法，就是让公开类保持 Java。风险不会出现。</p>
+<p>对内部 Kotlin（services、SystemUI、Settings、应用）来说，钉死 kotlinc 没问题：kotlinc 升级时所有内部代码都会重编译，而需要冻结的产物是公开桩与隐藏 API CSV，两者都会在 kotlinc 升级中重新生成，API 与隐藏 API 检查会在升级落地前验证这些变化。</p>
+<p>设想框架往 <code>android.os.SomeClass</code> 里加了唯一一个 Kotlin 公开方法，这是节奏问题的一个具体例子。该方法随 SDK 级别 N 发布，由 kotlinc 2.2.0 编译。<code>prebuilts/sdk/N/public/api/android.txt</code> 这份冻结产物记下了 kotlinc 2.2.0 所产生的 JVM 签名。设备以 SDK N 上市，把该产物烘焙进自己的桩 jar。</p>
+<p>一年后，AOSP 为启用某个新的 Compose 特性而采用 kotlinc 2.4.0。假定 kotlinc 2.4.0 对同一源码类生成了不同的 JVM 签名——哪怕只是细微差别，哪怕只是出于某种不透明的改写原因。那么按 SDK N 桩编译的应用，在运行新框架的设备上就会解析失败。</p>
+<p>框架有两个选项：把旧的 kotlinc 生成形状继续钉住，这会让升级失去意义；或者发布一个兼容垫片，把新形状转发到旧形状，这会让表面成倍增长。Java 两个问题都没有，因为 <code>javac</code> 没有会影响生成签名的特性版本。</p>
+<p>kotlinc 问题在厂商侧的镜像情形是：厂商分区通常在设备上市时一次性构建，之后在设备的余生里不再重建。一个链接了框架 Kotlin API 的厂商服务，把 kotlinc-N 的生成物烘焙了进去；当框架通过系统升级换成 kotlinc N+1 时，厂商分区仍然期望 kotlinc-N 的生成物，而框架无法重编译厂商分区。Java 完全避开这一点；公开面上的 Kotlin 会创造一条新的冻结轴（kotlinc 生成形状），而这条轴在今天的厂商分区契约中没有对应物。</p>
+<p>Mainline 的情形让问题更尖锐，因为 Mainline 模块的发布频率高于系统。今天构建的一个 Mainline APEX，其 <code>min_sdk_version</code> 设为（比如说）Android 11，它必须在 SDK 11 及以上的每台设备上运行。如果框架在 SDK 12 引入了某个 Kotlin 公开 API，而该 Mainline 模块想用它，模块只能：</p>
+<ol>
+<li>把 <code>min_sdk_version</code> 抬到 12（失去对更老设备的覆盖）。</li>
+<li>用运行时反射有条件地调用该 API（放弃编译期类型检查）。</li>
+<li>继续用等价的 Java API。</li>
+</ol>
+<p>选项 3 是最省力的路。上面的清点表也印证了这一点：Mainline 模块的入口点是 Java 形状的，即便其内部实现是 Kotlin。</p>
+<p>历史脉络同样重要。Project Treble 把框架-厂商切分正式化，system-API 面则是被事后改造成跨该切分的稳定契约。Mainline 计划把框架-模块切分正式化，module-library 面被加在 system-API 之上，为模块提供受控的模块间契约。每一条新的冻结轴都配有显式的签名管理、显式的工具链支持与显式的测试基础设施。要把“Kotlin 生成形状”加为第四条冻结轴，需要同等的工程量——而这件事并没有发生。</p>
+<p>关于 APEX 格式与更新流程的更多背景，见仓库根目录的<a href="54-mainline-modules.md">第 54 章 —— Mainline 模块</a>。</p>
+<h2 id="kotlin-在-aosp-中已存在的位置">Kotlin 在 AOSP 中已存在的位置</h2>
+<p>Kotlin 在平台中的角色分量不小，但位置集中。“不对称”一节引入的清点表，可以按各位置的职责进一步展开：</p>
+<table>
+<thead>
+<tr>
+<th>路径</th>
+<th>Kotlin 文件数</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameworks/base/packages/SystemUI/</code></td>
+<td>8,896</td>
+<td>系统 UI 外壳：锁屏、通知、快捷设置、状态栏、系统栏、UI 用 Compose</td>
+</tr>
+<tr>
+<td><code>packages/apps/Settings/</code></td>
+<td>2,300</td>
+<td>设置应用</td>
+</tr>
+<tr>
+<td><code>packages/apps/Launcher3/</code></td>
+<td>1,326</td>
+<td>启动器主屏与最近任务</td>
+</tr>
+<tr>
+<td><code>cts/</code></td>
+<td>1,209</td>
+<td>兼容性测试套件（测试中可自由使用 Kotlin）</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/</code></td>
+<td>292</td>
+<td>生产用 Kotlin 全在 <code>services/permission/</code>；其余是测试——没有别的系统服务使用生产 Kotlin</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/</code></td>
+<td>45</td>
+<td>全部是 <code>core/tests/</code> 下的测试代码；<code>core/java/</code> 中零生产 Kotlin</td>
+</tr>
+<tr>
+<td><code>tools/metalava/</code></td>
+<td>784</td>
+<td>签名工具本身就是 Kotlin</td>
+</tr>
+</tbody>
+</table>
+<p>在 <code>frameworks/base/services/</code> 内，生产用 Kotlin 集中在 Android 13 引入的权限访问子系统。三个有代表性的文件可以说明其形态：</p>
+<p><strong><code>AccessCheckingService.kt</code></strong> ——
+<code>frameworks/base/services/permission/java/com/android/server/permission/access/AccessCheckingService.kt</code>。
+这是新权限栈的入口类。它继承 <code>SystemService</code>，向 <code>LocalServices</code> 注册若干 manager 接口，并通过 <code>getState { ... }</code> 作用域辅助方法暴露其状态。相关片段：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#B392F0">@Keep</span></span>
+<span class="line"><span style="color:#F97583">class</span><span style="color:#B392F0"> AccessCheckingService</span><span style="color:#E1E4E8">(context: </span><span style="color:#B392F0">Context</span><span style="color:#E1E4E8">) : </span><span style="color:#B392F0">SystemService</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">context</span><span style="color:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#B392F0">    @Volatile</span><span style="color:#F97583"> private</span><span style="color:#F97583"> lateinit</span><span style="color:#F97583"> var</span><span style="color:#E1E4E8"> state: </span><span style="color:#B392F0">AccessState</span></span>
+<span class="line"><span style="color:#F97583">    private</span><span style="color:#F97583"> val</span><span style="color:#E1E4E8"> stateLock </span><span style="color:#F97583">=</span><span style="color:#B392F0"> Any</span><span style="color:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#F97583">    ..</span><span style="color:#E1E4E8">.</span></span>
+<span class="line"><span style="color:#F97583">    override</span><span style="color:#F97583"> fun</span><span style="color:#B392F0"> onStart</span><span style="color:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#E1E4E8">        appOpService </span><span style="color:#F97583">=</span><span style="color:#B392F0"> AppOpService</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">this</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        permissionService </span><span style="color:#F97583">=</span><span style="color:#B392F0"> PermissionService</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">this</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">        ..</span><span style="color:#E1E4E8">.</span></span>
+<span class="line"><span style="color:#E1E4E8">        LocalServices.</span><span style="color:#B392F0">addService</span><span style="color:#E1E4E8">(AppOpsCheckingServiceInterface::</span><span style="color:#B392F0">class</span><span style="color:#E1E4E8">.java, appOpService)</span></span>
+<span class="line"><span style="color:#E1E4E8">        LocalServices.</span><span style="color:#B392F0">addService</span><span style="color:#E1E4E8">(PermissionManagerServiceInterface::</span><span style="color:#B392F0">class</span><span style="color:#E1E4E8">.java, permissionService)</span></span></code></pre>
+<p>它是安全的 Kotlin，原因在于它向外部调用方呈现的每一个接口——<code>AppOpsCheckingServiceInterface</code>、<code>PermissionManagerServiceInterface</code>、<code>AppFunctionAccessServiceInterface</code>——都是注册进 Java 形状服务注册表的 Java 接口。其他系统代码调用这些 Java 接口，永远看不到 Kotlin 类。该服务的 binder 面（定义在 <code>IPermissionManager.aidl</code> 及其同类文件中）是 AIDL，而 AIDL 天生就是 Java 形状。</p>
+<p>内部实现则毫不掩饰地采用 Kotlin 惯用写法。文件靠近末尾处：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#B392F0">@OptIn</span><span style="color:#E1E4E8">(ExperimentalContracts::</span><span style="color:#B392F0">class</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">internal</span><span style="color:#F97583"> inline</span><span style="color:#F97583"> fun</span><span style="color:#E1E4E8"> &lt;</span><span style="color:#B392F0">T</span><span style="color:#E1E4E8">&gt; </span><span style="color:#B392F0">getState</span><span style="color:#E1E4E8">(action: </span><span style="color:#B392F0">GetStateScope</span><span style="color:#E1E4E8">.() </span><span style="color:#F97583">-&gt;</span><span style="color:#E1E4E8"> T): </span><span style="color:#B392F0">T</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#B392F0">    contract</span><span style="color:#E1E4E8"> { </span><span style="color:#B392F0">callsInPlace</span><span style="color:#E1E4E8">(action, InvocationKind.EXACTLY_ONCE) }</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#B392F0"> GetStateScope</span><span style="color:#E1E4E8">(state).</span><span style="color:#B392F0">action</span><span style="color:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>这一条声明用到三个 Kotlin 特性，而每一个放到公开面上都会成为问题。第一是带接收者的函数类型（<code>GetStateScope.() -&gt; T</code>），Java 没有等价物。第二是带近似 <code>reified</code> 的 lambda 参数的 <code>inline</code> 函数，它会被内联进每个调用方的字节码。第三是来自 <code>kotlin.contracts</code> 的实验性 <code>contract</code> API，它本身需要显式 opt-in，且仅存在于源码层。这个函数是 <code>internal</code>，包名是 <code>com.android.server.permission.access</code>（仅服务端），唯一的调用方是同包内的其他 Kotlin 类。三个棘手特性在这里都没有事，因为边界是单个子系统内部的 Kotlin 之间。</p>
+<p>对比一下：如果 <code>getState</code> 位于公开的 Java 面上，同一种写法将不得不怎样表达。<code>inline</code> 函数将变成普通方法（失去内联收益）；带接收者的函数类型将变成显式的 <code>GetStateScope</code> 参数；<code>contract</code> 将没有等价物。结果会比 Kotlin 原版或等价的 Java 设计都更难看、也更慢。这正是团队选择“实现用 Kotlin、边界用 Java”的原因之一。</p>
+<p><strong><code>AccessPolicy.kt</code></strong> ——
+<code>frameworks/base/services/permission/java/com/android/server/permission/access/AccessPolicy.kt</code>。
+<code>AccessPolicy</code> 类以 <code>SchemePolicy</code> 实现构成的 map 做索引，并把按方案划分的工作委派给子类。相关声明：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#F97583">class</span><span style="color:#B392F0"> AccessPolicy</span></span>
+<span class="line"><span style="color:#F97583">private</span><span style="color:#B392F0"> constructor</span><span style="color:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#F97583">    private</span><span style="color:#F97583"> val</span><span style="color:#E1E4E8"> schemePolicies: </span><span style="color:#B392F0">IndexedMap</span><span style="color:#E1E4E8">&lt;</span><span style="color:#B392F0">String</span><span style="color:#E1E4E8">, </span><span style="color:#B392F0">IndexedMap</span><span style="color:#E1E4E8">&lt;</span><span style="color:#B392F0">String</span><span style="color:#E1E4E8">, </span><span style="color:#B392F0">SchemePolicy</span><span style="color:#E1E4E8">&gt;&gt;</span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span></code></pre>
+<p>后面在文件里还声明了一个抽象的 <code>SchemePolicy</code> 基类。这种“抽象类加子类”的模式纯属内部使用。<code>AppIdPermissionPolicy</code>、<code>DevicePermissionPolicy</code>、<code>AppIdAppOpPolicy</code>、<code>PackageAppOpPolicy</code>、<code>AppIdAppFunctionAccessPolicy</code> 都是普通的公开 Kotlin 类（Kotlin 没有包内可见性），但它们靠构建可见性被限制在权限子系统内：该库的 <code>Android.bp</code> 设置了 <code>visibility: ["//frameworks/base/services"]</code>，且它们中没有一个出现在任何签名文件里。</p>
+<p><strong><code>Permission.kt</code></strong> ——
+<code>frameworks/base/services/permission/java/com/android/server/permission/access/permission/Permission.kt</code>。
+一个为单条权限条目建模的 <code>data class</code>，外加存放常量的 <code>companion object</code>：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="kotlin"><code><span class="line"><span style="color:#F97583">data</span><span style="color:#F97583"> class</span><span style="color:#B392F0"> Permission</span><span style="color:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#F97583">    val</span><span style="color:#E1E4E8"> permissionInfo: </span><span style="color:#B392F0">PermissionInfo</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#F97583">    val</span><span style="color:#E1E4E8"> isReconciled: </span><span style="color:#B392F0">Boolean</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#F97583">    val</span><span style="color:#E1E4E8"> type: </span><span style="color:#B392F0">Int</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#F97583">    val</span><span style="color:#E1E4E8"> appId: </span><span style="color:#B392F0">Int</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#B392F0">    @Suppress</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"ArrayInDataClass"</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">val</span><span style="color:#E1E4E8"> gids: </span><span style="color:#B392F0">IntArray</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> EmptyArray.INT,</span></span>
+<span class="line"><span style="color:#F97583">    val</span><span style="color:#E1E4E8"> areGidsPerUser: </span><span style="color:#B392F0">Boolean</span><span style="color:#F97583"> =</span><span style="color:#79B8FF"> false</span></span>
+<span class="line"><span style="color:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#F97583">    ..</span><span style="color:#E1E4E8">.</span></span>
+<span class="line"><span style="color:#F97583">    companion</span><span style="color:#F97583"> object</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">        const</span><span style="color:#F97583"> val</span><span style="color:#E1E4E8"> TYPE_MANIFEST </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#F97583">        const</span><span style="color:#F97583"> val</span><span style="color:#E1E4E8"> TYPE_DYNAMIC </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 2</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">        fun</span><span style="color:#B392F0"> typeToString</span><span style="color:#E1E4E8">(type: </span><span style="color:#B392F0">Int</span><span style="color:#E1E4E8">): </span><span style="color:#B392F0">String</span><span style="color:#F97583"> =</span><span style="color:#F97583"> ..</span><span style="color:#E1E4E8">.</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>这个文件展示了放到公开 API 上会成为负担的那些特性：<code>data class</code> 合成 <code>equals</code>、<code>hashCode</code>、<code>toString</code>、<code>copy</code>、<code>componentN</code>；参数默认值；伴生对象常量。它们在这里全都存在却毫无后果，因为 <code>services/permission/</code> 之外没有任何东西按类型引用 <code>Permission</code>。</p>
+<p><strong>权限子系统的测试</strong>。<code>services/tests/</code> 下的 Kotlin 文件补完了这幅图景。JUnit 的运行器是 Java；当 Kotlin 测试想要一段 <code>@BeforeClass</code> 设置时，Java 运行器需要测试类上有一个静态方法，于是 Kotlin 测试代码把设置放进 <code>companion object</code> 并标注 <code>@JvmStatic</code>。<code>services/tests/displayservicetests/</code> 中的测试工具文件则用 <code>@JvmOverloads</code>，把带默认参数的辅助方法暴露给尚未迁移到 Kotlin 的 Java 测试代码。</p>
+<p>这些用法不出现在生产代码里，因为 AOSP 中的生产用 Kotlin 只向 Java 调用。只有 Java 测试运行器真的需要从外部伸手进 Kotlin。</p>
+<p>关于 Kotlin 出现位置的另几点补充，有助于补全这幅图景：</p>
+<p><strong>CTS 里的 Kotlin 测试</strong>。<code>cts/</code> 下约有 1,200 个 Kotlin 文件。CTS 验证 OEM 构建是否符合 Android 兼容性定义。CTS 中的测试必然是可由测试运行器以 Java 调用的，但测试体本身可以是 Kotlin。CTS 可以自由使用 Kotlin，因为测试不随系统发布——它们是针对系统运行的。永久冻结的约束不适用。</p>
+<p><strong>Settings、Launcher3 与整个应用层</strong>。这些应用随系统镜像发布，但在功能上是应用：它们针对公开 SDK 编译，承受与第三方应用相同的生命周期约束。它们对 Kotlin 的使用遵循管理良好的 Kotlin 代码库的相同规则。Settings 与框架之间的 ABI 是公开 API 加 system-API 面——Java 形状——尽管 Settings 的内部类大量是 Kotlin。</p>
+<p><strong>SystemUI 的角色</strong>。SystemUI 是与 system_server 相邻的进程，承载锁屏、通知、快捷设置与系统栏。它是 AOSP 中最大的 Kotlin 代码库，有 8,896 个文件。SystemUI 与平台其余部分的接口经由定义良好的边界：binder 调用用 AIDL、共享状态用 content provider、activity 启动用 intent。这些边界没有一个会把 Kotlin 类型作为参数露出来。SystemUI 可以自由重构；它向系统其余部分呈现的 ABI 由 AIDL 与平台的 intent 契约界定。</p>
+<p><strong><code>frameworks/base/services/</code> 各处的测试</strong>。在 <code>@JvmOverloads</code>、<code>@JvmStatic</code> 以及“权限子系统的测试”等处提到的同一套 Kotlin 测试/Java 运行器互操作模式，在 <code>services/tests/</code> 中随处可见；参见那些小节。</p>
+<p><strong><code>frameworks/base/core/</code> 里的 Kotlin</strong>。这里的 45 个文件全是 <code>frameworks/base/core/tests/</code> 下的测试代码——承载 API 的 <code>core/java/</code> 树中零生产 Kotlin。那里没有任何东西能作为公开 API 条目出现在 <code>current.txt</code> 中，因为 metalava 读取的是生产源码，而生产源码是纯 Java。原则上，Kotlin 源码可以待在 <code>core/java/</code> 里，只要它不进入公开 API 面——API 检查就是那条边界的执行者。但今天没有一个这么做。</p>
+<p><strong>kotlin-stdlib 的链接</strong>。<code>kotlin-stdlib</code> 根本不在引导类路径上。平台中唯一的生产消费者是权限子系统，它把 stdlib 静态链接进自己的库（<code>frameworks/base/services/permission/Android.bp</code>）。该库落入 SYSTEMSERVERCLASSPATH 上的 <code>services.jar</code>，只由 <code>system_server</code> 加载。该子系统还把每个 stdlib 类都用 jarjar 改名为 <code>com.android.server.permission.jarjar.kotlin.**</code>（<code>frameworks/base/services/permission/jarjar-rules.txt</code>）。</p>
+<p>因此，<code>kotlin.collections.MapsKt</code>、<code>kotlin.coroutines.Continuation</code>、<code>kotlin.Result</code> 之类的 stdlib 类型，从应用进程无法到达。未来若要讲“Kotlin 上公开面”这件事，就得决定 stdlib 类型是否算公开 API 的一部分——通过任何返回 stdlib 类型的公开方法，它们会传递性地成为一部分。另一种选择是：公开 API 只能使用经审定的 stdlib 子集。</p>
+<h2 id="最难用于公开面的那些-kotlin-特性">最难用于公开面的那些 Kotlin 特性</h2>
+<p>ABI 差距一节走过的是一个个具体的生成机制。本节退后一步，把同样的特性按它们给一个冻结公开面带来的设计压力归类。</p>
+<p><strong>伴生对象</strong>。正如“Java/Kotlin ABI 差距”中 <code>@JvmStatic</code> 小节所述，每个伴生对象都钉死了一个选择：是否在外层类上暴露静态成员。这个选择在 <code>current.txt</code> 中可见，一旦做出便无法撤销。对内部代码而言，默认做法——Java 调用方走 <code>Foo.Companion</code>——没问题，因为没有 Java 调用方。对公开类而言，这个选择是永久的，并且会影响每个应用开发者的 IDE 体验。</p>
+<p>还有一个下游的微妙之处：标了 <code>@JvmStatic</code> 的伴生对象成员在字节码中被复制两份，一份在伴生类上，一份在外层类上。任何对该成员的反射查找都会看到两份副本。遍历类层级的工具（Hilt 式依赖注入、mock 生成器、运行时注解扫描器）都必须应付这种重复。</p>
+<p><strong>默认参数</strong>。详见 <code>@JvmOverloads</code> 小节。永久冻结的后果有两部分：在公开 Kotlin 函数中重排参数会悄悄弄坏此前合成的那些重载；事后再加 <code>@JvmOverloads</code>（或去掉它）会改变重载集合的大小。</p>
+<p>还有一个与演进相关的顾虑。即便在 Kotlin 内部，在既有函数的<em>末尾</em>新增一个带默认值的参数是源码兼容的，却不一定总是二进制兼容。原因在于合成的 <code>$default</code> 辅助方法接收一个位掩码，而位掩码的宽度取决于参数个数：某个函数一旦跨过 kotlinc 内部的宽度阈值，其 <code>$default</code> 合成形状就会改变，并要求所有调用方重新编译。Java 没有等价物；你要么新增一个重载，要么不新增。</p>
+<p><strong>内联类/值类</strong>。详见值类小节。改写方案取决于 kotlinc。每个接收或返回值类的方法，其推断出的 JVM 签名是一个哈希，而不是稳定的字符串。对公开 API 而言，整套改写纪律都得被宣布为一条 kotlinc 无法演进的二进制契约。</p>
+<p>还有二阶顾虑：值类在某些调用边界“拆箱”，在另一些边界“装箱”，而精确的拆箱规则同样是 kotlinc 的生成决策，会影响 Java 调用方所看到的 JVM 签名。这些规则决定 <code>UserId</code> 何时以 <code>long</code> 传递、何时以对象引用传递。</p>
+<p><strong>类型别名</strong>。Kotlin 类型别名只存在于源码层。<code>typealias UserId = Long</code> 在 JVM 层解析为 <code>Long</code>，对签名没有影响。它们在内部 Kotlin 中完全安全，在公开边界也同样安全——<em>前提是</em> metalava 被教会先展开它们再输出 <code>current.txt</code>。今天 metalava 对它消费的 Kotlin 源码就是这么做的。风险纯粹在工具层面。</p>
+<p>另一面是，类型别名不会把自己的身份带进 API。两个解析到同一底层类型的类型别名，在 JVM 层无法区分。因此 <code>current.txt</code> 永远只能显示解析后的类型，而不是源码作者使用的别名。对一个把命名本身视为契约一部分的公开 API 而言，这只是一份必须在 API 边界被压平掉的源码层雅致。</p>
+<p><strong><code>suspend</code> 函数</strong>。详见 suspend 小节。<code>Continuation</code> 参数与 <code>Object</code> 擦除返回类型，编码了 kotlinc 对协程降级方式的选择。对冻结的公开 API 而言，这种降级方式得变成一份契约。</p>
+<p>这种降级还把公开 API 与协程运行时纠缠在一起。<code>Continuation</code> 接口住在 <code>kotlin.coroutines</code> 里，但真正的协程机器（dispatcher、context、取消、结构化并发）住在另一个库 <code>kotlinx.coroutines</code> 中。那个库有自己的版本节奏，也不属于引导类路径。一个公开的 <code>suspend</code> API 将不得不三选一：声明哪个协程运行时是隐含契约、自带一份运行时，还是保持不可知。这三个都是不平凡的决定。</p>
+<p><strong>可空性注解</strong>。Kotlin 的 <code>T?</code> 与 <code>T</code> 会以 <code>@Nullable</code>/<code>@NonNull</code> 注解的形式反映在 JVM 方法签名上（通常是 JetBrains 的 <code>org.jetbrains.annotations.Nullable</code> 与 <code>.NotNull</code>）。对 Java 调用方而言，这些注解只是提示性的——有没有它们，字节码签名都相同。对消费 Java API 的 Kotlin 调用方而言，注解很重要：它们决定 Kotlin 推断出的是 <code>T</code> 还是 <code>T?</code>。</p>
+<p>公开框架的 Java 用隐藏的平台注解 <code>android.annotation.NonNull</code>/<code>android.annotation.Nullable</code> 表达同样的意图，metalava 会把它投影成生成桩里的 androidx 风格注解。迁移到 Kotlin 源码，要么显式保留这些注解，要么依赖 kotlinc 生成 JetBrains 风格的注解。无论哪种，框架的可空性叙事都得声明哪个注解命名空间才是契约。还有一层更安静的顾虑，关乎 <code>platform types</code>：当 Kotlin 代码消费一个未标注可空性的 Java API 时，参数或返回类型会变成“平台类型”，没有编译期空检查。反过来——从 Java 消费一个 Kotlin 公开 API——可空性信息会完全消失，除非 metalava 被教会把它投影成 Java 可调用的注解。</p>
+<p><strong>Sealed 类与 sealed 接口</strong>。Kotlin 的 <code>sealed</code> 类把子类化限制在同一文件或模块中声明的一组已知类型。字节码会用 <code>kotlin.Metadata</code> 标记给该类打上记号，Kotlin 的穷尽式 <code>when</code> 检查就依赖它。从 Java 的角度，这种封存在语言层面不可见：只要 JVM 没有强制执行源码层的子类限制，Java 调用方就能扩展这个 sealed 类。</p>
+<p>kotlinc 只在以 JVM 17+ 为目标时才生成 JVM 的 <code>PermittedSubclasses</code> 属性。因此一个公开 Kotlin sealed 类的强制下限取决于 kotlinc 的目标版本，而目标版本本身就是一条冻结轴。公开的 Kotlin sealed 类将不得不承诺一套特定的封存语义，使其能在整个 SDK 生命周期内同时对 Kotlin 与 Java 消费者成立。</p>
+<p><strong>扩展函数</strong>。Kotlin 扩展函数——<code>fun String.lastSegment(): String</code>——会编译成一个静态方法，第一个参数是接收者。包含该静态方法的类以源文件命名（默认是 <code>UtilsKt</code>）。对 Java 调用方而言，扩展函数只是一个合成类上的静态方法；对 Kotlin 调用方而言，它可通过接收者上的点号写法到达。</p>
+<p>往框架里加一个公开扩展函数，会在一个新建（或既有）的 Kt 类上多出一个静态方法；删掉它就是删掉这个方法。扩展位于哪个文件、接收者是第一个还是最后一个参数——这些选择全都在 <code>current.txt</code> 中可见。</p>
+<p>在所有这些情形里，特性在内部很好用，对外部则构成约束。反复出现的主题与 ABI 一节所述相同：Kotlin 的源码层抽象比 Java 更丰富，这份丰富性的代价在编译期付出——一条声明被映射成<em>一整套</em> JVM 生成物，而这套生成物的确切组成取决于编译器。一个永久冻结的面，需要其中每一件生成物都能被单独命名、单独引用，并在未来每一次编译器升级中单独得以保留。</p>
+<h2 id="若要采用需要哪些前置条件">若要采用，需要哪些前置条件</h2>
+<p>这是一份约束的快照，不是路线图。假如 AOSP 项目决定允许 Kotlin 出现在公开框架 API 面上，下面这份清单记录了届时需要就位的东西。各项按依赖顺序排列：后一项都以前一项为前提。</p>
+<ol>
+<li>
+<p><strong>一个被宣布为二进制契约的稳定 Kotlin 元数据格式。</strong> 嵌入每个 Kotlin class 文件的 <code>kotlin.Metadata</code> 注解编码了源码层形状（sealed 层级、可空性、默认值、suspend 降级方式），供 Kotlin 反射与工具链消费。今天这个格式是有版本的，且与 kotlinc 耦合。Kotlin 社区已通过 KEEP（Kotlin Evolution and Enhancement Process）提案讨论过二进制稳定性。</p>
+<p>AOSP 若要消费公开面上的 Kotlin，该元数据格式就必须成为一份已声明的、对外有版本的二进制契约。这份契约需要明确的向后与向前兼容保证，还需要一套与 AOSP 十年时限匹配的弃用政策。当前按 <code>kotlin.Metadata</code> 版本划分的兼容行为是“第 N 版 kotlinc 能读取第 N-K 版 kotlinc 的元数据，K 有界”。这个界限对频繁重编译的 Gradle 驱动的 Kotlin 项目够用，但对十年不够用。</p>
+</li>
+<li>
+<p><strong>一条面向平台面、能识别 Kotlin 的 metalava 管线。</strong> <code>tools/metalava/FORMAT.md</code> 定义的签名格式已经有表达 Kotlin 修饰符（<code>sealed</code>、<code>inline</code>、<code>value</code>、<code>suspend</code>、<code>data</code>、<code>operator</code>、<code>infix</code>）、Kotlin 属性与默认参数的语法。这套语法是为源码为 Kotlin 的 androidx 签名文件而建；<code>tools/metalava/metalava-model-text/</code> 的文本模型今天就能解析这些词法单位。不存在的，是它们在平台 SDK 面上的采用。</p>
+<p>平台 <code>current.txt</code> 是 <code>style=java</code>。在那里接纳每一种 Kotlin 构造，本身都是一个 API 设计问题。语法必须能经文本模型往返，并在未来 kotlinc 演进中存活；它还必须补上格式中仍有的空缺（<code>companion object</code> 形状、把可空性作为一等契约）。<code>tools/metalava/metalava/src/main/.../ComparisonVisitor.kt</code> 中的比较逻辑需要规则，来判断哪些 Kotlin 特有的改动构成破坏性差异。今天 metalava 通过其 PSI 模型（<code>tools/metalava/metalava-model-psi/</code>）读取 Kotlin 源码，但为平台输出的是 Java 投影签名。</p>
+</li>
+<li>
+<p><strong>一套跟踪 Kotlin 描述符的隐藏 API 执行机制。</strong> <code>out/soong/hiddenapi/hiddenapi-flags.csv</code> 用的是裸 JVM 描述符。Kotlin 类早已以 kotlinc 生成的形状出现在其中，但按源码特性的一对多关系（一条 <code>@JvmOverloads</code> 声明产生 N 行描述符）让按源码做策略变得难以表达。</p>
+<p>一个描述符级的 CSV 需要一个更高级别的伴生物，把“源码声明 X 属于公开 API”映射到“JVM 描述符 {d1, d2, …, dN} 必须全部被一致地打上标记”。没有它，改动某个 Kotlin 公开 API 的作者就无法轻松确认：由此产生的所有描述符都落进了正确的隐藏 API 类别。</p>
+</li>
+<li>
+<p><strong>更新后的文档工具链。</strong> Dackka（Google 能识别 Kotlin 的文档工具，用于 AndroidX，但未入库 AOSP）今天就能理解 Kotlin 源码。但平台参考文档需要一套共享模型，在这套模型里，Kotlin 源码层视图与 Java 的 JVM 投影视图都是第一等的。</p>
+<p>使用 Java 工具面对 Kotlin 平台 API 的应用开发者，必须看到连贯的 Javadoc；使用 Kotlin 工具的应用开发者，必须看到源码层 Kotlin 签名。当前模型假定底层 API 是 Java 形状的。真正双语化的 API 面，意味着双语化的文档，工具链必须理解这一点。例如，一个 Kotlin <code>data class</code> 从 Kotlin 视角应以其源码层字段呈现，从 Java 视角则应以其合成的 <code>componentN</code> 方法呈现。</p>
+</li>
+<li>
+<p><strong>API 委员会对命名约定规则的裁定。</strong> <code>tools/metalava/API-LINT.md</code> 中的 lint 规则是按 Java 命名约定校准的（<code>is</code>/<code>get</code> 访问器配对、复数形式的集合方法、<code>setOnXxxListener</code> 回调注册模式）。Kotlin 惯用法——属性语法、操作符重载、infix 函数、扩展函数——需要明确的接受或拒绝规则，并由 API 委员会作为政策批准。规则还须与 Java 可调用投影相组合：公开类上的一个 Kotlin <code>var</code> 会编译成 <code>getX</code>/<code>setX</code> 两个 Java 访问器，但规则条文必须说明，究竟是以 Kotlin 源码用 <code>var</code>、以 Java 访问器名，还是两者兼有作为规范契约。</p>
+</li>
+<li>
+<p><strong>kotlinc 发布与 AOSP 节奏的对齐。</strong> 需要这样一个 kotlinc 版本：框架可以采用它，而在任何公开类上都观察不到签名位移。这是最强的约束，因为它把两个独立组织的发布周期绑在了一起。AOSP 大约每年切一次大版本 SDK；kotlinc 的发布列车更快，且与 SDK 边界不对齐。</p>
+<p>实际的缓解办法是声明“每个公开 API 面绑定一个冻结的 kotlinc 版本”，相当于 Kotlin 版的 <code>LOCAL_SDK_VERSION</code>。这样每个发布的 SDK 都绑定到产出其签名的那个 kotlinc。实现这一点需要 Soong 的机制：跟踪哪个 kotlinc 编译了哪份 <code>current.txt</code>，并对下游 Mainline 模块强制执行该绑定。</p>
+</li>
+<li>
+<p><strong>用于迁移与审计的工具。</strong> 即便上述各项全部就位，AOSP 项目还要面对一次性的迁移成本。每个被提议 Kotlin 化的既有 Java 公开 API 类，都需要一场并排审计，确认这些源码声明经新的 Kotlin 感知 metalava 处理后，产生的 <code>current.txt</code> 条目前与 Java 源码完全一致。凡是条目有差异之处，就是一次二进制断裂。这样的审计工具今天并不存在。</p>
+</li>
+<li>
+<p><strong>为 <code>suspend</code> API 决定协程运行时。</strong> 正如“最难用于公开面的那些 Kotlin 特性”所述，公开的 <code>suspend</code> API 会把消费者绑定到某个协程运行时上。AOSP 将不得不在三个选项中选一个：选项（a）是把 <code>kotlinx.coroutines</code> 声明为冻结的平台库，并承担随之而来的全部二进制稳定性；选项（b）是自带一套最小协程运行时；选项（c）是在公开面上彻底避开 <code>suspend</code>。</p>
+<p>每个选项都是一份为期多年的承诺。</p>
+</li>
+</ol>
+<p>这份清单是从今天的 AOSP 树内部所能看到的约束快照。它不是对这些问题将如何（或是否会）被解决的预测，也不是在倡导启动其中任何一项。</p>
+<h2 id="动手试试">动手试试</h2>
+<p>下面五个练习让你在真实的 AOSP 检出上验证本附录的论断。每个练习都使用可从 AOSP 根目录运行的命令。</p>
+<h3 id="练习-c-1清点平台树中的-kotlin">练习 C-1：清点平台树中的 Kotlin</h3>
+<p>本附录开头那张不对称表，是统计选定路径下 <code>.kt</code> 文件数得出的。运行同样的 <code>find</code> 命令，在你本地的树里确认这些数字，然后与本文的清点表对比。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79B8FF">cd</span><span style="color:#E1E4E8"> $AOSP</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">echo</span><span style="color:#9ECBFF"> "frameworks/base/services Kotlin: $(</span><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> frameworks/base/services </span><span style="color:#79B8FF">-name</span><span style="color:#9ECBFF"> '*.kt' </span><span style="color:#F97583">|</span><span style="color:#B392F0"> wc</span><span style="color:#79B8FF"> -l</span><span style="color:#9ECBFF">)"</span></span>
+<span class="line"><span style="color:#79B8FF">echo</span><span style="color:#9ECBFF"> "frameworks/base/core Kotlin:     $(</span><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> frameworks/base/core </span><span style="color:#79B8FF">-name</span><span style="color:#9ECBFF"> '*.kt' </span><span style="color:#F97583">|</span><span style="color:#B392F0"> wc</span><span style="color:#79B8FF"> -l</span><span style="color:#9ECBFF">)"</span></span>
+<span class="line"><span style="color:#79B8FF">echo</span><span style="color:#9ECBFF"> "packages/SystemUI Kotlin:        $(</span><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> frameworks/base/packages/SystemUI </span><span style="color:#79B8FF">-name</span><span style="color:#9ECBFF"> '*.kt' </span><span style="color:#F97583">|</span><span style="color:#B392F0"> wc</span><span style="color:#79B8FF"> -l</span><span style="color:#9ECBFF">)"</span></span>
+<span class="line"><span style="color:#79B8FF">echo</span><span style="color:#9ECBFF"> "packages/apps/Settings Kotlin:   $(</span><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> packages/apps/Settings </span><span style="color:#79B8FF">-name</span><span style="color:#9ECBFF"> '*.kt' </span><span style="color:#F97583">|</span><span style="color:#B392F0"> wc</span><span style="color:#79B8FF"> -l</span><span style="color:#9ECBFF">)"</span></span>
+<span class="line"><span style="color:#79B8FF">echo</span><span style="color:#9ECBFF"> "packages/apps/Launcher3 Kotlin:  $(</span><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> packages/apps/Launcher3 </span><span style="color:#79B8FF">-name</span><span style="color:#9ECBFF"> '*.kt' </span><span style="color:#F97583">|</span><span style="color:#B392F0"> wc</span><span style="color:#79B8FF"> -l</span><span style="color:#9ECBFF">)"</span></span>
+<span class="line"><span style="color:#79B8FF">echo</span><span style="color:#9ECBFF"> "cts Kotlin:                      $(</span><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> cts </span><span style="color:#79B8FF">-name</span><span style="color:#9ECBFF"> '*.kt' </span><span style="color:#F97583">|</span><span style="color:#B392F0"> wc</span><span style="color:#79B8FF"> -l</span><span style="color:#9ECBFF">)"</span></span>
+<span class="line"><span style="color:#79B8FF">echo</span><span style="color:#9ECBFF"> "frameworks/base total Kotlin:    $(</span><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> frameworks/base </span><span style="color:#79B8FF">-name</span><span style="color:#9ECBFF"> '*.kt' </span><span style="color:#F97583">|</span><span style="color:#B392F0"> wc</span><span style="color:#79B8FF"> -l</span><span style="color:#9ECBFF">)"</span></span>
+<span class="line"><span style="color:#79B8FF">echo</span><span style="color:#9ECBFF"> "frameworks/base total Java:      $(</span><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> frameworks/base </span><span style="color:#79B8FF">-name</span><span style="color:#9ECBFF"> '*.java' </span><span style="color:#F97583">|</span><span style="color:#B392F0"> wc</span><span style="color:#79B8FF"> -l</span><span style="color:#9ECBFF">)"</span></span></code></pre>
+<p><strong>预期输出</strong>：与表中同一数量级的数字。相对于 Java 总量，<code>frameworks/base/core</code> 与 <code>frameworks/base/services</code> 都显得很小。确切计数会随树的演进而漂移。</p>
+<h3 id="练习-c-2查看一个公开-api-签名文件">练习 C-2：查看一个公开 API 签名文件</h3>
+<p>打开 <code>frameworks/base/core/api/current.txt</code> 看它的结构。它很大，请用分页器。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79B8FF">cd</span><span style="color:#E1E4E8"> $AOSP</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Header</span></span>
+<span class="line"><span style="color:#B392F0">head</span><span style="color:#79B8FF"> -5</span><span style="color:#9ECBFF"> frameworks/base/core/api/current.txt</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Find a class entry</span></span>
+<span class="line"><span style="color:#B392F0">grep</span><span style="color:#79B8FF"> -n</span><span style="color:#9ECBFF"> 'public class Activity '</span><span style="color:#9ECBFF"> frameworks/base/core/api/current.txt</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Locate the Java source for that class</span></span>
+<span class="line"><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> frameworks/base/core</span><span style="color:#79B8FF"> -name</span><span style="color:#9ECBFF"> 'Activity.java'</span><span style="color:#79B8FF"> -path</span><span style="color:#9ECBFF"> '*/java/android/app/*'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Confirm the file is Java</span></span>
+<span class="line"><span style="color:#B392F0">head</span><span style="color:#79B8FF"> -3</span><span style="color:#9ECBFF"> frameworks/base/core/java/android/app/Activity.java</span></span></code></pre>
+<p><strong>要观察什么</strong>：签名文件以 <code>// Signature format: 6.0</code> 开头，接着一行 <code>// - style=java</code> 标记，然后是 <code>package android {</code>。每个类都以 Java 风格的语法描述。<code>Activity.java</code> 源文件应当存在于 <code>frameworks/base/core/java/android/app/Activity.java</code>，并且是 Java 而非 Kotlin。（注意，<code>android.Manifest</code> 虽在 <code>current.txt</code> 顶部附近也有一条目，却根本没有入库的源文件：aapt2 在构建时依据 <code>frameworks/base/core/res/AndroidManifest.xml</code> 中的权限声明生成它。）</p>
+<h3 id="练习-c-3追踪一个-kotlin-实现的服务如何跨-binder">练习 C-3：追踪一个 Kotlin 实现的服务如何跨 binder</h3>
+<p><code>AccessCheckingService</code> 是平台中少数几个生产用 Kotlin 服务之一。请确认：尽管其源码是 Kotlin，它向其他系统代码呈现的契约仍然是 Java 形状。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79B8FF">cd</span><span style="color:#E1E4E8"> $AOSP</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># The Kotlin source</span></span>
+<span class="line"><span style="color:#B392F0">ls</span><span style="color:#79B8FF"> -l</span><span style="color:#9ECBFF"> frameworks/base/services/permission/java/com/android/server/permission/access/AccessCheckingService.kt</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Confirm it extends SystemService</span></span>
+<span class="line"><span style="color:#B392F0">grep</span><span style="color:#79B8FF"> -n</span><span style="color:#9ECBFF"> 'class AccessCheckingService'</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#9ECBFF">    frameworks/base/services/permission/java/com/android/server/permission/access/AccessCheckingService.kt</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># The Java interfaces it registers with LocalServices</span></span>
+<span class="line"><span style="color:#B392F0">grep</span><span style="color:#79B8FF"> -rn</span><span style="color:#9ECBFF"> 'PermissionManagerServiceInterface\|AppOpsCheckingServiceInterface'</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#9ECBFF">    frameworks/base/services/permission/java/com/android/server/permission/access/AccessCheckingService.kt</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Find the AIDL definition for the binder surface</span></span>
+<span class="line"><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> frameworks/base</span><span style="color:#79B8FF"> -name</span><span style="color:#9ECBFF"> 'IPermissionManager.aidl'</span></span></code></pre>
+<p><strong>要观察什么</strong>：<code>AccessCheckingService</code> 继承 Java 的 <code>SystemService</code> 基类，并注册 Java 接口。与之对应的 binder 面定义在一个编译成 Java 桩的 <code>.aidl</code> 文件中。Kotlin 实现从不以 Kotlin 的身份跨越进程边界。</p>
+<h3 id="练习-c-4在-aosp-中找-jvmstatic--jvmoverloads">练习 C-4：在 AOSP 中找 <code>@JvmStatic</code> / <code>@JvmOverloads</code></h3>
+<p>这两个注解的存在，是为了让 Kotlin 代码可被 Java 调用。生产框架代码很少需要它们，因为生产用 Kotlin 是向 Java 调用（而不是反过来）。在树中搜索，验证这一模式。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79B8FF">cd</span><span style="color:#E1E4E8"> $AOSP</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Where does @JvmStatic appear in services?</span></span>
+<span class="line"><span style="color:#B392F0">grep</span><span style="color:#79B8FF"> -rln</span><span style="color:#9ECBFF"> '@JvmStatic'</span><span style="color:#9ECBFF"> frameworks/base/services/</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> head</span><span style="color:#79B8FF"> -10</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Where does @JvmOverloads appear in services?</span></span>
+<span class="line"><span style="color:#B392F0">grep</span><span style="color:#79B8FF"> -rln</span><span style="color:#9ECBFF"> '@JvmOverloads'</span><span style="color:#9ECBFF"> frameworks/base/services/</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> head</span><span style="color:#79B8FF"> -10</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Same searches scoped to production (non-test) code only</span></span>
+<span class="line"><span style="color:#B392F0">grep</span><span style="color:#79B8FF"> -rln</span><span style="color:#9ECBFF"> '@JvmStatic'</span><span style="color:#9ECBFF"> frameworks/base/services/</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> grep</span><span style="color:#79B8FF"> -v</span><span style="color:#9ECBFF"> '/tests/'</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> head</span><span style="color:#79B8FF"> -10</span></span>
+<span class="line"><span style="color:#B392F0">grep</span><span style="color:#79B8FF"> -rln</span><span style="color:#9ECBFF"> '@JvmOverloads'</span><span style="color:#9ECBFF"> frameworks/base/services/</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> grep</span><span style="color:#79B8FF"> -v</span><span style="color:#9ECBFF"> '/tests/'</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> head</span><span style="color:#79B8FF"> -10</span></span></code></pre>
+<p><strong>要观察什么</strong>：前两次搜索的每一处命中都在 <code>tests/</code> 子目录内，第三、第四次搜索没有结果。结论是：AOSP 的服务 Kotlin 是单向的、从 Kotlin 到 Java，不需要把自己投影回 Java 可调用的形状。这就是 <code>@JvmStatic</code> 与 <code>@JvmOverloads</code> 在生产代码中缺席的原因。而一个公开 API 会在处处需要这些注解，并且不得不永久承诺它们的生成形状。</p>
+<h3 id="练习-c-5查看-metalava">练习 C-5：查看 metalava</h3>
+<p>Metalava 是定义公开 API 契约的工具。读它的顶层布局、格式规范与兼容性文档。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79B8FF">cd</span><span style="color:#E1E4E8"> $AOSP</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Top-level layout</span></span>
+<span class="line"><span style="color:#B392F0">ls</span><span style="color:#9ECBFF"> tools/metalava/</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Main readme</span></span>
+<span class="line"><span style="color:#B392F0">head</span><span style="color:#79B8FF"> -40</span><span style="color:#9ECBFF"> tools/metalava/README.md</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Format spec for current.txt</span></span>
+<span class="line"><span style="color:#B392F0">wc</span><span style="color:#79B8FF"> -l</span><span style="color:#9ECBFF"> tools/metalava/FORMAT.md</span></span>
+<span class="line"><span style="color:#B392F0">head</span><span style="color:#79B8FF"> -40</span><span style="color:#9ECBFF"> tools/metalava/FORMAT.md</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Compatibility policy</span></span>
+<span class="line"><span style="color:#B392F0">head</span><span style="color:#79B8FF"> -40</span><span style="color:#9ECBFF"> tools/metalava/COMPATIBILITY.md</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># API lint rules</span></span>
+<span class="line"><span style="color:#B392F0">head</span><span style="color:#79B8FF"> -40</span><span style="color:#9ECBFF"> tools/metalava/API-LINT.md</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Module count</span></span>
+<span class="line"><span style="color:#B392F0">ls</span><span style="color:#79B8FF"> -d</span><span style="color:#9ECBFF"> tools/metalava/metalava-</span><span style="color:#79B8FF">*</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> wc</span><span style="color:#79B8FF"> -l</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Total Kotlin source size of the tool itself</span></span>
+<span class="line"><span style="color:#B392F0">find</span><span style="color:#9ECBFF"> tools/metalava</span><span style="color:#79B8FF"> -name</span><span style="color:#9ECBFF"> '*.kt'</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> wc</span><span style="color:#79B8FF"> -l</span></span></code></pre>
+<p><strong>要观察什么</strong>：这个工具本身就是 Kotlin（<code>.kt</code> 计数应在大约 800）。<code>FORMAT.md</code> 含“Support Kotlin Modifiers”与“Support Default Values”两节，那是为 androidx 签名文件而建的 Kotlin 专用语法；而平台的 <code>current.txt</code> 是 <code>style=java</code>，一点都没用到。兼容性政策是判断“能否改动 <code>current.txt</code>”的关卡，它并没有一条单独的 Kotlin 轨道。模块清单（<code>metalava-*</code> 目录）则展示语言前端与文本模型。把 metalava 作为工具运行需要已构建的二进制，不在本练习范围内。</p>
+<h2 id="小结">小结</h2>
+<p>Kotlin 在 AOSP 内部的角色与它在公开 API 面上的缺席之间这种不对称，不是风格偏好，而是四条约束的后果。这四条都作用于同一件产物：<code>prebuilts/sdk/&lt;N&gt;/public/api/android.txt</code> 中按 SDK 冻结的签名快照，及其活源 <code>frameworks/base/core/api/current.txt</code>。</p>
+<p>第一条约束是契约的寿命。在用设备会在一个固定的 SDK 级别上停留十年中的大部分时间。<code>current.txt</code> 中的每个签名，都必须在这段寿命内跨每一个 kotlinc 版本、每一次 Kotlin 元数据格式修订、每一处标准库变化保持兼容。内部 Kotlin 没有可比拟的寿命约束——编译器生成签名的任何变化，都会被下一次构建时的重编译吸收掉。</p>
+<p>第二条约束是二进制映射。Java 源码声明与 JVM 签名是一对一映射；Kotlin 源码声明映射为一整套 JVM 生成物，其组成取决于编译器。这些生成物是重载、改写过的名字、伴生访问器、合成辅助方法、<code>Continuation</code> 参数以及元数据块。要冻结这套集合，就得逐件独立地冻结。“Java/Kotlin ABI 差距”一节走过了这种一对多关系显现的八类特性，每一类各自都是一个冻结问题。</p>
+<p>第三条约束是工具链。Metalava、隐藏 API 执行、Doclava、jarjar，以及 <code>@SystemApi</code>/<code>@UnsupportedAppUsage</code> 注解管线，全部工作在 JVM 描述符之上。它们消费 Kotlin 源码（metalava 能读），但产出的是语言中立、JVM 形状的契约——<code>current.txt</code> 文本、描述符 CSV、Javadoc HTML。一个 Kotlin 形状的公开 API，需要并行的工具链来把 Kotlin 构造接纳为一等公民。工具链本身并不反对 Kotlin，它只是还没有把 Kotlin 源码层建模出来。</p>
+<p>第四条约束是运行时共享。框架 jar 被加载进一条唯一的引导类路径，与从 zygote fork 出来的每个应用进程共享。父优先的类加载器委派意味着 BOOTCLASSPATH 中的任何类型都胜过应用 APK 中的同名类型。把 Kotlin 签名放到公开 API 上，会迫使 <code>kotlin-stdlib</code> 进入引导类路径，进而覆盖每个应用 Gradle 构建所打包的那个 <code>kotlin-stdlib</code> 版本。</p>
+<p>OEM 无法从设备镜像内部解决这一点，应用开发者也无法从 APK 内部解决。唯一的出路是 WebView 式的、按进程的 zygote 隔离，而 AOSP 今天只在一个理由充分的场景里付出这笔代价。</p>
+<p>结果就是清点表所显示的样子：Kotlin 存在于应用与 UI 层、测试代码（包括 <code>frameworks/base/core/</code> 下全部 Kotlin）、metalava 自身，以及权限子系统。它不出现在 <code>current.txt</code> 中，因为把它放进去的代价，至今还没有被完整偿付。</p>
+<h2 id="关键源文件参考">关键源文件参考</h2>
+<table>
+<thead>
+<tr>
+<th>路径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tools/metalava/</code></td>
+<td>签名工具。本身是 Kotlin（784 个 .kt 文件）；输出与语言无关的签名文本。</td>
+</tr>
+<tr>
+<td><code>tools/metalava/FORMAT.md</code></td>
+<td><code>current.txt</code> 文本格式的规范。</td>
+</tr>
+<tr>
+<td><code>tools/metalava/COMPATIBILITY.md</code></td>
+<td>metalava 在签名漂移上执行的兼容性政策。</td>
+</tr>
+<tr>
+<td><code>tools/metalava/API-LINT.md</code></td>
+<td>API lint 规则文档。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/api/current.txt</code></td>
+<td>公开 API 签名快照（<code>android.*</code>）。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/api/current.txt</code></td>
+<td>系统服务的 API 面。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/api/</code></td>
+<td>编排签名生成的构建逻辑（<code>api.go</code>、<code>Android.bp</code>、<code>StubLibraries.bp</code>、<code>ApiDocs.bp</code>）。</td>
+</tr>
+<tr>
+<td><code>prebuilts/sdk/&lt;N&gt;/public/api/android.txt</code></td>
+<td>SDK 级别 N 的冻结公开 API 签名（例如 <code>prebuilts/sdk/34/public/api/android.txt</code>）。</td>
+</tr>
+<tr>
+<td><code>prebuilts/sdk/&lt;N&gt;/public/android.jar</code></td>
+<td>应用在 SDK 级别 N 编译所依赖的冻结桩 jar。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/boot/hiddenapi/hiddenapi-unsupported.txt</code></td>
+<td>源清单：unsupported（原 greylist）成员——可访问但会受警告。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/boot/hiddenapi/hiddenapi-unsupported-packages.txt</code></td>
+<td>源清单：整个包归入 unsupported 类别。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/boot/hiddenapi/hiddenapi-max-target-o.txt</code></td>
+<td>源黑名单：O 及更早的旧式 API。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/boot/hiddenapi/hiddenapi-max-target-p.txt</code></td>
+<td>源黑名单：P 及更早的 API。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/boot/hiddenapi/hiddenapi-max-target-q.txt</code></td>
+<td>源黑名单：Q 及更早的 API。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/boot/hiddenapi/hiddenapi-max-target-r-loprio.txt</code></td>
+<td>源黑名单：R 及更早的 API（低优先级）。</td>
+</tr>
+<tr>
+<td><code>out/soong/hiddenapi/hiddenapi-flags.csv</code></td>
+<td>生成的描述符执行表。</td>
+</tr>
+<tr>
+<td><code>prebuilts/runtime/appcompat/hiddenapi-flags.csv</code></td>
+<td>供宿主侧 veridex/<code>appcompat.sh</code> APK 扫描器使用的预置描述符表（约 51 MB）。</td>
+</tr>
+<tr>
+<td><code>build/soong/java/kotlin.go</code></td>
+<td>Soong 的 kotlinc Ninja 规则（编译、快照、增量）。</td>
+</tr>
+<tr>
+<td><code>build/soong/java/kotlin_test.go</code></td>
+<td>kotlinc 规则的单元测试。</td>
+</tr>
+<tr>
+<td><code>build/soong/java/config/kotlin.go</code></td>
+<td>Soong 配置：kotlinc 二进制路径、插件、禁用标志。</td>
+</tr>
+<tr>
+<td><code>external/kotlinc/</code></td>
+<td>钉死的预置 kotlinc。</td>
+</tr>
+<tr>
+<td><code>external/kotlinc/build.txt</code></td>
+<td>钉死的 kotlinc 版本戳（<code>2.2.0-custom-branch-22</code>）。</td>
+</tr>
+<tr>
+<td><code>external/kotlinc/bin/kotlinc</code></td>
+<td>kotlinc 二进制。</td>
+</tr>
+<tr>
+<td><code>external/kotlinc/lib/kotlin-stdlib.jar</code></td>
+<td>Kotlin 标准库预置产物；今天是非 boot 依赖（没有引导类路径 jar 链接它）。</td>
+</tr>
+<tr>
+<td><code>external/kotlinc/Android.bp</code></td>
+<td><code>kotlin-stdlib</code> 的 <code>java_import</code> 声明（第 59 行）。</td>
+</tr>
+<tr>
+<td><code>build/make/target/product/default_art_config.mk</code></td>
+<td><code>PRODUCT_BOOT_JARS</code> 的默认组成（第 38 行）。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</code></td>
+<td><code>preloadClasses()</code> 读取 <code>/system/etc/preloaded-classes</code>（第 284 行）。</td>
+</tr>
+<tr>
+<td><code>libcore/dalvik/src/main/java/dalvik/system/PathClassLoader.java</code></td>
+<td>应用类加载器；其父为引导类加载器（第 44 行）。</td>
+</tr>
+<tr>
+<td><code>libcore/ojluni/src/main/java/java/lang/ClassLoader.java</code></td>
+<td><code>loadClass()</code> 的父优先委派（第 622 行）。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/core/java/android/webkit/WebViewZygote.java</code></td>
+<td>把 WebView 类加载器与主类加载器隔离的独立 zygote（第 32 行）。</td>
+</tr>
+<tr>
+<td><code>external/kotlinc/lib/kotlin-compiler.jar</code></td>
+<td>Kotlin 编译器 jar。</td>
+</tr>
+<tr>
+<td><code>external/kotlinc/lib/compose-compiler-plugin.jar</code></td>
+<td>Compose 编译器插件。</td>
+</tr>
+<tr>
+<td><code>external/kotlinc/lib/kotlin-annotation-processing.jar</code></td>
+<td>kapt（Kotlin 注解处理）。</td>
+</tr>
+<tr>
+<td><code>external/kotlinc/lib/jvm-abi-gen.jar</code></td>
+<td>JVM ABI 生成插件。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/permission/java/com/android/server/permission/access/AccessCheckingService.kt</code></td>
+<td>生产用 Kotlin 服务样例；继承 <code>SystemService</code>。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/permission/java/com/android/server/permission/access/AccessPolicy.kt</code></td>
+<td>策略层级样例；抽象 <code>SchemePolicy</code> 加具体子类。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/permission/java/com/android/server/permission/access/permission/Permission.kt</code></td>
+<td>带伴生对象的 <code>data class</code> 样例。</td>
+</tr>
+<tr>
+<td><code>frameworks/base/services/permission/java/com/android/server/permission/access/AccessPersistence.kt</code></td>
+<td>生产代码中 <code>companion object</code> 用法示例。</td>
+</tr>
+<tr>
+<td><code>system/apex/docs/README.md</code></td>
+<td>APEX/Mainline 二进制稳定性文档。</td>
+</tr>
+<tr>
+<td><code>system/apex/tests/README.md</code></td>
+<td>APEX 测试基础设施文档。</td>
+</tr>
+<tr>
+<td><code>system/apex/shim/README.md</code></td>
+<td>APEX shim 模块文档。</td>
+</tr>
+<tr>
+<td><code>build/soong/apex/apex.go</code></td>
+<td>Soong 主要的 APEX 模块定义。</td>
+</tr>
+<tr>
+<td><code>build/soong/android/apex.go</code></td>
+<td>跨领域的 APEX 工具。</td>
+</tr>
+</tbody>
+</table>
+</div></article></main></div><footer class="site-footer">&copy; 2026 qng-stack</footer><script type="module" src="/_astro/BlogPost.astro_astro_type_script_index_0_lang.Cz6GC1N3.js"></script></body></html>

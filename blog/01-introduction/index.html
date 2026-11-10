@@ -1,0 +1,2103 @@
+<!DOCTYPE html><html lang="zh-CN"><head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><script type="module" src="/_astro/BaseHead.astro_astro_type_script_index_0_lang.CIKiyBwV.js"></script><link rel="icon" href="/favicon.ico"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="qng-stack" href="https://qng-stack.github.io/rss.xml"><meta name="generator" content="Astro v7.4.5"><!-- Canonical URL --><link rel="canonical" href="https://qng-stack.github.io/blog/01-introduction/"><!-- Primary Meta Tags --><title>第1章：简介</title><meta name="description" content="Android 开源项目（AOSP）是人类历史上规模最大、复杂度最高、影响最为深远的开源项目之一。它支撑超过 30 亿台活跃设备，涵盖手机、平板、电视、汽车、可穿戴设备以及嵌入式系统。其代码仓库横跨数千个 Git 仓库，总代码行数达数亿行。整套架构将 C 语言编写的 Linux 内核与 Java/Kotlin 应..."><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://qng-stack.github.io/blog/01-introduction/"><meta property="og:title" content="第1章：简介"><meta property="og:description" content="Android 开源项目（AOSP）是人类历史上规模最大、复杂度最高、影响最为深远的开源项目之一。它支撑超过 30 亿台活跃设备，涵盖手机、平板、电视、汽车、可穿戴设备以及嵌入式系统。其代码仓库横跨数千个 Git 仓库，总代码行数达数亿行。整套架构将 C 语言编写的 Linux 内核与 Java/Kotlin 应..."><meta property="og:image" content="https://qng-stack.github.io/_astro/blog-placeholder-1.Bx0Zcyzv.jpg"><!-- Twitter --><meta name="twitter:card" content="summary_large_image"><link rel="stylesheet" href="/_astro/Header.BiL--6dQ.css"></head><body class="chapter-page"><header class="site-header"><div class="shell header-inner"><div class="header-start"><button class="outline-toggle" type="button" aria-expanded="false" aria-controls="chapter-outline"><span class="sr-only">本章目录</span><span class="outline-toggle-icon" aria-hidden="true"></span></button><a class="brand" href="/">qng-stack</a></div><div class="nav-links"><a href="/">首页</a><a href="/about">关于</a><a class="github-link" href="https://github.com/qng-stack" target="_blank"><span class="sr-only">qng-stack 的 GitHub</span><svg viewBox="0 0 16 16" aria-hidden="true" width="18" height="18"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg></a></div></div><div class="outline-backdrop"></div></header><div class="chapter-spread"><nav class="chapter-outline" id="chapter-outline" aria-label="本章标题"><p>本章</p><a href="#11-本书的创作目的" data-depth="2">1.1 本书的创作目的</a><a href="#12-aosp-与-android-的区别" data-depth="2">1.2 AOSP 与 Android 的区别</a><a href="#121-aosp开源基础底座" data-depth="3">1.2.1 AOSP：开源基础底座</a><a href="#122-google-移动服务-gms闭源组件层" data-depth="3">1.2.2 Google 移动服务 GMS：闭源组件层</a><a href="#123-oem-厂商层设备厂商定制" data-depth="3">1.2.3 OEM 厂商层：设备厂商定制</a><a href="#124-完整整体视图" data-depth="3">1.2.4 完整整体视图</a><a href="#125-aosp-许可证说明" data-depth="3">1.2.5 AOSP 许可证说明</a><a href="#13-aosp-分层蛋糕系统架构" data-depth="2">1.3 AOSP 分层蛋糕：系统架构</a><a href="#131-完整架构总图" data-depth="3">1.3.1 完整架构总图</a><a href="#132-第-1-层linux-内核" data-depth="3">1.3.2 第 1 层：Linux 内核</a><a href="#133-第-2-层硬件抽象层-hal" data-depth="3">1.3.3 第 2 层：硬件抽象层 HAL</a><a href="#134-第-3-层原生服务与原生库" data-depth="3">1.3.4 第 3 层：原生服务与原生库</a><a href="#134-第-4-层android-运行时-art" data-depth="3">1.3.4 第 4 层：Android 运行时 ART</a><a href="#136-第-5-层framework-系统服务system_server" data-depth="3">1.3.6 第 5 层：Framework 系统服务（system_server）</a><a href="#137-第-6-层framework-api-层" data-depth="3">1.3.7 第 6 层：Framework API 层</a><a href="#138-第-7-层应用层" data-depth="3">1.3.8 第 7 层：应用层</a><a href="#14-仓库结构完整指南" data-depth="2">1.4 仓库结构完整指南</a><a href="#141-运行时与核心库" data-depth="3">1.4.1 运行时与核心库</a><a href="#142-framework-框架" data-depth="3">1.4.2 Framework 框架</a><a href="#143-构建系统" data-depth="3">1.4.3 构建系统</a><a href="#144-平台与硬件相关" data-depth="3">1.4.4 平台与硬件相关</a><a href="#145-测试与开发工具" data-depth="3">1.4.5 测试与开发工具</a><a href="#146-external--第三方开源库" data-depth="3">1.4.6 external/ — 第三方开源库</a><a href="#147-out--编译输出目录" data-depth="3">1.4.7 out/ — 编译输出目录</a><a href="#15-各个角色维护分工" data-depth="2">1.5 各个角色维护分工</a><a href="#151-google-职责" data-depth="3">1.5.1 Google 职责</a><a href="#152-soc-芯片厂商职责高通联发科三星-lsigoogle-tensor展锐" data-depth="3">1.5.2 SoC 芯片厂商职责（高通、联发科、三星 LSI、Google Tensor、展锐）</a><a href="#153-oem-设备厂商职责三星小米oppo一加摩托罗拉索尼" data-depth="3">1.5.3 OEM 设备厂商职责（三星、小米、OPPO、一加、摩托罗拉、索尼）</a><a href="#154-开源社区贡献" data-depth="3">1.5.4 开源社区贡献</a><a href="#16-aosp-版本历史" data-depth="2">1.6 AOSP 版本历史</a><a href="#161-完整版本表" data-depth="3">1.6.1 完整版本表</a><a href="#17-开发者成长之路本书路线图" data-depth="2">1.7 开发者成长之路：本书路线图</a><a href="#171-阶段-1下载源码并编译" data-depth="3">1.7.1 阶段 1：下载源码并编译</a><a href="#172-阶段-2理解架构" data-depth="3">1.7.2 阶段 2：理解架构</a><a href="#173-阶段-3探索与调试" data-depth="3">1.7.3 阶段 3：探索与调试</a><a href="#174-阶段-4修改与开发" data-depth="3">1.7.4 阶段 4：修改与开发</a><a href="#175-阶段-5进阶与精通" data-depth="3">1.7.5 阶段 5：进阶与精通</a><a href="#176-追踪一次-api-调用的完整链路" data-depth="3">1.7.6 追踪一次 API 调用的完整链路</a><a href="#18-关键概念速查" data-depth="2">1.8 关键概念速查</a><a href="#181-binder" data-depth="3">1.8.1 Binder</a><a href="#182-hal硬件抽象层" data-depth="3">1.8.2 HAL（硬件抽象层）</a><a href="#183-aidlandroid-接口定义语言" data-depth="3">1.8.3 AIDL（Android 接口定义语言）</a><a href="#184-hidl硬件接口定义语言" data-depth="3">1.8.4 HIDL（硬件接口定义语言）</a><a href="#185-apexandroid-pony-express" data-depth="3">1.8.5 APEX（Android Pony EXpress）</a><a href="#186-mainline" data-depth="3">1.8.6 Mainline</a><a href="#187-artandroid-运行时" data-depth="3">1.8.7 ART（Android 运行时）</a><a href="#188-zygote" data-depth="3">1.8.8 Zygote</a><a href="#189-system_server" data-depth="3">1.8.9 system_server</a><a href="#1810-surfaceflinger" data-depth="3">1.8.10 SurfaceFlinger</a><a href="#1811-windowmanagerservicewms" data-depth="3">1.8.11 WindowManagerService（WMS）</a><a href="#1812-activitymanagerserviceams-activitytaskmanagerserviceatms" data-depth="3">1.8.12 ActivityManagerService（AMS）/ ActivityTaskManagerService（ATMS）</a><a href="#1813-packagemanagerservicepms" data-depth="3">1.8.13 PackageManagerService（PMS）</a><a href="#19-aosp-开发工具概览" data-depth="2">1.9 AOSP 开发工具概览</a><a href="#191-源码管理" data-depth="3">1.9.1 源码管理</a><a href="#192-编译工具" data-depth="3">1.9.2 编译工具</a><a href="#193-调试与分析" data-depth="3">1.9.3 调试与分析</a><a href="#194-设备工具" data-depth="3">1.9.4 设备工具</a><a href="#195-dumpsys-命令你的最佳帮手" data-depth="3">1.9.5 dumpsys 命令：你的最佳帮手</a><a href="#110-本书使用的约定" data-depth="2">1.10 本书使用的约定</a><a href="#1101-源码路径" data-depth="3">1.10.1 源码路径</a><a href="#1102-代码清单" data-depth="3">1.10.2 代码清单</a><a href="#1103-shell-命令" data-depth="3">1.10.3 Shell 命令</a><a href="#1104-mermaid-图表" data-depth="3">1.10.4 Mermaid 图表</a><a href="#1105-术语" data-depth="3">1.10.5 术语</a><a href="#1106-配合-ai-助手使用本书" data-depth="3">1.10.6 配合 AI 助手使用本书</a><a href="#111-延伸阅读" data-depth="2">1.11 延伸阅读</a><a href="#112-总结" data-depth="2">1.12 总结</a></nav><main><article><p class="article-kicker"><time datetime="2026-10-30T15:37:47.000Z">2026年10月30日</time></p><h1 class="article-title">第1章：简介</h1><div class="prose"><h1 id="第1章简介">第1章：简介</h1>
+<h2 id="11-本书的创作目的">1.1 本书的创作目的</h2>
+<p>Android 开源项目（AOSP）是人类历史上规模最大、复杂度最高、影响最为深远的开源项目之一。它支撑超过 30 亿台活跃设备，涵盖手机、平板、电视、汽车、可穿戴设备以及嵌入式系统。其代码仓库横跨数千个 Git 仓库，总代码行数达数亿行。整套架构将 C 语言编写的 Linux 内核与 Java/Kotlin 应用框架衔接起来；原生 C++ 服务、定制化 IPC 机制（Binder）以及专门设计的运行时（ART），充当二者之间的桥梁。</p>
+<p>然而，尽管 Android 应用无处不在，但即便是经验丰富的 Android 应用开发者，对 AOSP 的理解仍然比较浅薄。普通 Android 开发者只能通过 developer.android.com 文档记载的 SDK API 这一狭窄窗口接触 AOSP。在这些 API 之下，还存在各类系统服务、原生守护进程、硬件抽象层、内核驱动，以及把所有组件粘合在一起的构建系统。很少有开发者会深入这个领域，能够熟练驾驭这套代码的人更是凤毛麟角。</p>
+<p>本书旨在改变这一现状。</p>
+<p>本书面向多类读者：包括 OEM 厂商与芯片厂商中负责集成全新 SoC 的系统工程师；编译自定义系统固件的 ROM 开发者；开展平台分析的安全研究人员；还有充满好奇心的应用开发者——他们想知道调用 <code>startActivity()</code> 时底层究竟发生了什么。读完本书，你将具备阅读、理解、修改、编译以及调试 AOSP 所需要的全部知识。</p>
+<p>本书基于 <strong>Android 17</strong>——API 级别 37，内部代号 <strong>Cinnamon Bun</strong>（在 <code>frameworks/base/core/java/android/os/Build.java</code> 中定义 <code>VERSION_CODES.CINNAMON_BUN = 37</code>，该版本接续 <code>BAKLAVA = 36</code>）。书中引用源码均基于 AOSP <code>main</code> 开发主干分支（对外也发布为 <code>android17-release</code> 分支）2026 年年中的代码状态。对于 Android 17 新增或重构的子系统，书中会专门标注，并指引读者参考对应章节深入学习。</p>
+<p>本章作为全书开篇，会清晰定义 AOSP 是什么、不是什么；梳理从内核到应用的整套系统架构；逐目录讲解源码树；厘清各模块的维护责任；回顾平台版本演进历史，并介绍后续全书内容大纲。</p>
+<hr>
+<h2 id="12-aosp-与-android-的区别">1.2 AOSP 与 Android 的区别</h2>
+<p>日常经常混用“AOSP”和“Android”两个术语，但二者指代完全不同。当你基于源码进行平台开发，必须搞懂二者差异。</p>
+<h3 id="121-aosp开源基础底座">1.2.1 AOSP：开源基础底座</h3>
+<p><strong>AOSP 即 Android Open Source Project（Android 开源项目）</strong>，是 Google 基于 Apache 2.0 协议对外发布、可完整编译的开源操作系统。部分组件遵循 GPL、LGPL、BSD 协议。AOSP 包含如下内容：</p>
+<ul>
+<li><strong>Linux 内核</strong>（搭载 Android 专属补丁）</li>
+<li><strong>C 标准库</strong>（Bionic，Android 自研 libc）</li>
+<li><strong>原生运行时与原生服务</strong>（SurfaceFlinger、AudioFlinger、InputFlinger 以及数十个其他服务）</li>
+<li><strong>Android Runtime（ART）</strong>：执行应用字节码</li>
+<li><strong>Java/Kotlin 框架</strong>：应用开发者使用的 <code>android.*</code> 系列 API</li>
+<li><strong>构建系统</strong>（Soong/Blueprint，同时兼容传统 Make 编译体系）</li>
+<li><strong>系统应用</strong>（设置、Launcher3、SystemUI、联系人、拨号、相机、日历等）</li>
+<li><strong>兼容性测试套件 CTS</strong>：定义“Android 兼容设备”的判定标准</li>
+<li><strong>硬件抽象层 HAL</strong>，附带参考实现</li>
+<li><strong>开发工具</strong>（adb、fastboot、模拟器配置）</li>
+</ul>
+<p>你可以下载 AOSP 源码、编译，并烧录到支持的硬件（主要是 Google 参考设备和 Android 模拟器）。除访问源码仓库外，整个过程无需 Google 参与。编译产物是一套功能完整的操作系统，但<strong>并不是消费者日常使用的“Android”</strong>。</p>
+<h3 id="122-google-移动服务-gms闭源组件层">1.2.2 Google 移动服务 GMS：闭源组件层</h3>
+<p>绝大多数面向消费者发售的设备，都会搭载 Google 提供的一套庞大闭源组件，即 <strong>Google Mobile Services（GMS，谷歌移动服务）</strong>。该层包含：</p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Google Play Store</strong></td>
+<td>主流应用分发商店</td>
+</tr>
+<tr>
+<td><strong>Google Play Services</strong></td>
+<td>后台服务，提供定位、身份认证、FCM 推送通知、SafetyNet/Play Integrity 等数百套 API</td>
+</tr>
+<tr>
+<td><strong>Google 搜索 / Google 助理</strong></td>
+<td>语音助手与搜索集成能力</td>
+</tr>
+<tr>
+<td><strong>Chrome</strong></td>
+<td>默认浏览器（替代 AOSP 内置 Browser2）</td>
+</tr>
+<tr>
+<td><strong>Gmail</strong></td>
+<td>邮件客户端（替代 AOSP Email）</td>
+</tr>
+<tr>
+<td><strong>Google Maps</strong></td>
+<td>地图与导航服务</td>
+</tr>
+<tr>
+<td><strong>YouTube</strong></td>
+<td>视频流媒体应用</td>
+</tr>
+<tr>
+<td><strong>Google Photos</strong></td>
+<td>照片管理（替代 AOSP Gallery 图库）</td>
+</tr>
+<tr>
+<td><strong>Google Play Protect</strong></td>
+<td>安全扫描能力</td>
+</tr>
+<tr>
+<td><strong>Google 拨号 / 联系人</strong></td>
+<td>AOSP 应用的增强版本</td>
+</tr>
+<tr>
+<td><strong>SetupWizard</strong></td>
+<td>设备首次开机引导界面</td>
+</tr>
+</tbody>
+</table>
+<p>GMS 并不开源。OEM 厂商需要签署一份名为 <strong>MADA（Mobile Application Distribution Agreement，移动应用分发协议）</strong> 的法律许可协议，才可以获得 GMS 授权。这份协议历史上要求 OEM 必须预装最低限度的 Google 应用集合，还规定应用摆放位置（例如 Google 搜索必须放在主屏幕）。<strong>CDD（Android 兼容性定义文档）</strong> 和 <strong>CTS 兼容性测试套件</strong> 定义技术层面要求；MADA 协议则定义商业层面要求。</p>
+<p>这层区别会带来几个重要现实影响：</p>
+<ol>
+<li><strong>纯 AOSP 版本是“去谷歌化”系统</strong>。直接编译 AOSP 源码，不叠加 GMS，系统可以正常运行，但没有谷歌账号登录、没有 Play 商店、没有 FCM 推送，所有依赖 Google Play Services 的 API 全部不可用。很多 Play 商店下载的 App 会因此功能异常。</li>
+<li><strong>各类自定义 ROM 就处于这个缺口之中</strong>。LineageOS、GrapheneOS、CalyxOS、/e/OS 这类项目均基于 AOSP 构建。它们要么完全不带 GMS；要么可以通过 Open GApps、MindTheGapps 等包可选安装 GMS；要么使用 microG 这类开源组件替换 GMS 功能。</li>
+<li><strong>华为/荣耀是大规模使用无 GMS-AOSP 最典型案例</strong>。受美国贸易管制，Google 无法向华为授予 GMS 许可。此后华为发售的设备运行基于 AOSP 的系统，搭载自研 HMS 华为移动服务以及 AppGallery 应用商店。</li>
+</ol>
+<h3 id="123-oem-厂商层设备厂商定制">1.2.3 OEM 厂商层：设备厂商定制</h3>
+<p>在 AOSP 之上、面向消费者设备交付之前，还存在一层：<strong>OEM 设备厂商定制层</strong>。主流 OEM 会做大量深度修改：</p>
+<table>
+<thead>
+<tr>
+<th>OEM 厂商</th>
+<th>定制 UI 品牌</th>
+<th>主要改动点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>三星</strong></td>
+<td>One UI</td>
+<td>定制 SystemUI、多窗口增强、DeX 桌面模式、Knox 安全框架、S-Pen 手写笔支持、定制相机堆栈</td>
+</tr>
+<tr>
+<td><strong>小米</strong></td>
+<td>MIUI / HyperOS</td>
+<td>深度定制 UI、自定义桌面启动器、控制中心、安全中心、应用双开功能</td>
+</tr>
+<tr>
+<td><strong>OPPO/一加</strong></td>
+<td>ColorOS / OxygenOS</td>
+<td>定制 AOD 息屏显示、智能侧边栏、禅定模式、定制图库与相机</td>
+</tr>
+<tr>
+<td><strong>Google</strong></td>
+<td>Pixel Experience</td>
+<td>Material You 动态主题、Pixel 桌面、Pixel 独占特性、Tensor 芯片专项优化</td>
+</tr>
+<tr>
+<td><strong>华为</strong></td>
+<td>EMUI / HarmonyOS</td>
+<td>几乎全栈深度定制，逐步替换 AOSP 原有组件</td>
+</tr>
+<tr>
+<td><strong>索尼</strong></td>
+<td>接近原生风格</td>
+<td>大体保留 AOSP，增强相机、音频、显示模块</td>
+</tr>
+<tr>
+<td><strong>摩托罗拉</strong></td>
+<td>My UX</td>
+<td>接近原生，新增手势（敲击开启手电筒、扭转启动相机）</td>
+</tr>
+</tbody>
+</table>
+<p>厂商定制会渗透软件栈每一层：内核增加自定义驱动与调度器调优；HAL 替换为厂商私有相机、音频、显示实现；框架新增专属系统服务；SystemUI 修改状态栏、快捷设置、锁屏界面；应用层替换桌面、图库、相机、设置。</p>
+<h3 id="124-完整整体视图">1.2.4 完整整体视图</h3>
+<p>消费设备上完整 Android 软件栈，可以理解为三层嵌套结构：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> Consumer</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">消费设备</span><span style="color:#E1E4E8">（</span><span style="color:#FFAB70">例如三星 Galaxy S26</span><span style="color:#E1E4E8">）"]</span></span>
+<span class="line"><span style="color:#F97583">        subgraph</span><span style="color:#B392F0"> OEM</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">OEM 厂商层</span><span style="color:#E1E4E8">（</span><span style="color:#FFAB70">One UI </span><span style="color:#E1E4E8">/ </span><span style="color:#FFAB70">MIUI </span><span style="color:#E1E4E8">/ </span><span style="color:#FFAB70">ColorOS 等</span><span style="color:#E1E4E8">）"]</span></span>
+<span class="line"><span style="color:#FFAB70">            OEM_UI</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"定制 SystemUI、桌面、设置"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">            OEM_FW</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"框架扩展"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">            OEM_HAL</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"私有 HAL 实现与驱动"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">        end</span></span>
+<span class="line"><span style="color:#F97583">        subgraph</span><span style="color:#FFAB70"> GMS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Google 移动服务 GMS"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">            PlayStore</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Play 商店"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">            PlayServices</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Play 服务"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">            GoogleApps</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"谷歌应用（Gmail、地图、Chrome 等）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">        end</span></span>
+<span class="line"><span style="color:#F97583">        subgraph</span><span style="color:#FFAB70"> AOSP_Layer</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"AOSP 开源层"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">            Framework</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Framework 框架 API（android.*）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">            Runtime</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ART 运行时"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">            NativeServices</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"原生服务"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">            HAL</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"硬件抽象层 HAL"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">            Kernel</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Linux 内核"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">        end</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    OEM_UI </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> GMS</span></span>
+<span class="line"><span style="color:#FFAB70">    OEM_FW </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> AOSP_Layer</span></span>
+<span class="line"><span style="color:#FFAB70">    OEM_HAL </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Kernel</span></span>
+<span class="line"><span style="color:#FFAB70">    GMS </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Framework</span></span>
+<span class="line"><span style="color:#FFAB70">    Framework </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Runtime</span></span>
+<span class="line"><span style="color:#FFAB70">    Runtime </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> NativeServices</span></span>
+<span class="line"><span style="color:#FFAB70">    NativeServices </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> HAL</span></span>
+<span class="line"><span style="color:#FFAB70">    HAL </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Kernel</span></span>
+<span class="line"><span style="color:#FFAB70">    style AOSP_Layer fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e8f5e9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span>
+<span class="line"><span style="color:#FFAB70">    style GMS fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e3f2fd</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">1565c0</span></span>
+<span class="line"><span style="color:#FFAB70">    style OEM fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fce4ec</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">c62828</span></span>
+<span class="line"><span style="color:#FFAB70">    style Consumer fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fff3e0</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e65100</span></span></code></pre>
+<blockquote>
+<p><strong>本书核心定位：</strong> 本书几乎全部聚焦绿色部分——也就是 AOSP 本身，操作系统本体就位于这一层。GMS 与 OEM 定制都是构建在 AOSP 之上。想要读懂上层两者，你必须先吃透 AOSP。</p>
+</blockquote>
+<h3 id="125-aosp-许可证说明">1.2.5 AOSP 许可证说明</h3>
+<p>AOSP 并非统一许可证，不同组件采用不同协议，源于各自上游项目：</p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>许可证</th>
+<th>选用原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linux Kernel</td>
+<td>GPLv2</td>
+<td>继承上游 Linux 内核协议</td>
+</tr>
+<tr>
+<td>Bionic（libc）</td>
+<td>BSD</td>
+<td>避免用户态 GPL 传染，允许闭源应用链接使用</td>
+</tr>
+<tr>
+<td>Java Framework 框架</td>
+<td>Apache 2.0</td>
+<td>宽松协议，允许 OEM 修改，无需对外公开修改源码</td>
+</tr>
+<tr>
+<td>ART</td>
+<td>Apache 2.0</td>
+<td>和框架保持一致</td>
+</tr>
+<tr>
+<td>工具链 LLVM/Clang</td>
+<td>Apache 2.0 + LLVM 特殊例外</td>
+<td>沿用 LLVM 上游协议</td>
+</tr>
+<tr>
+<td>第三方 external 库</td>
+<td>多种多样</td>
+<td>每个子库保留原始协议（MIT、BSD、LGPL 等）</td>
+</tr>
+<tr>
+<td>CTS 兼容性测试套件</td>
+<td>Apache 2.0</td>
+<td>OEM 运行测试无许可风险</td>
+</tr>
+<tr>
+<td>SELinux 策略</td>
+<td>公有领域 Public Domain</td>
+<td>继承上游 SELinux</td>
+</tr>
+</tbody>
+</table>
+<p>Bionic 选择 BSD 协议，而没有选用 glibc 的 LGPL，是一个奠基性的设计决策。这就从法律层面允许闭源应用、闭源 HAL 实现链接 Android C 库，不会触发 Copyleft 传染性开源义务。正是这个选择，移动生态才可以基于 Android，同时保留私有驱动与闭源应用。</p>
+<hr>
+<h2 id="13-aosp-分层蛋糕系统架构">1.3 AOSP 分层蛋糕：系统架构</h2>
+<p>Android 是一套分层软件栈；每一层为上层提供服务，同时依赖下层提供能力。理解这套分层架构，是从事 AOSP 开发最重要的基础概念。你需要搞清楚每个组件所处位置、组件之间如何交互、使用什么通信机制。</p>
+<h3 id="131-完整架构总图">1.3.1 完整架构总图</h3>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> Applications</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">第 7 层</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">应用层</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        SystemApps</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"系统应用&lt;br /&gt;(SystemUI、Launcher3、设置、&lt;br /&gt;联系人、拨号、Camera2)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        UserApps</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"用户应用&lt;br /&gt;(第三方 APK)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> FrameworkAPI</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">第 6 层</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">框架 API 层</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        AndroidAPI</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"android.* 包&lt;br /&gt;(app, content, view, widget,&lt;br /&gt;media, location, telephony,&lt;br /&gt;net, os, graphics, ...)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> FrameworkServices</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">第 5 层</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">Framework 系统服务</span><span style="color:#E1E4E8">（</span><span style="color:#FFAB70">system_server</span><span style="color:#E1E4E8">）"]</span></span>
+<span class="line"><span style="color:#FFAB70">        AMS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ActivityManager&lt;br /&gt;Service"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        WMS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"WindowManager&lt;br /&gt;Service"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        PMS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"PackageManager&lt;br /&gt;Service"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        PKMS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"PowerManager&lt;br /&gt;Service"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        IMS_FW</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"InputMethod&lt;br /&gt;ManagerService"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        NMS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Notification&lt;br /&gt;ManagerService"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        CMS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ConnectivityService"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        TMS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"TelephonyRegistry"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Others</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"60+ 更多&lt;br /&gt;服务"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> ART</span><span style="color:#E1E4E8">_Layer["</span><span style="color:#FFAB70">第 4 层</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">Android 运行时 ART</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        ART</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ART&lt;br /&gt;(AOT + JIT + 解释器)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        CoreLibs</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"核心库&lt;br /&gt;(libcore: java.*, javax.*,&lt;br /&gt;org.apache.*, android.icu.*)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Zygote</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Zygote 进程&lt;br /&gt;(应用进程工厂)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> NativeLayer</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">第 3 层</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">原生服务与原生库</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        SF</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"SurfaceFlinger"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        AF</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"AudioFlinger"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        IF</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"InputFlinger"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        MC</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"MediaCodec /&lt;br /&gt;MediaPlayerService"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        CamSvc</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"CameraService"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        SenSvc</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"SensorService"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        NativeBinder</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"libbinder /&lt;br /&gt;libbinder_ndk"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Bionic_Lib</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Bionic&lt;br /&gt;(libc, libm, libdl)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> HAL</span><span style="color:#E1E4E8">_Layer["</span><span style="color:#FFAB70">第 2 层</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">硬件抽象层 HAL</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        HIDL_HALs</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"HIDL HAL&lt;br /&gt;(遗留：相机、音频、&lt;br /&gt;传感器、图形)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        AIDL_HALs</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"AIDL HAL&lt;br /&gt;(现代：电源、振动器、&lt;br /&gt;电池健康、灯光)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        HWBinder</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"hwbinder /&lt;br /&gt;vndbinder"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> Kernel</span><span style="color:#E1E4E8">_Layer["</span><span style="color:#FFAB70">第 1 层</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">Linux 内核</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        Drivers</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"设备驱动&lt;br /&gt;(GPU、相机、触摸、&lt;br /&gt;调制解调器、传感器)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Binder_Driver</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Binder 驱动&lt;br /&gt;(/dev/binder,&lt;br /&gt;/dev/hwbinder,&lt;br /&gt;/dev/vndbinder)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Subsystems</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"内核子系统&lt;br /&gt;(内存、调度器、文件系统、&lt;br /&gt;网络、电源管理)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        AndroidKernel</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Android 专属组件&lt;br /&gt;(Binder、ashmem/memfd,&lt;br /&gt;ION/DMA-BUF、fuse)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    Applications </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> FrameworkAPI</span></span>
+<span class="line"><span style="color:#FFAB70">    FrameworkAPI </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> FrameworkServices</span></span>
+<span class="line"><span style="color:#FFAB70">    FrameworkServices </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> ART_Layer</span></span>
+<span class="line"><span style="color:#FFAB70">    FrameworkServices </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> NativeLayer</span></span>
+<span class="line"><span style="color:#FFAB70">    ART_Layer </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> NativeLayer</span></span>
+<span class="line"><span style="color:#FFAB70">    NativeLayer </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> HAL_Layer</span></span>
+<span class="line"><span style="color:#FFAB70">    HAL_Layer </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Kernel_Layer</span></span>
+<span class="line"><span style="color:#FFAB70">    style Applications fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fff9c4</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">f9a825</span></span>
+<span class="line"><span style="color:#FFAB70">    style FrameworkAPI fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e8f5e9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span>
+<span class="line"><span style="color:#FFAB70">    style FrameworkServices fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">c8e6c9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span>
+<span class="line"><span style="color:#FFAB70">    style ART_Layer fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e3f2fd</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">1565c0</span></span>
+<span class="line"><span style="color:#FFAB70">    style NativeLayer fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e1f5fe</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">0277bd</span></span>
+<span class="line"><span style="color:#FFAB70">    style HAL_Layer fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">f3e5f5</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">7b1fa2</span></span>
+<span class="line"><span style="color:#FFAB70">    style Kernel_Layer fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fce4ec</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">c62828</span></span></code></pre>
+<p>下面从底层到上层逐层解析。</p>
+<h3 id="132-第-1-层linux-内核">1.3.2 第 1 层：Linux 内核</h3>
+<p>Android 运行于 Linux 内核之上。Android 17 采用 <strong>Linux 6.x LTS 长期支持分支</strong>。<code>android17-6.18</code> GKI 基于 Linux 6.18 版本；Android 16 对应 <code>android16-6.12</code>。内核包含 Android 专属补丁，由 <strong>ACK（Android Common Kernel，Android 通用内核）</strong> 与 <strong>GKI（Generic Kernel Image，通用内核镜像）</strong> 项目维护。支持的内核分支以及生命周期记录在 <code>kernel/configs/kernel-lifetimes.xml</code>；各个分支 GKI 配置片段存放在 <code>kernel/configs/</code> 目录。</p>
+<h4 id="android-特有的内核特性">Android 特有的内核特性</h4>
+<p>Android 内核并非原版 Linux，内置多个 Android 专属子系统与驱动：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>用途</th>
+<th>源码位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Binder</strong></td>
+<td>Android 核心 IPC 机制。内核驱动，实现进程间基于事务的通信。三个设备节点：<code>/dev/binder</code>（框架），<code>/dev/hwbinder</code>（HAL），<code>/dev/vndbinder</code>（vendor 之间通信）</td>
+<td>内核源码 <code>drivers/android/binder.c</code></td>
+</tr>
+<tr>
+<td><strong>Ashmem / memfd</strong></td>
+<td>匿名共享内存。早期使用 ashmem，现在逐步迁移到标准 Linux <code>memfd_create</code>。用于进程间传递大块数据（例如 GraphicBuffer 图形缓冲区）</td>
+<td>遗留实现在 <code>drivers/staging/android/</code></td>
+</tr>
+<tr>
+<td><strong>ION / DMA-BUF Heaps</strong></td>
+<td>硬件缓冲区内存分配器，用于 GPU、相机、显示。ION 是 Android 自研；DMA-BUF heaps 是可以合入 Linux 上游的替代方案</td>
+<td><code>drivers/dma-buf/</code></td>
+</tr>
+<tr>
+<td><strong>Low Memory Killer 低内存查杀</strong></td>
+<td>内存压力下杀死后台进程。早期是内核模块 lowmemorykiller；现在用户态 lmkd 配合内核 PSI 内存压力信息</td>
+<td>用户态：<code>system/memory/lmkd/</code></td>
+</tr>
+<tr>
+<td><strong>fuse（存储）</strong></td>
+<td>FUSE 文件系统，实现分区存储 scoped-storage；是 App 文件访问性能关键路径</td>
+<td>标准内核 fuse 模块</td>
+</tr>
+<tr>
+<td><strong>dm-verity</strong></td>
+<td>校验启动。保证 system 分区没有被篡改</td>
+<td><code>drivers/md/dm-verity*</code></td>
+</tr>
+<tr>
+<td><strong>SELinux</strong></td>
+<td>强制访问控制 MAC。Android 使用严格 SELinux 策略，限制每一个进程权限</td>
+<td>策略配置：<code>system/sepolicy/</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="gki-通用内核镜像">GKI 通用内核镜像</h4>
+<p>Google 在 Android 12 引入 <strong>GKI</strong> 架构，解决内核碎片化问题。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> LR</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Before</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"GKI 出现之前"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Upstream1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"上游 Linux LTS"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> ACK1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Android Common Kernel"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        ACK1 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> SoC1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"SoC 厂商内核&lt;br /&gt;(高通/联发科/三星)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        SoC1 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> OEM1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"OEM 厂商内核&lt;br /&gt;(三星/小米等)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> After</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"引入 GKI 之后"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Upstream2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"上游 Linux LTS"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> ACK2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Android Common Kernel"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        ACK2 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> GKI2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"通用内核镜像 GKI&lt;br /&gt;(Google 维护、签名)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        GKI2 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Modules</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Vendor 内核模块&lt;br /&gt;(SoC/OEM 驱动，可动态加载)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    style Before fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fce4ec</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">c62828</span></span>
+<span class="line"><span style="color:#FFAB70">    style After fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e8f5e9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span></code></pre>
+<p>GKI 之前，每台设备都维护一份独立内核。Google fork 上游 Linux LTS 得到 ACK；SoC 厂商（例如高通 msm-kernel）再次 fork；OEM 厂商继续 fork。造成严重碎片化：设备搭载内核版本远远落后上游，安全补丁要数月时间才能分发到终端设备。</p>
+<p>GKI 提供一份由 Google 编译的统一内核二进制，同一 Android 版本、同一内核版本的所有设备共用该内核。厂商特有功能全部作为 <strong>LKMs 可加载内核模块</strong>，存放在独立 <code>vendor_dlkm</code> 分区。这样 Google 可以独立更新内核，不需要依赖芯片厂商。</p>
+<p>AOSP 源码树中和内核相关目录：</p>
+<ul>
+<li><code>kernel/configs/</code> — GKI 内核配置片段</li>
+<li><code>kernel/prebuilts/</code> — 开发用预编译内核镜像</li>
+<li><code>kernel/tests/</code> — 内核测试套件</li>
+</ul>
+<p>真正完整内核源码一般通过独立内核 manifest 获取：<code>repo init -u https://android.googlesource.com/kernel/manifest</code>。内核代码体量巨大，绝大多数平台开发人员并不需要修改内核，因此不和主 AOSP 放在同一个仓库。</p>
+<h3 id="133-第-2-层硬件抽象层-hal">1.3.3 第 2 层：硬件抽象层 HAL</h3>
+<p>HAL 是 Android 用户态代码和硬件驱动之间的接口层。依靠 HAL，Android 框架不需要修改就可以跑在各式各样硬件之上。</p>
+<h4 id="hal-架构演进">HAL 架构演进</h4>
+<p>Android 的 HAL 经历多次重大演进：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#E1E4E8">timeline</span></span>
+<span class="line"><span style="color:#E1E4E8">    title HAL 架构演进时间线</span></span>
+<span class="line"><span style="color:#E1E4E8">    section Legacy (Android 1.0-7.x)</span></span>
+<span class="line"><span style="color:#E1E4E8">        2008-2016 : C 结构体式 HAL</span></span>
+<span class="line"><span style="color:#E1E4E8">                   : hw_module_t / hw_device_t</span></span>
+<span class="line"><span style="color:#E1E4E8">                   : dlopen() 在调用进程内部加载</span></span>
+<span class="line"><span style="color:#E1E4E8">                   : 没有版本控制，不保证稳定性</span></span>
+<span class="line"><span style="color:#E1E4E8">    section HIDL (Android 8.0-12)</span></span>
+<span class="line"><span style="color:#E1E4E8">        2017-2021 : 硬件接口定义语言 HIDL</span></span>
+<span class="line"><span style="color:#E1E4E8">                   : HAL 独立进程运行</span></span>
+<span class="line"><span style="color:#E1E4E8">                   : hwbinder 作为传输通道</span></span>
+<span class="line"><span style="color:#E1E4E8">                   : 严格版本号（主版本.次版本）</span></span>
+<span class="line"><span style="color:#E1E4E8">                   : 支撑 Treble：框架/vendor 分区分离</span></span>
+<span class="line"><span style="color:#E1E4E8">    section AIDL (Android 11+)</span></span>
+<span class="line"><span style="color:#E1E4E8">        2020-至今 : Android 接口定义语言 AIDL</span></span>
+<span class="line"><span style="color:#E1E4E8">                      : 新增 HAL 优先使用，替代 HIDL</span></span>
+<span class="line"><span style="color:#E1E4E8">                      : 使用标准 binder 传输</span></span>
+<span class="line"><span style="color:#E1E4E8">                      : 框架与 HAL IPC 使用同一套语言</span></span>
+<span class="line"><span style="color:#E1E4E8">                      : NDK 后端保障 vendor 侧稳定性</span></span></code></pre>
+<p><strong>传统 Treble 之前 HAL</strong>：以动态库 so 形式直接加载到调用进程内部。例如相机 HAL，是一个 <code>.so</code> 文件，cameraserver 进程通过 <code>dlopen()</code> 载入。虽然可以工作，但框架和 HAL 强耦合；一方升级另一方也必须同步升级。</p>
+<p><strong>Project Treble（Android 8.0）引入 HIDL</strong>：把 HAL 迁移到独立进程，使用 <code>hwbinder</code> 完成跨进程通信。框架与 vendor 厂商实现之间形成一套带版本、稳定的接口。由此实现：</p>
+<ul>
+<li><strong>更快系统版本升级</strong>：OEM 升级 Android 框架，不需要改动 vendor HAL 实现</li>
+<li><strong>GSI 通用系统镜像</strong>：一份 system 镜像可以跑多款不同硬件设备</li>
+<li><strong>VTS 厂商测试套件</strong>：自动化测试 HAL 实现是否符合接口规范</li>
+</ul>
+<p><strong>Stable AIDL（Android 11 及以上）成为 HAL 首选接口语言</strong>。它就是应用和框架之间多年一直在用的 AIDL，增加了稳定 <strong>NDK 后端</strong>，供厂商进行 HAL 实现。<strong>所有新增 HAL 必须使用 AIDL；HIDL 已经冻结，不再接受新增接口定义。</strong></p>
+<h4 id="hal-接口目录">HAL 接口目录</h4>
+<p>标准 HAL 接口定义全部存放在 <code>hardware/interfaces/</code>：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>hardware/interfaces/</span></span>
+<span class="line"><span>    audio/              -- Audio HAL（录音、播放、音效）</span></span>
+<span class="line"><span>    automotive/         -- 车机专属 HAL（车辆信息、EVS）</span></span>
+<span class="line"><span>    biometrics/         -- 指纹、人脸认证</span></span>
+<span class="line"><span>    bluetooth/          -- 蓝牙 HAL</span></span>
+<span class="line"><span>    boot/               -- Boot 控制 HAL（A/B 升级）</span></span>
+<span class="line"><span>    broadcastradio/     -- FM/AM 广播收音机</span></span>
+<span class="line"><span>    camera/             -- Camera HAL（Camera2 API 后端）</span></span>
+<span class="line"><span>    cas/                -- 条件访问系统（广播 DRM）</span></span>
+<span class="line"><span>    confirmationui/     -- 可信 UI 确认弹窗</span></span>
+<span class="line"><span>    contexthub/         -- Context Hub（低功耗传感器协处理器）</span></span>
+<span class="line"><span>    drm/                -- DRM 插件 HAL（Widevine 等）</span></span>
+<span class="line"><span>    dumpstate/          -- bugreport 日志生成</span></span>
+<span class="line"><span>    fastboot/           -- fastboot HAL</span></span>
+<span class="line"><span>    gatekeeper/         -- 密码/PIN 校验</span></span>
+<span class="line"><span>    gnss/               -- GPS/GNSS 定位</span></span>
+<span class="line"><span>    graphics/           -- 图形 HAL：</span></span>
+<span class="line"><span>        allocator/      --   Gralloc 缓冲区分配器</span></span>
+<span class="line"><span>        composer/       --   HWC 硬件显示合成器</span></span>
+<span class="line"><span>        mapper/         --   Buffer 缓冲区映射</span></span>
+<span class="line"><span>    health/             -- 电池充电健康状态</span></span>
+<span class="line"><span>    identity/           -- 身份凭证</span></span>
+<span class="line"><span>    input/              -- 输入分类器</span></span>
+<span class="line"><span>    ir/                 -- 红外发射器</span></span>
+<span class="line"><span>    keymaster/          -- 密码密钥管理</span></span>
+<span class="line"><span>    light/              -- LED/背光控制</span></span>
+<span class="line"><span>    media/              -- 媒体编解码（OMX/Codec2）</span></span>
+<span class="line"><span>    memtrack/           -- 内存追踪</span></span>
+<span class="line"><span>    neuralnetworks/     -- NNAPI 机器学习加速</span></span>
+<span class="line"><span>    nfc/                -- NFC</span></span>
+<span class="line"><span>    power/              -- 电源管理、电源 hint 提示</span></span>
+<span class="line"><span>    radio/              -- 无线通信 Radio（RIL 替代）</span></span>
+<span class="line"><span>    secure_element/     -- 安全芯片访问</span></span>
+<span class="line"><span>    sensors/            -- 传感器 HAL（加速度计、陀螺仪等）</span></span>
+<span class="line"><span>    soundtrigger/       -- 热词唤醒</span></span>
+<span class="line"><span>    thermal/            -- 温控管理</span></span>
+<span class="line"><span>    tv/                 -- TV 输入框架</span></span>
+<span class="line"><span>    usb/                -- USB HAL</span></span>
+<span class="line"><span>    vibrator/           -- 振动马达触觉反馈</span></span>
+<span class="line"><span>    wifi/               -- Wi-Fi HAL</span></span>
+<span class="line"><span>    ... 还有更多（总计 60+ 套 HAL 接口）</span></span></code></pre>
+<p>每个 HAL 子目录存放 <code>.aidl</code> 或者 <code>.hal</code> 接口定义文件，附带默认参考实现以及 VTS 测试用例。</p>
+<h4 id="treble-边界vndk-与-vendor-分区">Treble 边界：VNDK 与 Vendor 分区</h4>
+<p>Project Treble 在 <strong>system 分区</strong>（框架，Google/OEM 更新）与 <strong>vendor 分区</strong>（HAL、驱动，SoC 芯片厂商维护）之间划定硬性隔离边界。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> LR</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> System</span><span style="color:#E1E4E8">_Partition["</span><span style="color:#FFAB70">System 分区 </span><span style="color:#F97583">(</span><span style="color:#9ECBFF">/system</span><span style="color:#F97583">)</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        FW</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Framework 框架"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        SS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"系统服务"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        SysApps</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"系统应用"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> Vendor</span><span style="color:#E1E4E8">_Partition["</span><span style="color:#FFAB70">Vendor 分区 </span><span style="color:#F97583">(</span><span style="color:#9ECBFF">/vendor</span><span style="color:#F97583">)</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        VendorHALs</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Vendor HAL&lt;br /&gt;实现代码"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        VendorLibs</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Vendor 库文件"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        VendorFW</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Vendor 固件 firmware"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Interfaces</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"稳定接口层"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        AIDL_IF</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"AIDL HAL 接口"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        HIDL_IF</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"HIDL HAL 接口"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        VNDK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"VNDK&lt;br /&gt;(Vendor NDK：稳定 system 库集合)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    System_Partition </span><span style="color:#F97583">&lt;--&gt;</span><span style="color:#FFAB70"> Interfaces</span></span>
+<span class="line"><span style="color:#FFAB70">    Interfaces </span><span style="color:#F97583">&lt;--&gt;</span><span style="color:#FFAB70"> Vendor_Partition</span></span>
+<span class="line"><span style="color:#FFAB70">    style System_Partition fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e8f5e9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span>
+<span class="line"><span style="color:#FFAB70">    style Vendor_Partition fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">f3e5f5</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">7b1fa2</span></span>
+<span class="line"><span style="color:#FFAB70">    style Interfaces fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fff9c4</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">f9a825</span></span></code></pre>
+<p><strong>VNDK（Vendor NDK）</strong>：是一套允许 vendor 代码链接使用的 system 系统库集合。vendor 代码不能随意链接 system 内部库，只能使用 VNDK 集合。编译期和运行期依靠 <strong>linker 命名空间</strong>（配置文件在 <code>system/linkerconfig/</code>）强制该隔离规则。</p>
+<h3 id="134-第-3-层原生服务与原生库">1.3.4 第 3 层：原生服务与原生库</h3>
+<p>内核、HAL 之上，是庞大 C/C++ 原生服务与库集合。它们是系统干活的主力：负责显示合成、音频混音、输入事件分发、媒体播放等工作。</p>
+<h4 id="核心原生服务">核心原生服务</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> NativeServices</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">原生服务</span><span style="color:#F97583">(</span><span style="color:#9ECBFF">C/C++</span><span style="color:#F97583">)</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        SF</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"SurfaceFlinger&lt;br /&gt;&lt;i&gt;frameworks/native/services/&lt;br /&gt;surfaceflinger/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        AF</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"AudioFlinger&lt;br /&gt;&lt;i&gt;frameworks/av/services/&lt;br /&gt;audioflinger/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        IF</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"InputFlinger&lt;br /&gt;&lt;i&gt;frameworks/native/services/&lt;br /&gt;inputflinger/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        CS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"CameraService&lt;br /&gt;&lt;i&gt;frameworks/av/services/&lt;br /&gt;camera/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        MS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"MediaPlayerService&lt;br /&gt;&lt;i&gt;frameworks/av/media/&lt;br /&gt;libmediaplayerservice/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        SS_native</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"SensorService&lt;br /&gt;&lt;i&gt;frameworks/native/services/&lt;br /&gt;sensorservice/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        GPU</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"GpuService&lt;br /&gt;&lt;i&gt;frameworks/native/services/&lt;br /&gt;gpuservice/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        IPCS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ServiceManager&lt;br /&gt;(Native)&lt;br /&gt;&lt;i&gt;frameworks/native/cmds/&lt;br /&gt;servicemanager/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> NativeLibs</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"核心原生库"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Binder</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"libbinder&lt;br /&gt;&lt;i&gt;frameworks/native/&lt;br /&gt;libs/binder/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        BionicLib</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Bionic (libc/libm/libdl)&lt;br /&gt;&lt;i&gt;bionic/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        GUI</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"libgui (Surface/BufferQueue)&lt;br /&gt;&lt;i&gt;frameworks/native/&lt;br /&gt;libs/gui/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        UI</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"libui (Graphic types)&lt;br /&gt;&lt;i&gt;frameworks/native/&lt;br /&gt;libs/ui/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Input</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"libinput&lt;br /&gt;&lt;i&gt;frameworks/native/&lt;br /&gt;libs/input/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Utils</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"libutils / libcutils&lt;br /&gt;&lt;i&gt;system/core/&lt;br /&gt;libutils/ libcutils/&lt;/i&gt;"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    SF </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> GUI</span></span>
+<span class="line"><span style="color:#FFAB70">    SF </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> UI</span></span>
+<span class="line"><span style="color:#FFAB70">    AF </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Binder</span></span>
+<span class="line"><span style="color:#FFAB70">    IF </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Input</span></span>
+<span class="line"><span style="color:#FFAB70">    CS </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Binder</span></span>
+<span class="line"><span style="color:#FFAB70">    MS </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Binder</span></span>
+<span class="line"><span style="color:#FFAB70">    NativeServices </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> NativeLibs</span></span>
+<span class="line"><span style="color:#FFAB70">    NativeLibs </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> BionicLib</span></span>
+<span class="line"><span style="color:#FFAB70">    style NativeServices fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e1f5fe</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">0277bd</span></span>
+<span class="line"><span style="color:#FFAB70">    style NativeLibs fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e0f7fa</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">00695c</span></span></code></pre>
+<p>重点原生服务介绍：</p>
+<p><strong>SurfaceFlinger</strong>（<code>frameworks/native/services/surfaceflinger/</code>）显示合成服务。Android 设备屏幕上每一帧画面都由它合成。接收各个应用窗口通过 <code>BufferQueue</code> 送来图形缓冲区；使用 GPU 客户端合成模式，或者调用 HWC HAL 硬件合成；最后把最终画面输出到显示设备。它管理多显示器、VSYNC 信号时序，并且和 system_server 里面 WindowManagerService 协同完成窗口布局与可见性管理。</p>
+<p><strong>AudioFlinger</strong>（<code>frameworks/av/services/audioflinger/</code>）音频混音路由服务。接收 App 与系统服务音频数据流，按照音乐、通知、闹钟、通话等音频流类型混音，施加音效处理；再通过 Audio HAL 把混合后音频输出到对应硬件设备。还负责采样率转换、声道映射、延迟管理。</p>
+<p><strong>InputFlinger</strong>（<code>frameworks/native/services/inputflinger/</code>）读取内核 <code>/dev/input</code> 原始输入事件（触摸、键盘、鼠标、游戏手柄），做事件分类，分发到目标窗口。其中 <strong>InputDispatcher</strong> 维护窗口-输入通道映射关系，保证触摸事件传递给点击位置下的窗口，键盘事件给到获得焦点窗口；同时优先拦截系统手势（返回、Home、多任务），不会下发给应用。</p>
+<p><strong>CameraService</strong>（<code>frameworks/av/services/camera/</code>）作为中间层，衔接上层应用 Camera2 API 与厂商实现 Camera HAL。管理相机设备生命周期、请求处理、数据流管理。</p>
+<p><strong>MediaPlayerService / MediaCodecService</strong>（<code>frameworks/av/</code>）负责媒体播放与编解码。Codec2 框架接替老 OMX/Stagefright 架构，管理软硬件音视频编解码器。</p>
+<p><strong>ServiceManager</strong>（<code>frameworks/native/cmds/servicemanager/</code>）原生 Binder 服务注册中心。所有可供 Binder 访问的系统服务都向 ServiceManager 注册；客户端按名字查找服务。实际上一共有三个 ServiceManager：对应普通 framework binder（<code>/dev/binder</code>）；hwservicemanager 管理 <code>/dev/hwbinder</code>；vndservicemanager 管理 <code>/dev/vndbinder</code>。</p>
+<h4 id="bionicandroid-的-c-标准库">Bionic：Android 的 C 标准库</h4>
+<p>Bionic（<code>bionic/</code>）是 Android 自研 C 库、数学库与动态链接器，<strong>不是 glibc</strong>。从零开发，部分代码源自 BSD。设计目标：</p>
+<ol>
+<li><strong>体积小巧</strong>：移动设备内存有限，Bionic 远小于 glibc。</li>
+<li><strong>启动速度快</strong>：<code>dlopen()</code>、<code>pthread_create()</code> 等高频接口针对移动场景做优化。</li>
+<li><strong>BSD 许可证</strong>：避开 LGPL 协议约束；LGPL 会强制要求允许用户替换 C 库。</li>
+<li><strong>Android 专属能力</strong>：属性系统（<code>__system_property_get</code>）、Android 日志（<code>__android_log_print</code>）、Binder 支持。</li>
+</ol>
+<p>Bionic 包含：</p>
+<ul>
+<li><code>bionic/libc/</code> — C 库主体</li>
+<li><code>bionic/libm/</code> — 数学库</li>
+<li><code>bionic/libdl/</code> — 动态加载库（dlopen 系列）</li>
+<li><code>bionic/linker/</code> — 动态链接器（<code>/system/bin/linker64</code>），运行时加载 so、解析符号</li>
+</ul>
+<p><code>bionic/linker/</code> 下的链接器非常关键，它实现 <strong>linker 命名空间隔离</strong>，落实 Treble 的 vendor-system 边界。default、sphal、vndk、rs 等不同命名空间，控制进程可以看到哪些库，避免 vendor 代码访问不稳定的 system 内部库。</p>
+<h3 id="134-第-4-层android-运行时-art">1.3.4 第 4 层：Android 运行时 ART</h3>
+<p>Android Runtime（<code>art/</code>）执行应用字节码。Android 5.0 Lollipop 开始 ART 替换 Dalvik 成为默认运行时。</p>
+<h4 id="art-编译流水线">ART 编译流水线</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> LR</span></span>
+<span class="line"><span style="color:#FFAB70">    Source</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Java/Kotlin&lt;br /&gt;源码"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> Compiler</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"javac / kotlinc"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Compiler </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Bytecode</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">".class 文件&lt;br /&gt;(Java 字节码)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Bytecode </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> D8</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"D8/R8&lt;br /&gt;(Dex 编译器)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    D8 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> DEX</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">".dex 文件&lt;br /&gt;(Dalvik 字节码)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    DEX </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> APK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"APK 安装包"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Device</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"设备上执行"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        APK </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> dex2oat</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"dex2oat&lt;br /&gt;(AOT 编译器)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        dex2oat </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> OAT</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">".oat / .art / .vdex&lt;br /&gt;(机器码 + 优化 dex)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        APK </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> JIT</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"JIT 编译器&lt;br /&gt;(运行期)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        JIT </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> JITCode</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"内存中 JIT 编译机器码"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        APK </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Interp</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"解释器&lt;br /&gt;(兜底)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    style Source fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fff9c4</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">f9a825</span></span>
+<span class="line"><span style="color:#FFAB70">    style DEX fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e8f5e9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span>
+<span class="line"><span style="color:#FFAB70">    style Device fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e3f2fd</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">1565c0</span></span></code></pre>
+<p>ART 采用<strong>多级混合编译策略</strong>：</p>
+<ol>
+<li><strong>解释器</strong>：逐条执行字节码。速度最慢，但永远可用；调试、极少执行的代码会走解释器。</li>
+<li><strong>JIT 即时编译器</strong>：运行时把高频热点方法编译成本地机器码；收集运行 profile 配置并持久化存储到磁盘。</li>
+<li><strong>AOT 预编译编译器（dex2oat）</strong>：利用 JIT 生成的 profile 配置，在设备空闲或者应用安装阶段，把高频方法提前编译为机器码。这套 PGO（Profile-Guided Optimization，配置文件引导优化）是 Android 7.0 引入。</li>
+<li><strong>云端 Profile（Android 9+）</strong>：Google Play 分发来自海量用户聚合得到的 profile 数据。安装 App 时，dex2oat 可以直接使用云端 profile，在你还没有打开 App 之前，就编译好最常用的代码路径。</li>
+</ol>
+<p>ART 源码目录 <code>art/</code> 主要模块：</p>
+<ul>
+<li><code>art/runtime/</code> — 运行时本体：GC 垃圾回收、类加载、JNI、线程管理</li>
+<li><code>art/compiler/</code> — JIT 与 AOT 编译器</li>
+<li><code>art/dex2oat/</code> — AOT 编译工具</li>
+<li><code>art/libartbase/</code> — 基础公共工具</li>
+<li><code>art/libdexfile/</code> — DEX 文件解析</li>
+<li><code>art/libnativebridge/</code> — 跨指令集桥接（Berberis/Houdini，ARM 程序跑在 x86）</li>
+<li><code>art/libnativeloader/</code> — 带命名空间隔离的库加载</li>
+<li><code>art/odrefresh/</code> — 设备上刷新 ART 模块产物</li>
+<li><code>art/openjdkjvm/</code> — JVM 接口实现</li>
+<li><code>art/openjdkjvmti/</code> — JVMTI 调试分析接口</li>
+<li><code>art/profman/</code> — PGO 的 profile 管理</li>
+<li><code>art/imgdiag/</code> — boot 镜像诊断</li>
+</ul>
+<h4 id="zygote应用进程工厂">Zygote：应用进程工厂</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">sequenceDiagram</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> Init</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> init</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> Zygote</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> Zygote</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> SS</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> system_server</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> AMS</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> ActivityManagerService</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> App</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> Application Process</span></span>
+<span class="line"><span style="color:#FFAB70">    Init</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Zygote</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 启动 zygote（app_process）</span></span>
+<span class="line"><span style="color:#F97583">    Note</span><span style="color:#B392F0"> over</span><span style="color:#FFAB70"> Zygote</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 预加载类&lt;br /&gt;预加载资源&lt;br /&gt;初始化 ART 运行时</span></span>
+<span class="line"><span style="color:#FFAB70">    Zygote</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">SS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> fork() 生成 system_server</span></span>
+<span class="line"><span style="color:#F97583">    Note</span><span style="color:#B392F0"> over</span><span style="color:#FFAB70"> SS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 启动 100+ 系统服务</span></span>
+<span class="line"><span style="color:#FFAB70">    SS</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">AMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 启动 ActivityManagerService</span></span>
+<span class="line"><span style="color:#F97583">    Note</span><span style="color:#B392F0"> over</span><span style="color:#FFAB70"> AMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 用户点击启动 App</span></span>
+<span class="line"><span style="color:#FFAB70">    AMS</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Zygote</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 请求新建进程&lt;br /&gt;(socket 指令)</span></span>
+<span class="line"><span style="color:#FFAB70">    Zygote</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">App</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> fork()</span></span>
+<span class="line"><span style="color:#F97583">    Note</span><span style="color:#B392F0"> over</span><span style="color:#FFAB70"> App</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 进程定制初始化:&lt;br /&gt;设置 UID/GID&lt;br /&gt;设置 SELinux 上下文&lt;br /&gt;加载 APK&lt;br /&gt;调用 Application.onCreate()</span></span>
+<span class="line"><span style="color:#FFAB70">    App</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">AMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> attachApplication()</span></span>
+<span class="line"><span style="color:#FFAB70">    AMS</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">App</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 调度启动 Activity</span></span></code></pre>
+<p><strong>Zygote</strong>（<code>frameworks/base/cmds/app_process/</code> 以及 <code>system/zygote/</code>）是 Android 极具代表性架构创新。所有 App 进程以及 <code>system_server</code> 全部由 Zygote fork 而来。</p>
+<p>开机流程：</p>
+<ol>
+<li>init 进程启动 zygote 二进制（实际为 app_process64）</li>
+<li>Zygote 初始化 ART 运行时</li>
+<li>Zygote <strong>预加载</strong>成千上万个所有 App 都会用到的 Java 类、资源</li>
+<li>Zygote 进入循环，监听 Unix 域 socket 等待指令</li>
+</ol>
+<p>当需要新建应用进程：</p>
+<ol>
+<li>ActivityManagerService 通过 socket 向 Zygote 发送请求</li>
+<li>Zygote 调用 fork() 创建子进程</li>
+<li>子进程依靠 <strong>写时复制 copy-on-write</strong>，直接继承全部已经预加载好的类和资源，内存共享</li>
+<li>子进程做定制初始化：设置 UID、GID、SELinux 上下文，加载 APK，开始执行应用代码。</li>
+</ol>
+<p>这套 fork 机制造就 Android 极快的 App 启动速度。如果没有 Zygote，每个 App 都要从零初始化 ART 实例，加载校验成千上万类，解析框架资源，整个过程要数秒。依靠 Zygote，fork 只消耗毫秒级，共享内存页也减少物理内存占用。</p>
+<h3 id="136-第-5-层framework-系统服务system_server">1.3.6 第 5 层：Framework 系统服务（system_server）</h3>
+<p><code>system_server</code> 进程是 Android 框架的心脏。它是 Zygote 第一个 fork 出来的子进程，内部运行<strong>超过 100 个系统服务</strong>，几乎掌管用户体验方方面面。</p>
+<h4 id="system_server-服务总览">system_server 服务总览</h4>
+<p>system_server 下所有服务源码位于 <code>frameworks/base/services/core/java/com/android/server/</code>，包含上百个子目录：</p>
+<table>
+<thead>
+<tr>
+<th>目录</th>
+<th>服务名</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>am/</code></td>
+<td>ActivityManagerService</td>
+<td>进程生命周期管理、Activity 栈、任务栈、最近任务、广播、ContentProvider、OOM 评分调整</td>
+</tr>
+<tr>
+<td><code>wm/</code></td>
+<td>WindowManagerService、ActivityTaskManagerService</td>
+<td>窗口层级、Z 轴堆叠、输入焦点、显示布局、交转动画、屏幕旋转；ATMS 从 AMS 拆分出来，任务与 Activity 管理放在此处，和 WMS 共存</td>
+</tr>
+<tr>
+<td><code>pm/</code></td>
+<td>PackageManagerService</td>
+<td>APK 安装卸载、包解析、权限管理、Intent 解析匹配</td>
+</tr>
+<tr>
+<td><code>power/</code></td>
+<td>PowerManagerService</td>
+<td>WakeLock 唤醒锁、屏幕亮灭、Doze 休眠、省电模式、系统挂起 suspend</td>
+</tr>
+<tr>
+<td><code>display/</code></td>
+<td>DisplayManagerService</td>
+<td>显示器生命周期、亮度、色彩模式、显示策略</td>
+</tr>
+<tr>
+<td><code>input/</code></td>
+<td>InputManagerService</td>
+<td>输入设备管理、按键映射、输入事件分发策略</td>
+</tr>
+<tr>
+<td><code>inputmethod/</code></td>
+<td>InputMethodManagerService</td>
+<td>软键盘管理、输入法切换</td>
+</tr>
+<tr>
+<td><code>notification/</code></td>
+<td>NotificationManagerService</td>
+<td>通知发布、通知排序策略、勿扰模式 DND</td>
+</tr>
+<tr>
+<td><code>audio/</code></td>
+<td>AudioService</td>
+<td>音量控制、音频路由、音频焦点、音效管理</td>
+</tr>
+<tr>
+<td><code>connectivity/</code></td>
+<td>Vpn、PacProxyService</td>
+<td>VPN 实现（<code>Vpn.java</code>）、PAC 代理、网络指标统计；ConnectivityService 本体属于 Connectivity Mainline 模块</td>
+</tr>
+<tr>
+<td><code>location/</code></td>
+<td>LocationManagerService</td>
+<td>定位提供者、地理围栏、GNSS 管理</td>
+</tr>
+<tr>
+<td><code>camera/</code></td>
+<td>CameraServiceProxy</td>
+<td>相机访问策略、多相机协同调度</td>
+</tr>
+<tr>
+<td><code>storage/</code></td>
+<td>DeviceStorageMonitorService、DiskStatsLoggingService</td>
+<td>低存储告警、磁盘统计日志；StorageManagerService（卷管理、加密、存储适配）放在 server 包根目录，不在子文件夹内</td>
+</tr>
+<tr>
+<td><code>content/</code></td>
+<td>ContentService</td>
+<td>ContentObserver 通知、同步管理</td>
+</tr>
+<tr>
+<td><code>accounts/</code></td>
+<td>AccountManagerService</td>
+<td>账号管理、身份令牌</td>
+</tr>
+<tr>
+<td><code>clipboard/</code></td>
+<td>ClipboardService</td>
+<td>系统剪贴板</td>
+</tr>
+<tr>
+<td><code>accessibility/</code></td>
+<td>AccessibilityManagerService</td>
+<td>无障碍事件分发；服务本体路径不在该子目录，子目录放辅助工具类</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>其余数十个服务</td>
+</tr>
+</tbody>
+</table>
+<p>并不是所有系统服务都放在这个目录，例如 TelecomService 属于 <code>packages/services/Telecomm/</code>，此处只有少量编译适配胶水代码。</p>
+<p>所有系统服务通过 Binder IPC 和应用以及其他服务通信，接口全部由 AIDL 定义。</p>
+<h4 id="system_server-启动流程">system_server 启动流程</h4>
+<p>Zygote fork 得到 system_server 之后，会按照 <code>SystemServer.java</code> 定义固定顺序启动服务。分为 4 个阶段：</p>
+<ol>
+<li><strong>BootstrapServices 引导服务</strong>：系统运行最基础组件，AMS、PMS、PowerManager 等。</li>
+<li><strong>CoreServices 核心服务</strong>：基础重要但非开机必选（Battery、UsageStats）。</li>
+<li><strong>OtherServices 其余服务</strong>：Window、Input、Audio、Connectivity、Notification、Location 等 80 多个服务。</li>
+<li><strong>APEX Services</strong>：Mainline 模块内的服务。</li>
+</ol>
+<p>全部服务启动完成后向 ServiceManager 注册，其他进程就可以通过 Binder 查找调用。</p>
+<h3 id="137-第-6-层framework-api-层">1.3.7 第 6 层：Framework API 层</h3>
+<p>Framework API（<code>frameworks/base/core/java/android/</code>）就是应用开发者接触的那一层，对外是 Android 平台公开接口，文档发布在 developer.android.com，每个接口绑定 API Level 版本。</p>
+<p><code>android.*</code> 包下面大概 50 个顶级包。应用调用 API 时，例如调用 <code>startActivity()</code>，<code>android.app</code> 包的 Activity 类内部会调用 <code>ActivityTaskManager</code>，底层是 AIDL 生成的 <code>IActivityTaskManager.Stub.Proxy</code> 代理类；代理发起 Binder 事务，跨进程调用 system_server 中的 <code>ActivityTaskManagerService</code>。</p>
+<p><strong>这套模式——客户端代理封装 Binder IPC，服务端实现业务逻辑——贯穿整个 Android 框架。</strong></p>
+<h3 id="138-第-7-层应用层">1.3.8 第 7 层：应用层</h3>
+<p>栈最顶层是应用，分为随系统编译的系统应用，以及用户安装第三方 App。</p>
+<h4 id="aosp-内置系统应用">AOSP 内置系统应用</h4>
+<p>AOSP 在 <code>packages/apps/</code> 存放大量系统应用：</p>
+<table>
+<thead>
+<tr>
+<th>应用</th>
+<th>目录</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SystemUI</strong></td>
+<td><code>frameworks/base/packages/SystemUI/</code></td>
+<td>状态栏、通知栏、快捷设置、锁屏、音量弹窗、电源菜单、最近任务、画中画</td>
+</tr>
+<tr>
+<td><strong>Launcher3</strong></td>
+<td><code>packages/apps/Launcher3/</code></td>
+<td>主屏幕、应用抽屉、小组件、工作区</td>
+</tr>
+<tr>
+<td><strong>Settings</strong></td>
+<td><code>packages/apps/Settings/</code></td>
+<td>系统设置</td>
+</tr>
+<tr>
+<td><strong>Contacts</strong></td>
+<td><code>packages/apps/Contacts/</code></td>
+<td>联系人管理</td>
+</tr>
+<tr>
+<td><strong>Dialer</strong></td>
+<td><code>packages/apps/Dialer/</code></td>
+<td>拨号、通话管理</td>
+</tr>
+<tr>
+<td><strong>Camera2</strong></td>
+<td><code>packages/apps/Camera2/</code></td>
+<td>相机 App</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>日历、时钟、短信、图库、文件管理器、浏览器、证书管理等</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>SystemUI 比较特殊，它不是普通应用，是高权限系统进程，提供整套系统 UI 外壳。运行独立进程 <code>com.android.systemui</code>，权限很高，深度和 WindowManagerService 交互。</p>
+</blockquote>
+<h4 id="contentprovider-内容提供者">ContentProvider 内容提供者</h4>
+<p><code>packages/providers/</code> 存放系统内容提供者：联系人数据库、媒体数据库、日历、短信、下载管理等。<code>SettingsProvider</code> 例外，路径在 <code>frameworks/base/packages/SettingsProvider/</code>。</p>
+<hr>
+<h2 id="14-仓库结构完整指南">1.4 仓库结构完整指南</h2>
+<p>AOSP 源码树规模极其庞大。完整同步，包含预编译工具链、全部仓库，占用磁盘超过 300GB。想要高效阅读源码，你必须熟悉顶层目录结构。</p>
+<p>源码使用 <code>repo</code> 工具管理，repo 封装 Git；<code>.repo/manifest.xml</code> 记录全部 Git 仓库清单，每个 Git 仓库映射源码树一个子文件夹。完整 AOSP 包含超过 1000 个独立 Git 仓库。</p>
+<h3 id="141-运行时与核心库">1.4.1 运行时与核心库</h3>
+<h4 id="art--android-runtime"><code>art/</code> — Android Runtime</h4>
+<p>ART 虚拟机，执行 Java/Kotlin 应用和框架代码。包含 runtime、编译器 dex2oat、dex 解析、测试套件、性能 benchmark。</p>
+<blockquote>
+<p>面向读者：运行时工程师、GC、JIT/AOT 编译器开发；排查类加载、JNI 问题的开发者。</p>
+</blockquote>
+<h4 id="bionic--android-c-库"><code>bionic/</code> — Android C 库</h4>
+<p>Bionic 是 Android C 库、数学库、动态链接器。包含各架构汇编优化实现，动态链接器 linker 实现了 Treble 需要的命名空间隔离。</p>
+<blockquote>
+<p>面向读者：C/C++ 原生开发，排查 malloc 内存、链接器加载、ABI 差异问题。</p>
+</blockquote>
+<h4 id="libcore--java-核心库"><code>libcore/</code> — Java 核心库</h4>
+<p>Android 版 Java 标准库，实现 <code>java.*</code>、<code>javax.*</code> 系列 API，基于 OpenJDK 做大量定制，替换 glibc 为 Bionic，使用 android.icu 文本库。</p>
+<blockquote>
+<p>面向读者：排查 Java 标准库行为，维护 ART Mainline 模块。</p>
+</blockquote>
+<h4 id="libnativehelper--jni-辅助库"><code>libnativehelper/</code> — JNI 辅助库</h4>
+<p>JNI 工具头文件，提供 <code>jniRegisterNativeMethods()</code> 等工具，减少平台各处 JNI 重复样板代码。</p>
+<h4 id="dalvik--遗留-dalvik-虚拟机历史遗留"><code>dalvik/</code> — 遗留 Dalvik 虚拟机（历史遗留）</h4>
+<p>Android 5.0 之后 Dalvik 虚拟机本体已经移除；该目录只保留老 dx 工具、字节码工具、历史文档。</p>
+<h3 id="142-framework-框架">1.4.2 Framework 框架</h3>
+<h4 id="frameworks--android-框架"><code>frameworks/</code> — Android 框架</h4>
+<p>AOSP 中最大最重要目录。包含整套应用框架、原生服务、系统库、系统组件。</p>
+<ul>
+<li><code>frameworks/base/</code>：核心框架，Java API、system_server 服务、SystemUI、命令行工具 am/pm/wm</li>
+<li><code>frameworks/native/</code>：C/C++ 原生框架，SurfaceFlinger、AudioFlinger、libbinder、servicemanager</li>
+<li><code>frameworks/av/</code>：音视频框架，CameraService、AudioFlinger、Codec2 媒体编解码</li>
+</ul>
+<blockquote>
+<p>面向读者：几乎所有 AOSP 开发者。应用开发者看 bug 溯源；系统工程师修改系统服务；OEM 厂商定制 SystemUI、设置；SoC 厂商对接 HAL 接口。</p>
+</blockquote>
+<h4 id="packages--应用mainline-模块contentprovider后台服务"><code>packages/</code> — 应用、Mainline 模块、ContentProvider、后台服务</h4>
+<ul>
+<li><code>packages/apps/</code>：系统应用 55+ 款，Launcher3、Settings、Camera2 等</li>
+<li><code>packages/modules/</code>：Mainline 模块 40+，蓝牙、Wi-Fi、Connectivity、Telephony、Media、Permission、NpuManager 等，可通过 Play 商店独立升级</li>
+<li><code>packages/providers/</code>：内容提供者</li>
+<li><code>packages/services/</code>：Telecomm 等后台服务</li>
+</ul>
+<blockquote>
+<p>面向读者：研究系统 App 架构的应用开发者；OEM 定制预装应用；Mainline 模块开发人员。</p>
+</blockquote>
+<h3 id="143-构建系统">1.4.3 构建系统</h3>
+<h4 id="build--构建系统"><code>build/</code> — 构建系统</h4>
+<p>AOSP 混合编译体系：<strong>Soong（基于 Blueprint，Go 语言编写）</strong> 为主，遗留 Make 作为兼容。</p>
+<ul>
+<li><code>build/soong/</code> Soong 编译逻辑，cc/java/apex/rust 模块编译规则</li>
+<li><code>build/make/</code> 传统 Make 编译系统，envsetup.sh 定义 lunch/m/mm 等命令</li>
+</ul>
+<p>构建脚本后缀：<code>Android.bp</code>（Soong 推荐）；<code>Android.mk</code>（老 Make，正在迁移）。</p>
+<blockquote>
+<p>面向读者：所有编译 AOSP 的开发者；编译报错优先看这里。</p>
+</blockquote>
+<h4 id="toolchain--编译器-pgo-profile-配置"><code>toolchain/</code> — 编译器 PGO profile 配置</h4>
+<p>不存放编译器二进制；存放 AFDO 采样 profile，给 Clang 做真实业务路径性能优化。真正编译器二进制放在 prebuilts。</p>
+<h4 id="prebuilts--预编译二进制产物"><code>prebuilts/</code> — 预编译二进制产物</h4>
+<p>源码树体积最大目录，预编译 Clang/LLVM、JDK、SDK、aapt2、模拟器二进制、gradle 插件，编译过程不需要本地编译这些工具。</p>
+<blockquote>
+<p>面向读者：更新工具链、排查编译工具报错、搭建编译环境。</p>
+</blockquote>
+<h3 id="144-平台与硬件相关">1.4.4 平台与硬件相关</h3>
+<h4 id="system--底层核心系统组件"><code>system/</code> — 底层核心系统组件</h4>
+<p>内核与 Framework 之间底层组件：init 进程、debuggerd 崩溃捕获、libcutils 工具库、sepolicy SELinux 策略、apexd APEX 管理、netd 网络守护进程、vold 卷管理、lmkd 低内存查杀、logd 日志守护进程、hwservicemanager、linkerconfig 链接命名空间。</p>
+<p>Android 17 新增 <code>system/fs/</code>（fs_mgr 从 system/core 迁移），<code>system/mmd</code> 内存管理守护进程，<code>system/lfi/</code> 轻量级故障隔离沙箱。</p>
+<blockquote>
+<p>面向读者：系统工程师、安全研究人员、boot 启动、存储、网络、内存问题调试。</p>
+</blockquote>
+<h4 id="hardware--硬件抽象-hal"><code>hardware/</code> — 硬件抽象 HAL</h4>
+<p><code>hardware/interfaces/</code> 存放 AIDL/HAL 接口定义；还有各芯片厂商参考 HAL 实现 qcom、samsung、nxp 等。Android 17 新增 <code>hardware/sdv/</code> 软件定义车机 SDV HAL。</p>
+<blockquote>
+<p>面向读者：HAL 实现开发、SoC bring-up、驱动工程师。</p>
+</blockquote>
+<h4 id="device--设备产品配置"><code>device/</code> — 设备产品配置</h4>
+<p>每一台支持设备对应一份配置。BoardConfig.mk 板级配置、device.mk 产品包配置、overlay 资源覆盖、设备专属 selinux 策略、init.*.rc 开机脚本。执行 <code>lunch</code> 选择编译 target 本质就是选择这里定义的产品。</p>
+<h4 id="kernel--内核配置与预编译镜像"><code>kernel/</code> — 内核配置与预编译镜像</h4>
+<p>存放 GKI 配置片段、预编译内核镜像、内核测试套件；<strong>完整内核源码是独立仓库，不在此处</strong>。</p>
+<h4 id="bootable--开机与-recovery-模式"><code>bootable/</code> — 开机与 Recovery 模式</h4>
+<p>Recovery 模式，处理 OTA 升级、恢复出厂设置。现代设备使用 <code>system/update_engine</code> 做 A/B 无缝升级。</p>
+<h4 id="trusty--trusty-可信执行环境-tee"><code>trusty/</code> — Trusty 可信执行环境 TEE</h4>
+<p>Google 参考 TEE，ARM TrustZone 安全世界操作系统，存放密钥、生物特征模板、DRM 相关安全操作。</p>
+<h3 id="145-测试与开发工具">1.4.5 测试与开发工具</h3>
+<h4 id="cts--cts-兼容性测试套件"><code>cts/</code> — CTS 兼容性测试套件</h4>
+<p>几十万条测试用例，保证 API 兼容性。想要预装 GMS，OEM 设备必须通过 CTS。</p>
+<h4 id="test--测试基础设施"><code>test/</code> — 测试基础设施</h4>
+<p>VTS 厂商测试套件，专门测试 HAL HIDL/AIDL 接口合规性。</p>
+<h4 id="platform_testing--平台级集成测试"><code>platform_testing/</code> — 平台级集成测试</h4>
+<p>覆盖不属于公开 API 的平台内部行为。</p>
+<h4 id="development--开发示例工具"><code>development/</code> — 开发示例、工具</h4>
+<p>系统级样例代码，VNDK 辅助工具。</p>
+<h4 id="tools--各类开发分析工具"><code>tools/</code> — 各类开发分析工具</h4>
+<p><strong>Metalava</strong>：提取 API 签名，强制 API 兼容性规则；
+<strong>TradeFederation</strong>：测试框架，运行 CTS/VTS；
+还有 repohooks、dexter、安全分析工具等。</p>
+<h4 id="sdk--sdk-编译支持"><code>sdk/</code> — SDK 编译支持</h4>
+<p>编译对外 Android SDK 产物配置。</p>
+<h4 id="pdk--platform-development-kit-平台开发包"><code>pdk/</code> — Platform Development Kit 平台开发包</h4>
+<p>Google 给合作厂商 NDA 保密分发，新版本正式发布前就可以开始设备移植。</p>
+<h3 id="146-external--第三方开源库">1.4.6 external/ — 第三方开源库</h3>
+<p>470+ 子目录，全部是外部开源组件：boringssl、sqlite、skia 图形库、libvpx 媒体、okhttp 网络、icu 文本、gtest 单元测试、tensorflow-lite 机器学习等。每个库保留上游原始许可证。Android 17 新增 <code>external/lfi/</code> 轻量级故障隔离上游工具。</p>
+<h3 id="147-out--编译输出目录">1.4.7 out/ — 编译输出目录</h3>
+<p>不会纳入 git 版本管理。全部编译产物放在这里：img 镜像、中间临时文件。<code>out/target/product/&lt;device&gt;/</code> 存放可以 fastboot 烧录镜像。完整编译会产生上百 GB 中间文件。</p>
+<blockquote>
+<p>饼图说明源码磁盘占用：prebuilts 预编译占 45%；external 第三方库 20%；frameworks 框架 12%；out 编译输出 10%；cts+test 测试 5%；art+bionic 运行时 3%；system 系统组件 2%；其余各类合计 3%。
+绝大部分磁盘空间来自预编译二进制与第三方库；真正 Android 自研代码（框架、运行时、系统组件）只占很小一部分，但代码行数依然数千万级别。</p>
+</blockquote>
+<hr>
+<h2 id="15-各个角色维护分工">1.5 各个角色维护分工</h2>
+<p>Android 生态由 Google、芯片厂商 SoC、OEM 设备厂商、开源社区共同协作。搞清楚谁维护哪一块，你才知道 bug 该提交给谁、patch 该发给谁，理解架构背后各方约束。</p>
+<h3 id="151-google-职责">1.5.1 Google 职责</h3>
+<p>Google 是 AOSP 主要维护方，绝大部分框架代码、运行时改进、构建系统、测试基础设施由 Google 工程师开发维护。</p>
+<ol>
+<li><strong>框架开发</strong>：system_server 全部系统服务、Framework API、SurfaceFlinger/AudioFlinger 原生服务、媒体框架、Soong 构建系统。</li>
+<li><strong>API 治理</strong>：API 评审委员会审核新增公开 API；Metalava+CTS 强制执行 API 兼容；管理 API Level 版本；API 废弃策略。</li>
+<li><strong>兼容性</strong>：维护 CTS、CDD 文档、VTS 测试套件、Treble/VNDK 稳定性规则；GTS 为 GMS 闭源测试套件。</li>
+<li><strong>Mainline 模块</strong>：开发可通过 Play 商店独立升级的模块；Android 17 已经超过 30 个 Mainline 模块，包含 Connectivity、Media、Permission、ART、NPU Manager 等。</li>
+<li><strong>参考硬件</strong>：Pixel 设备、模拟器 goldfish、Cuttlefish 虚拟设备；Tensor 芯片全栈调优。</li>
+<li><strong>安全</strong>：月度安全公告与补丁、SELinux 策略、Verified Boot、Keystore/StrongBox 安全规范。</li>
+</ol>
+<h3 id="152-soc-芯片厂商职责高通联发科三星-lsigoogle-tensor展锐">1.5.2 SoC 芯片厂商职责（高通、联发科、三星 LSI、Google Tensor、展锐）</h3>
+<p>负责软件栈底层：</p>
+<ol>
+<li><strong>内核 BSP 板级支持包</strong>：SoC 设备树、片上外设驱动、DVFS 电源调度、温控、内核调度调优。</li>
+<li><strong>HAL 实现交付</strong>：相机 ISP 驱动、3A 算法；GPU 驱动+HWC 显示合成；音频 DSP；传感器 hub；Modem RIL；硬件编解码；NPU 驱动；Wi-Fi、蓝牙、GNSS HAL。</li>
+</ol>
+<blockquote>
+<p>Treble 架构下，SoC 只需要交付一套 HAL，OEM 可以升级 Framework。实际大版本 Android 升级仍然需要 SoC 更新 BSP，但小版本安全补丁可以不依赖芯片厂商。</p>
+</blockquote>
+<h3 id="153-oem-设备厂商职责三星小米oppo一加摩托罗拉索尼">1.5.3 OEM 设备厂商职责（三星、小米、OPPO、一加、摩托罗拉、索尼）</h3>
+<p>面向消费者最终产品，负责：</p>
+<ol>
+<li><strong>设备 Bring-up 整机移植</strong>：板级设备树、分区布局、init 脚本、SELinux 定制、内核配置裁剪。</li>
+<li><strong>用户体验定制</strong>：SystemUI 状态栏/快捷设置/锁屏；自定义 Launcher 桌面；设置页面新增项；主题图标动画铃声；开机动画。</li>
+<li><strong>功能开发</strong>：分屏、DeX 桌面模式、手写笔；计算摄影；安全套件（Knox、小米安全中心）；无障碍；双卡、本地支付区域定制。</li>
+<li><strong>测试认证</strong>：CTS、GMS GTS 认证、运营商测试、FCC/CE 地区合规。</li>
+<li><strong>版本维护</strong>：把新版 Android 移植到老设备；合入月度安全补丁；Mainline 模块分发；Modem/TrustZone 固件更新。</li>
+</ol>
+<h3 id="154-开源社区贡献">1.5.4 开源社区贡献</h3>
+<ol>
+<li><strong>自定义 ROM 开发</strong>：LineageOS、GrapheneOS、CalyxOS、/e/OS、Android-x86 等。基于 AOSP 构建替代发行版；侧重硬件兼容、隐私安全。</li>
+<li><strong>Bug 反馈与代码评审</strong>：AOSP Gerrit 接受外部提交，流程比普通开源严格；issuetracker.google.com 提交 bug；邮件列表交流。</li>
+<li><strong>第三方自定义内核</strong>：社区优化调度、提前合入上游 Linux 改进。</li>
+<li><strong>修改工具生态</strong>：Xposed 运行时 hook、Magisk 无系统分区 root，深度利用 ART、init、dm-verity 机制修改系统行为。</li>
+</ol>
+<hr>
+<h2 id="16-aosp-版本历史">1.6 AOSP 版本历史</h2>
+<h3 id="161-完整版本表">1.6.1 完整版本表</h3>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>API Level</th>
+<th>代号</th>
+<th>发布时间</th>
+<th>关键特性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1.0</strong></td>
+<td>1</td>
+<td>无代号</td>
+<td>2008-09</td>
+<td>首个正式版本，HTC Dream(G1)；Gmail、地图、浏览器、应用商店基础</td>
+</tr>
+<tr>
+<td><strong>1.1</strong></td>
+<td>2</td>
+<td>Petit Four（内部）</td>
+<td>2009-02</td>
+<td>bug 修复，API 微调</td>
+</tr>
+<tr>
+<td><strong>1.5</strong></td>
+<td>3</td>
+<td><strong>Cupcake 纸杯蛋糕</strong></td>
+<td>2009-04</td>
+<td>虚拟键盘、视频录制、AppWidget 小组件、动画切换</td>
+</tr>
+<tr>
+<td><strong>1.6</strong></td>
+<td>4</td>
+<td><strong>Donut 甜甜圈</strong></td>
+<td>2009-09</td>
+<td>CDMA 支持、多屏幕尺寸、快速搜索框、耗电统计展示</td>
+</tr>
+<tr>
+<td><strong>2.0</strong></td>
+<td>5</td>
+<td><strong>Eclair 闪电泡芙</strong></td>
+<td>2009-10</td>
+<td>多账号、Exchange 邮件、HTML5、蓝牙 2.1、动态壁纸</td>
+</tr>
+<tr>
+<td><strong>2.0.1</strong></td>
+<td>6</td>
+<td>Eclair</td>
+<td>2009-12</td>
+<td>次要更新</td>
+</tr>
+<tr>
+<td><strong>2.1</strong></td>
+<td>7</td>
+<td>Eclair MR1</td>
+<td>2010-01</td>
+<td>动态壁纸 API，5 屏桌面</td>
+</tr>
+<tr>
+<td><strong>2.2</strong></td>
+<td>8</td>
+<td><strong>Froyo 冻酸奶</strong></td>
+<td>2010-05</td>
+<td>Dalvik JIT 即时编译；USB 网络共享；Wi-Fi 热点；App 安装 SD 卡；V8 JS 引擎</td>
+</tr>
+<tr>
+<td><strong>2.3</strong></td>
+<td>9</td>
+<td><strong>Gingerbread 姜饼</strong></td>
+<td>2010-12</td>
+<td>NFC、SIP VoIP、陀螺仪气压计 API；并发 GC；全新黑绿主题 UI</td>
+</tr>
+<tr>
+<td><strong>2.3.3</strong></td>
+<td>10</td>
+<td>Gingerbread MR1</td>
+<td>2011-02</td>
+<td>NFC API 改进、新传感器</td>
+</tr>
+<tr>
+<td><strong>3.0</strong></td>
+<td>11</td>
+<td><strong>Honeycomb 蜂巢</strong></td>
+<td>2011-02</td>
+<td>平板专属；ActionBar；Fragment；硬件加速 2D 图形；全息 UI</td>
+</tr>
+<tr>
+<td><strong>3.1</strong></td>
+<td>12</td>
+<td>Honeycomb MR1</td>
+<td>2011-05</td>
+<td>USB host API、MTP/PTP、游戏手柄支持</td>
+</tr>
+<tr>
+<td><strong>3.2</strong></td>
+<td>13</td>
+<td>Honeycomb MR2</td>
+<td>2011-07</td>
+<td>屏幕兼容性改进</td>
+</tr>
+<tr>
+<td><strong>4.0</strong></td>
+<td>14</td>
+<td><strong>Ice Cream Sandwich 冰淇淋三明治</strong></td>
+<td>2011-10</td>
+<td>手机平板统一体验；人脸解锁；流量统计；Android Beam NFC 分享；Holo 主题</td>
+</tr>
+<tr>
+<td><strong>4.0.3</strong></td>
+<td>15</td>
+<td>Ice Cream Sandwich MR1</td>
+<td>2011-12</td>
+<td>Social stream API、日历提供者改进</td>
+</tr>
+<tr>
+<td><strong>4.1</strong></td>
+<td>16</td>
+<td><strong>Jelly Bean 果冻豆</strong></td>
+<td>2012-07</td>
+<td>Project Butter 黄油计划：三重缓冲、VSYNC、60 帧流畅；可展开通知；Google Now</td>
+</tr>
+<tr>
+<td><strong>4.2</strong></td>
+<td>17</td>
+<td>Jelly Bean MR1</td>
+<td>2012-11</td>
+<td>多用户支持（平板）、Daydream 屏保、应用验证、高级短信确认</td>
+</tr>
+<tr>
+<td><strong>4.3</strong></td>
+<td>18</td>
+<td>Jelly Bean MR2</td>
+<td>2013-07</td>
+<td>蓝牙低功耗 BLE、受限配置文件、OpenGL ES 3.0、引入 SELinux（宽容模式）</td>
+</tr>
+<tr>
+<td><strong>4.4</strong></td>
+<td>19</td>
+<td><strong>KitKat 奇巧巧克力</strong></td>
+<td>2013-10</td>
+<td>Project Svelte 低内存优化，适配 512MB 低端设备；存储访问框架 SAF；打印框架；ART 作为开发者选项引入；部分核心域 SELinux 强制模式</td>
+</tr>
+<tr>
+<td><strong>5.0</strong></td>
+<td>21</td>
+<td><strong>Lollipop 棒棒糖</strong></td>
+<td>2014-11</td>
+<td><strong>ART 正式替代 Dalvik，AOT 预编译</strong>；Material Design；64 位 ABI；Project Volta(JobScheduler、耗电分析)；多网络 API；SELinux 全部域强制模式</td>
+</tr>
+<tr>
+<td><strong>5.1</strong></td>
+<td>22</td>
+<td>Lollipop MR1</td>
+<td>2015-03</td>
+<td>双卡、设备保护（恢复出厂保护）、HD 高清语音通话</td>
+</tr>
+<tr>
+<td><strong>6.0</strong></td>
+<td>23</td>
+<td><strong>Marshmallow 棉花糖</strong></td>
+<td>2015-10</td>
+<td><strong>运行时权限</strong>替代旧安装时权限；Doze 深度休眠；App 待机；指纹 API；USB-C；可 adoptable 存储</td>
+</tr>
+<tr>
+<td><strong>7.0</strong></td>
+<td>24</td>
+<td><strong>Nougat 牛轧糖</strong></td>
+<td>2016-08</td>
+<td>分屏多窗口；通知直接回复；Vulkan；<strong>ART 开启 JIT+AOT 混合模式</strong>；基于文件加密；A/B 无缝 OTA 升级</td>
+</tr>
+<tr>
+<td><strong>7.1</strong></td>
+<td>25</td>
+<td>Nougat MR1</td>
+<td>2016-10</td>
+<td>应用快捷方式、图片键盘、增强动态壁纸、Daydream VR</td>
+</tr>
+<tr>
+<td><strong>8.0</strong></td>
+<td>26</td>
+<td><strong>Oreo 奥利奥</strong></td>
+<td>2017-08</td>
+<td><strong>Project Treble</strong> 框架/vendor 分区分离；通知渠道；自动填充；画中画 PIP；自适应图标</td>
+</tr>
+<tr>
+<td><strong>8.1</strong></td>
+<td>27</td>
+<td>Oreo MR1</td>
+<td>2017-12</td>
+<td>Android Go（低内存设备）、神经网络 API 1.0</td>
+</tr>
+<tr>
+<td><strong>9</strong></td>
+<td>28</td>
+<td><strong>Pie 派</strong></td>
+<td>2018-08</td>
+<td>手势导航；AI 自适应电池亮度；刘海屏 API；Wi-Fi RTT 室内定位；Biometric 生物识别 API；DNS over TLS</td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td>29</td>
+<td>Android 10</td>
+<td>2019-09</td>
+<td>公开不再使用甜品代号；深色主题；<strong>分区存储 scoped-storage</strong>；手势导航；折叠屏；5G API；<strong>Project Mainline APEX 模块</strong>；bubbles 气泡通知</td>
+</tr>
+<tr>
+<td><strong>11</strong></td>
+<td>30</td>
+<td>Android 11</td>
+<td>2020-09</td>
+<td>通知会话分组；气泡；一次性权限；<strong>HAL 支持 Stable AIDL</strong>；5G 增强；无线调试；设备控件智能家居</td>
+</tr>
+<tr>
+<td><strong>12</strong></td>
+<td>31</td>
+<td>Android 12</td>
+<td>2021-10</td>
+<td><strong>Material You 壁纸动态取色主题</strong>；<strong>GKI 通用内核镜像</strong>；隐私仪表盘；模糊定位；麦克风摄像头指示器；启动画面 API；Mainline 模块扩充</td>
+</tr>
+<tr>
+<td><strong>12L</strong></td>
+<td>32</td>
+<td>Android 12L</td>
+<td>2022-03</td>
+<td>大屏优化（平板、折叠屏、ChromeOS）；任务栏、多列布局、更好分屏</td>
+</tr>
+<tr>
+<td><strong>13</strong></td>
+<td>33</td>
+<td><strong>Android 13</strong></td>
+<td>2022-08</td>
+<td>按应用语言偏好、主题应用图标、通知权限、照片选择器、预测式返回手势、可编程着色器（AGSL）</td>
+</tr>
+<tr>
+<td><strong>14</strong></td>
+<td>34</td>
+<td><strong>Android 14</strong></td>
+<td>2023-10</td>
+<td>语法屈折 API、区域偏好、路径互操作、凭据管理器、Health Connect、超 HDR、无损 USB 音频；<strong>平台稳定性</strong>改进</td>
+</tr>
+<tr>
+<td><strong>15</strong></td>
+<td>35</td>
+<td><strong>Android 15（Vanilla Ice Cream）</strong></td>
+<td>2024</td>
+<td>应用归档、部分屏幕共享、卫星连接 API、改进 PDF 渲染、<strong>AV1 软件编解码</strong>、NFC 点击支付改进、隐私空间（敏感应用独立配置文件）、录屏投屏增强安全、Health Connect 扩展</td>
+</tr>
+<tr>
+<td><strong>16</strong></td>
+<td>36</td>
+<td><strong>Android 16（Baklava）</strong></td>
+<td>2025-06</td>
+<td><strong>16 KB 页大小</strong>面向 API 36 新应用强制支持；<strong>Live Updates 通知 API</strong> 用于持续任务（网约车、外卖、导航）；<strong>预测式返回手势</strong>面向 API 36 应用默认开启；<strong>Edge-to-edge 强制</strong>扩展（必须显式退出）；<strong>自适应布局</strong>面向大屏/折叠屏应用要求；Linux <strong>6.12</strong> LTS GKI；Mainline 模块继续扩充；性能等级 16</td>
+</tr>
+<tr>
+<td><strong>17</strong></td>
+<td>37</td>
+<td><strong>Android 17（Cinnamon Bun）</strong></td>
+<td>2026</td>
+<td>新 <strong>Software Defined Vehicle（SDV）</strong> 平台（<code>system/software_defined_vehicle/</code>、<code>device/google/sdv/</code>、<code>hardware/sdv/</code>）；<strong>NPU Manager</strong> Mainline 模块（<code>packages/modules/NpuManager</code>）用于设备端 NPU/AI 加速器；<strong>Lightweight Fault Isolation（LFI）</strong> 进程内沙箱（<code>system/lfi</code>、<code>external/lfi</code>），首个用于 swcodec APEX；内存管理守护进程 <strong>mmd</strong> 和 <strong>pmgd</strong> Process Memory Guardian；<code>fs_mgr</code> 从 <code>system/core</code> 迁移到 <code>system/fs</code>；完整版本编码（<code>SDK_INT_FULL</code>）支持小版本；首个 <code>android17-6.18</code>（Linux <strong>6.18</strong>）GKI 配置</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="17-开发者成长之路本书路线图">1.7 开发者成长之路：本书路线图</h2>
+<p>与 AOSP 打交道是一段旅程：从下载源码开始，逐步深入到理解、修改、编译、测试以及为平台做贡献。本节概述典型开发者成长路径，并将其映射到本书各章节。</p>
+<h3 id="171-阶段-1下载源码并编译">1.7.1 阶段 1：下载源码并编译</h3>
+<p>第一步是下载 AOSP 源码并编译。这在 <strong>第 2 章：搭建开发环境</strong> 中讲解。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span># 安装 repo 工具</span></span>
+<span class="line"><span>mkdir -p ~/bin</span></span>
+<span class="line"><span>curl https://storage.googleapis.com/git-repo-downloads/repo &gt; ~/bin/repo</span></span>
+<span class="line"><span>chmod a+x ~/bin/repo</span></span>
+<span class="line"><span># 初始化 AOSP 仓库</span></span>
+<span class="line"><span>mkdir aosp &amp;&amp; cd aosp</span></span>
+<span class="line"><span>repo init -u https://android.googlesource.com/platform/manifest -b main</span></span>
+<span class="line"><span># 同步所有仓库（约下载 100 GB）</span></span>
+<span class="line"><span>repo sync -c -j$(nproc) --optimized-fetch</span></span>
+<span class="line"><span># 配置编译环境</span></span>
+<span class="line"><span>source build/envsetup.sh</span></span>
+<span class="line"><span># 选择编译目标</span></span>
+<span class="line"><span>lunch aosp_cf_x86_64_phone-trunk_staging-eng</span></span>
+<span class="line"><span># 编译</span></span>
+<span class="line"><span>m -j$(nproc)</span></span></code></pre>
+<p><code>lunch</code> 命令选择一个 <strong>product（设备配置）</strong>、一个 <strong>release（发布版本）</strong> 和一个 <strong>variant（变体）</strong>（eng、userdebug 或 user）：</p>
+<table>
+<thead>
+<tr>
+<th>变体</th>
+<th>说明</th>
+<th>调试能力</th>
+<th>性能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eng</code></td>
+<td>工程版。完整调试，所有开发工具。</td>
+<td>完整：adb root、全部日志、调试断言</td>
+<td>较低（调试开销）</td>
+</tr>
+<tr>
+<td><code>userdebug</code></td>
+<td>类生产版带调试。<strong>开发推荐。</strong></td>
+<td>adb root、调试日志可用</td>
+<td>接近生产</td>
+</tr>
+<tr>
+<td><code>user</code></td>
+<td>生产版。面向消费者的正式出货版本。</td>
+<td>无 adb root、日志受限</td>
+<td>完整生产性能</td>
+</tr>
+</tbody>
+</table>
+<p>编译完成后，可以启动模拟器：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span># 启动 Cuttlefish（云/无头模拟器）</span></span>
+<span class="line"><span>launch_cvd</span></span>
+<span class="line"><span># 或者启动图形模拟器</span></span>
+<span class="line"><span>emulator</span></span></code></pre>
+<h3 id="172-阶段-2理解架构">1.7.2 阶段 2：理解架构</h3>
+<p>源码已下载、编译能跑起来之后，下一步是理解各部件如何拼装在一起。这贯穿前面几章：</p>
+<ul>
+<li><strong>第 1 章（本章）</strong>：全景——架构、源码树、利益相关方</li>
+<li><strong>第 2 章</strong>：编译环境、repo、Soong/Blueprint、<code>Android.bp</code> 模块、编译目标与变体</li>
+<li><strong>第 4 章</strong>：开机流程——从 bootloader 到锁屏</li>
+<li><strong>第 9 章</strong>：Binder IPC——所有跨进程通信的骨干</li>
+<li><strong>第 20 章</strong>：system_server 与框架服务——Android 的心脏</li>
+</ul>
+<h3 id="173-阶段-3探索与调试">1.7.3 阶段 3：探索与调试</h3>
+<p>理解了架构之后，你可以探索运行中的系统：</p>
+<ul>
+<li><strong>第 58 章</strong>：调试工具——logcat、dumpsys、Perfetto、LLDB、Android Studio 平台调试</li>
+<li><strong>第 18 章</strong>：ART 内部机制——垃圾回收、JIT/AOT、类加载</li>
+<li><strong>第 13 章</strong>：图形流水线——SurfaceFlinger、HWUI、BufferQueue、HWC</li>
+<li><strong>第 22 章</strong>：Activity 与窗口管理——AMS、WMS、任务栈</li>
+</ul>
+<h3 id="174-阶段-4修改与开发">1.7.4 阶段 4：修改与开发</h3>
+<p>理解带来修改的能力：</p>
+<ul>
+<li><strong>第 10 章</strong>：HAL 开发——实现一个硬件抽象层</li>
+<li><strong>第 48-49 章</strong>：系统应用开发——定制 SystemUI、Launcher、Settings</li>
+<li><strong>第 54 章</strong>：Mainline 模块——开发可升级组件</li>
+</ul>
+<h3 id="175-阶段-5进阶与精通">1.7.5 阶段 5：进阶与精通</h3>
+<ul>
+<li><strong>第 58 章</strong>：性能优化——性能剖析、追踪、基准测试</li>
+<li><strong>第 40 章</strong>：安全架构——SELinux、Keystore、Verified Boot、沙箱</li>
+<li><strong>第 57 章</strong>：测试——CTS、VTS、编写平台测试</li>
+</ul>
+<h3 id="176-追踪一次-api-调用的完整链路">1.7.6 追踪一次 API 调用的完整链路</h3>
+<p>为了让你对“理解架构”有具体的感知，我们追踪应用调用 <code>startActivity(intent)</code> 时发生什么：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">sequenceDiagram</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> App</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> Application (App Process)</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> Binder</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> Binder (Kernel Driver)</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> ATMS</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> ActivityTaskManagerService (system_server)</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> AMS</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> ActivityManagerService (system_server)</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> WMS</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> WindowManagerService (system_server)</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> Zygote</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> Zygote</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> Target</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> Target Application (New Process)</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> SF</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> SurfaceFlinger</span></span>
+<span class="line"><span style="color:#FFAB70">    App</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">App</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> startActivity(intent)</span></span>
+<span class="line"><span style="color:#FFAB70">    App</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">App</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Instrumentation&lt;br /&gt;.execStartActivity()</span></span>
+<span class="line"><span style="color:#FFAB70">    App</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Binder</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> IActivityTaskManager&lt;br /&gt;.startActivity()</span></span>
+<span class="line"><span style="color:#FFAB70">    Binder</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">ATMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> onTransact()</span></span>
+<span class="line"><span style="color:#F97583">    Note</span><span style="color:#B392F0"> over</span><span style="color:#FFAB70"> ATMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 解析 Intent&lt;br /&gt;(查询 PackageManager)</span></span>
+<span class="line"><span style="color:#F97583">    Note</span><span style="color:#B392F0"> over</span><span style="color:#FFAB70"> ATMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 检查权限</span></span>
+<span class="line"><span style="color:#F97583">    Note</span><span style="color:#B392F0"> over</span><span style="color:#FFAB70"> ATMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 查找或创建 Task</span></span>
+<span class="line"><span style="color:#FFAB70">    ATMS</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">ATMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Pause 当前 Activity</span></span>
+<span class="line"><span style="color:#F97583">    alt</span><span style="color:#9ECBFF"> 目标进程未运行</span></span>
+<span class="line"><span style="color:#FFAB70">        ATMS</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">AMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> startProcessLocked()</span></span>
+<span class="line"><span style="color:#FFAB70">        AMS</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Zygote</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Fork 请求&lt;br /&gt;(通过 socket)</span></span>
+<span class="line"><span style="color:#FFAB70">        Zygote</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Target</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> fork() + specialize</span></span>
+<span class="line"><span style="color:#FFAB70">        Target</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">AMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> attachApplication()</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    ATMS</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Target</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> scheduleTransaction()&lt;br /&gt;(LaunchActivityItem)</span></span>
+<span class="line"><span style="color:#FFAB70">    Target</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Target</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> handleLaunchActivity()</span></span>
+<span class="line"><span style="color:#FFAB70">    Target</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Target</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Activity.onCreate()</span></span>
+<span class="line"><span style="color:#FFAB70">    Target</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Target</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Activity.onStart()</span></span>
+<span class="line"><span style="color:#FFAB70">    Target</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Target</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Activity.onResume()</span></span>
+<span class="line"><span style="color:#FFAB70">    Target</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">WMS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> addWindow()</span></span>
+<span class="line"><span style="color:#FFAB70">    WMS</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">SF</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> createLayer()</span></span>
+<span class="line"><span style="color:#FFAB70">    Target</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">SF</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Dequeue buffer&lt;br /&gt;(via BufferQueue)</span></span>
+<span class="line"><span style="color:#FFAB70">    Target</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">Target</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Draw content&lt;br /&gt;(HWUI / Skia)</span></span>
+<span class="line"><span style="color:#FFAB70">    Target</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">SF</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Queue buffer</span></span>
+<span class="line"><span style="color:#FFAB70">    SF</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">SF</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Composite all layers</span></span>
+<span class="line"><span style="color:#FFAB70">    SF</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">SF</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Submit frame&lt;br /&gt;to display</span></span></code></pre>
+<p>这一次 API 调用穿越了：</p>
+<ol>
+<li><strong>应用进程</strong>（Java）——<code>Activity.startActivity()</code></li>
+<li><strong>Binder IPC</strong>（内核驱动）——跨进程事务</li>
+<li><strong>system_server</strong>（Java）——<code>ActivityTaskManagerService</code> 解析 Intent、检查权限、管理任务/Activity 栈</li>
+<li><strong>Zygote</strong>（原生）——如需要则 fork 新进程</li>
+<li><strong>目标应用进程</strong>（Java）——Activity 生命周期回调</li>
+<li><strong>WindowManagerService</strong>（Java）——窗口创建与布局</li>
+<li><strong>SurfaceFlinger</strong>（原生 C++）——显示合成</li>
+<li><strong>Display HAL</strong>（vendor）——硬件合成与显示输出</li>
+</ol>
+<p>一个 <code>startActivity()</code> 调用几乎触及 Android 栈的每一层。这正是理解完整架构的价值所在。当出现问题（启动缓慢、权限拒绝、显示异常）时，你需要知道该去调查哪一层。</p>
+<hr>
+<h2 id="18-关键概念速查">1.8 关键概念速查</h2>
+<p>本节对全书以及 AOSP 开发中最重要的概念给出简要定义。每个概念都会在后续章节深入展开；这里充当快速参考与导航。</p>
+<h3 id="181-binder">1.8.1 Binder</h3>
+<p><strong>Binder</strong> 是 Android 的跨进程通信（IPC）机制。它是 Android 最重要的架构元素——几乎所有进程间通信都走 Binder。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> LR</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Client_Process</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"客户端进程"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Proxy</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"AIDL Proxy&lt;br /&gt;(自动生成)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Kernel</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"内核"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        BinderDriver</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"/dev/binder&lt;br /&gt;(Binder 驱动)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Server_Process</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"服务端进程"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Stub</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"AIDL Stub&lt;br /&gt;(自动生成)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Impl</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Service&lt;br /&gt;实现"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    Proxy </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"transact()"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> BinderDriver</span></span>
+<span class="line"><span style="color:#FFAB70">    BinderDriver </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"onTransact()"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> Stub</span></span>
+<span class="line"><span style="color:#FFAB70">    Stub </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Impl</span></span>
+<span class="line"><span style="color:#FFAB70">    style Client_Process fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e3f2fd</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">1565c0</span></span>
+<span class="line"><span style="color:#FFAB70">    style Kernel fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fce4ec</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">c62828</span></span>
+<span class="line"><span style="color:#FFAB70">    style Server_Process fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e8f5e9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span></code></pre>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li><strong>基于事务</strong>：客户端发送数据 parcel，收到回复 parcel</li>
+<li><strong>默认同步</strong>：调用方阻塞直到服务端处理完请求返回</li>
+<li><strong>面向对象</strong>：Binder 引用以对象句柄形式跨进程传递</li>
+<li><strong>内核中介</strong>：内核驱动负责数据拷贝、UID/PID 校验、引用计数</li>
+<li><strong>三个实例</strong>：<code>/dev/binder</code>（框架 IPC）、<code>/dev/hwbinder</code>（框架到 HAL）、<code>/dev/vndbinder</code>（vendor 之间）</li>
+</ul>
+<p><strong>源码位置：</strong></p>
+<ul>
+<li>内核驱动：<code>drivers/android/binder.c</code>（在内核源码中）</li>
+<li>原生库：<code>frameworks/native/libs/binder/</code></li>
+<li>Java 层：<code>frameworks/base/core/java/android/os/Binder.java</code></li>
+<li>AIDL 编译器：<code>system/tools/aidl/</code></li>
+<li>ServiceManager：<code>frameworks/native/cmds/servicemanager/</code></li>
+</ul>
+<p>Binder 在 <strong>第 9 章</strong> 深入讲解。</p>
+<h3 id="182-hal硬件抽象层">1.8.2 HAL（硬件抽象层）</h3>
+<p><strong>Hardware Abstraction Layer</strong> 是 Android 框架与硬件专属 vendor 实现之间的标准化接口。它让同一套 Android 框架可以在不同硬件平台上运行。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#FFAB70">    FW</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Framework Service&lt;br /&gt;(例如 SensorService)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    HAL_IF</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"HAL Interface&lt;br /&gt;(例如 ISensors.aidl)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    HAL_IMPL</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"HAL Implementation&lt;br /&gt;(vendor 专属)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Driver</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Kernel Driver"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    FW </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> HAL_IF</span></span>
+<span class="line"><span style="color:#FFAB70">    HAL_IF </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> HAL_IMPL</span></span>
+<span class="line"><span style="color:#FFAB70">    HAL_IMPL </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Driver</span></span>
+<span class="line"><span style="color:#FFAB70">    style FW fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e8f5e9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span>
+<span class="line"><span style="color:#FFAB70">    style HAL_IF fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fff9c4</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">f9a825</span></span>
+<span class="line"><span style="color:#FFAB70">    style HAL_IMPL fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">f3e5f5</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">7b1fa2</span></span>
+<span class="line"><span style="color:#FFAB70">    style Driver fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fce4ec</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">c62828</span></span></code></pre>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>由 AIDL（现代）或 HIDL（遗留）接口定义</li>
+<li>由 SoC 厂商和 OEM 实现</li>
+<li>运行在独立进程（跨进程 HAL）以保证稳定性和安全性</li>
+<li>由 VTS（厂商测试套件）测试</li>
+<li>带版本号以保证向后兼容</li>
+</ul>
+<p><strong>源码位置：</strong> <code>hardware/interfaces/</code>（接口定义）</p>
+<p>HAL 开发在 <strong>第 10 章</strong> 讲解。</p>
+<h3 id="183-aidlandroid-接口定义语言">1.8.3 AIDL（Android 接口定义语言）</h3>
+<p><strong>AIDL</strong> 是用于定义 Binder IPC 接口的语言。AIDL 编译器在 Java、C++、NDK C++、Rust 中生成客户端代理和服务端桩代码。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>// 示例：IActivityManager.aidl</span></span>
+<span class="line"><span>interface IActivityManager {</span></span>
+<span class="line"><span>    int startActivity(in IApplicationThread caller,</span></span>
+<span class="line"><span>                      in String callingPackage,</span></span>
+<span class="line"><span>                      in Intent intent,</span></span>
+<span class="line"><span>                      in String resolvedType,</span></span>
+<span class="line"><span>                      in IBinder resultTo,</span></span>
+<span class="line"><span>                      in String resultWho,</span></span>
+<span class="line"><span>                      int requestCode,</span></span>
+<span class="line"><span>                      int flags,</span></span>
+<span class="line"><span>                      in ProfilerInfo profilerInfo,</span></span>
+<span class="line"><span>                      in Bundle options);</span></span>
+<span class="line"><span>    // ... 更多方法</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>同时用于框架 IPC 和 HAL 接口（Stable AIDL）</li>
+<li>支持 parcelable 数据类型（自定义数据结构）</li>
+<li>为 Java、C++（libbinder）、NDK C++（libbinder_ndk）、Rust 生成代码</li>
+<li>Stable AIDL 接口带版本号且向后兼容</li>
+<li>取代 HIDL 用于新增 HAL 接口（Android 11+）</li>
+</ul>
+<p><strong>源码位置：</strong></p>
+<ul>
+<li>AIDL 编译器：<code>system/tools/aidl/</code></li>
+<li>框架 AIDL 文件：遍布 <code>frameworks/base/core/java/</code></li>
+<li>HAL AIDL 文件：<code>hardware/interfaces/</code></li>
+</ul>
+<h3 id="184-hidl硬件接口定义语言">1.8.4 HIDL（硬件接口定义语言）</h3>
+<p><strong>HIDL</strong> 随 Project Treble（Android 8.0）引入，作为 HAL 接口定义语言。它已被 Stable AIDL 取代用于新接口，但仍在存量 HAL 中使用。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>// 示例：ICameraDevice.hal (HIDL)</span></span>
+<span class="line"><span>interface ICameraDevice {</span></span>
+<span class="line"><span>    getCameraCharacteristics()</span></span>
+<span class="line"><span>        generates (Status status, CameraMetadata cameraCharacteristics);</span></span>
+<span class="line"><span>    open(ICameraDeviceCallback callback)</span></span>
+<span class="line"><span>        generates (Status status, ICameraDeviceSession session);</span></span>
+<span class="line"><span>    // ...</span></span>
+<span class="line"><span>};</span></span></code></pre>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>使用 <code>hwbinder</code> 传输（与框架 binder 分离）</li>
+<li>严格版本号（例如 <code>android.hardware.camera.device@3.5</code>）</li>
+<li>支持 binderized（跨进程）和 passthrough（进程内）两种模式</li>
+<li><strong>冻结：不再接受新增 HIDL 接口</strong></li>
+<li>存量 HIDL 接口将一直维护到迁移到 AIDL 为止</li>
+</ul>
+<p><strong>源码位置：</strong></p>
+<ul>
+<li>HIDL 编译器：<code>system/tools/hidl/</code></li>
+<li>HAL HIDL 文件：<code>hardware/interfaces/</code>（<code>.hal</code> 文件）</li>
+<li>运行时：<code>system/libhidl/</code></li>
+</ul>
+<h3 id="185-apexandroid-pony-express">1.8.5 APEX（Android Pony EXpress）</h3>
+<p><strong>APEX</strong> 是 Mainline 模块的打包格式。这些 Android 组件可以独立于完整系统更新进行升级，由 Google Play 商店分发。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> APEX</span><span style="color:#E1E4E8">_Package["</span><span style="color:#FFAB70">APEX Package </span><span style="color:#F97583">(</span><span style="color:#9ECBFF">.apex</span><span style="color:#F97583">)</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        Manifest</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"apex_manifest.pb"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Payload</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Payload Image&lt;br /&gt;(ext4 文件系统)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        PubKey</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Public Key"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Contents</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Payload 内容"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Libs</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"共享库"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Bins</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"二进制"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Jars</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Java 库"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        FW_Res</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"框架资源"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    Payload </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Contents</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Boot</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"开机时"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        APEXd</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"apexd 守护进程"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Mount</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"挂载到&lt;br /&gt;/apex/{name}/"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    APEXd </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> APEX_Package</span></span>
+<span class="line"><span style="color:#FFAB70">    APEX_Package </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Mount</span></span>
+<span class="line"><span style="color:#FFAB70">    style APEX_Package fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e3f2fd</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">1565c0</span></span>
+<span class="line"><span style="color:#FFAB70">    style Contents fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e8f5e9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span>
+<span class="line"><span style="color:#FFAB70">    style Boot fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fff9c4</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">f9a825</span></span></code></pre>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>自带文件系统镜像的自包含包</li>
+<li>开机时挂载到 <code>/apex/&lt;name&gt;/</code></li>
+<li>加密签名并校验</li>
+<li>支持回滚（如果新版本出问题）</li>
+<li>通过 Play 商店更新（不需要完整 OTA）</li>
+<li>由 <code>apexd</code> 管理（<code>system/apex/apexd/</code>）</li>
+<li>示例：ART、Conscrypt、Media、DNS Resolver、WiFi、Tethering</li>
+</ul>
+<p><strong>源码位置：</strong> <code>system/apex/</code>（基础设施）、<code>packages/modules/</code>（各模块）</p>
+<h3 id="186-mainline">1.8.6 Mainline</h3>
+<p><strong>Project Mainline</strong>（Android 10 引入）是 Android 模块化计划，让核心组件可以通过 Play 商店独立更新。每个 Mainline 模块以 APEX 或更新的 APK 交付。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Traditional</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"传统更新模型"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Google1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Google 发布&lt;br /&gt;新版 Android"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        SoC1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"SoC 厂商更新 BSP"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        OEM1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"OEM 集成并测试"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Carrier1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"运营商批准"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        User1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"用户收到更新&lt;br /&gt;(6-18 个月后)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Google1 </span><span style="color:#F97583">--</span><span style="color:#9ECBFF">&gt; SoC1 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> OEM1 </span><span style="color:#F97583">--</span><span style="color:#9ECBFF">&gt; Carrier1 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> User1</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Mainline_Model</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Mainline 更新模型"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Google2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Google 更新&lt;br /&gt;Mainline 模块"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        PlayStore</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Google Play 商店&lt;br /&gt;分发更新"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        User2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"用户收到更新&lt;br /&gt;(几天/几周)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        Google2 </span><span style="color:#F97583">--</span><span style="color:#9ECBFF">&gt; PlayStore </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> User2</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    style Traditional fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">fce4ec</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">c62828</span></span>
+<span class="line"><span style="color:#FFAB70">    style Mainline_Model fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e8f5e9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span></code></pre>
+<p>截至 Android 17，Mainline 模块包括：</p>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>类型</th>
+<th>更新内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ART</strong></td>
+<td>APEX</td>
+<td>运行时本身（GC、JIT、AOT、核心库）</td>
+</tr>
+<tr>
+<td><strong>Conscrypt</strong></td>
+<td>APEX</td>
+<td>TLS/SSL（证书处理、加密）</td>
+</tr>
+<tr>
+<td><strong>DNS Resolver</strong></td>
+<td>APEX</td>
+<td>DNS 解析</td>
+</tr>
+<tr>
+<td><strong>Media</strong></td>
+<td>APEX</td>
+<td>媒体编解码、解封装器、框架</td>
+</tr>
+<tr>
+<td><strong>WiFi</strong></td>
+<td>APEX</td>
+<td>WiFi 协议栈</td>
+</tr>
+<tr>
+<td><strong>Tethering</strong></td>
+<td>APEX</td>
+<td>热点与网络共享</td>
+</tr>
+<tr>
+<td><strong>Bluetooth</strong></td>
+<td>APEX</td>
+<td>蓝牙协议栈</td>
+</tr>
+<tr>
+<td><strong>Connectivity</strong></td>
+<td>APEX</td>
+<td>网络连接</td>
+</tr>
+<tr>
+<td><strong>Telephony</strong></td>
+<td>APEX</td>
+<td>电话框架</td>
+</tr>
+<tr>
+<td><strong>Permission</strong></td>
+<td>APEX</td>
+<td>运行时权限逻辑与 UI（分发 PermissionController 和 SafetyCenter 应用）</td>
+</tr>
+<tr>
+<td><strong>Neural Networks</strong></td>
+<td>APEX</td>
+<td>NNAPI 运行时</td>
+</tr>
+<tr>
+<td><strong>NPU Manager</strong></td>
+<td>APEX</td>
+<td>NPU/AI 加速器管理（17 新增，第 53 章）</td>
+</tr>
+<tr>
+<td><strong>StatsD</strong></td>
+<td>APEX</td>
+<td>指标采集</td>
+</tr>
+<tr>
+<td><strong>IPsec</strong></td>
+<td>APEX</td>
+<td>VPN</td>
+</tr>
+<tr>
+<td><strong>SDK Extensions</strong></td>
+<td>APEX</td>
+<td>API 扩展机制</td>
+</tr>
+<tr>
+<td><strong>AdServices</strong></td>
+<td>APEX</td>
+<td>隐私保护广告</td>
+</tr>
+<tr>
+<td><strong>UWB</strong></td>
+<td>APEX</td>
+<td>超宽带</td>
+</tr>
+<tr>
+<td><strong>ADB</strong></td>
+<td>APEX</td>
+<td>Android Debug Bridge</td>
+</tr>
+<tr>
+<td><strong>Health Connect</strong></td>
+<td>APEX</td>
+<td>健康与健身数据</td>
+</tr>
+<tr>
+<td><strong>Scheduling</strong></td>
+<td>APEX</td>
+<td>任务调度</td>
+</tr>
+<tr>
+<td><strong>Profiling</strong></td>
+<td>APEX</td>
+<td>性能剖析</td>
+</tr>
+<tr>
+<td><strong>On-Device Personalization</strong></td>
+<td>APEX</td>
+<td>ML 个性化</td>
+</tr>
+</tbody>
+</table>
+<p>Mainline 的意义怎么强调都不为过。在 Mainline 之前，DNS 解析器或媒体框架出现安全漏洞，必须靠一次完整系统更新。那次更新要穿过整套 OEM/运营商更新管线。有了 Mainline，Google 可以在数周内把修复推送到数十亿台设备，无论 OEM 是否发布了系统更新。</p>
+<h3 id="187-artandroid-运行时">1.8.7 ART（Android 运行时）</h3>
+<p><strong>ART</strong> 是在 Android 上执行应用和框架代码的托管运行时。它于 Android 5.0 取代 Dalvik。</p>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>执行 DEX 字节码（Dalvik Executable 格式）</li>
+<li>多级执行：解释器、JIT 编译器、AOT 编译器（<code>dex2oat</code>）</li>
+<li>配置文件引导优化：JIT profile 引导 AOT 编译</li>
+<li>并发压缩式垃圾回收器（CMC：Concurrent Mark-Compact，Android 14 起的默认方案；取代了老的 CC/Concurrent Copying 收集器）</li>
+<li>支持 32 位和 64 位架构（ARM、ARM64、x86、x86_64、RISC-V）</li>
+<li>本身是 Mainline 模块（可通过 Play 商店更新）</li>
+</ul>
+<p><strong>源码位置：</strong> <code>art/</code></p>
+<p>ART 内部机制在 <strong>第 18 章</strong> 讲解。</p>
+<h3 id="188-zygote">1.8.8 Zygote</h3>
+<p><strong>Zygote</strong> 是所有 Android 应用进程和 <code>system_server</code> 的父进程，它们都由 Zygote fork 而来。</p>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>开机早期由 <code>init</code> 启动</li>
+<li>预加载通用类（约 18,000 个，列在 <code>frameworks/base/config/preloaded-classes</code>）和资源</li>
+<li>监听 Unix 域 socket 等待 fork 请求</li>
+<li>使用 <code>fork()</code> 通过写时复制实现快速进程创建</li>
+<li>64 位设备上有两个实例：<code>zygote64</code>（主）和 <code>zygote</code>（32 位，用于遗留应用）</li>
+</ul>
+<p><strong>源码位置：</strong></p>
+<ul>
+<li>入口：<code>frameworks/base/cmds/app_process/</code></li>
+<li>Java：<code>frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</code></li>
+<li>Rust 实现的 Zygote 守护进程：<code>system/zygote/</code>（crates <code>zygote-sys</code>、<code>zygote-messages</code>、<code>zygote-core</code>、<code>zygote</code>）</li>
+</ul>
+<h3 id="189-system_server">1.8.9 system_server</h3>
+<p><strong>system_server</strong> 是所有基于 Java 的框架服务的宿主进程。它是开机时 Zygote fork 的第一个进程。</p>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>承载 100+ 系统服务（AMS、WMS、PMS 等）</li>
+<li>服务通过 Binder IPC 与应用通信</li>
+<li>以 <code>system</code> 用户（UID 1000）运行，拥有广泛权限</li>
+<li>system_server 崩溃会导致整个系统重启（软重启）</li>
+<li>是内核和 init 之后最关键的进程</li>
+</ul>
+<p><strong>源码位置：</strong></p>
+<ul>
+<li>入口：<code>frameworks/base/services/java/com/android/server/SystemServer.java</code></li>
+<li>服务：<code>frameworks/base/services/core/java/com/android/server/</code></li>
+<li>原生组件：<code>frameworks/base/services/core/jni/</code></li>
+</ul>
+<h3 id="1810-surfaceflinger">1.8.10 SurfaceFlinger</h3>
+<p><strong>SurfaceFlinger</strong> 是合成所有可见 surface（窗口、图层）为屏幕上最终画面的系统服务。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> LR</span></span>
+<span class="line"><span style="color:#FFAB70">    App1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"App 1&lt;br /&gt;窗口"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> BQ1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"BufferQueue"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    App2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"App 2&lt;br /&gt;窗口"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> BQ2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"BufferQueue"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    SysUI</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"SystemUI&lt;br /&gt;(状态栏)"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> BQ3</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"BufferQueue"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    Nav</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"导航栏"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> BQ4</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"BufferQueue"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    BQ1 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> SF</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"SurfaceFlinger"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    BQ2 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> SF</span></span>
+<span class="line"><span style="color:#FFAB70">    BQ3 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> SF</span></span>
+<span class="line"><span style="color:#FFAB70">    BQ4 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> SF</span></span>
+<span class="line"><span style="color:#FFAB70">    SF </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> HWC</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"HWC HAL&lt;br /&gt;(硬件&lt;br /&gt;合成器)"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    HWC </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> Display</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"显示"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    style SF fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e3f2fd</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">1565c0</span></span>
+<span class="line"><span style="color:#FFAB70">    style HWC fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">f3e5f5</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">7b1fa2</span></span>
+<span class="line"><span style="color:#FFAB70">    style Display fill</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">e8f5e9</span><span style="color:#E1E4E8">,</span><span style="color:#FFAB70">stroke</span><span style="color:#E1E4E8">:#</span><span style="color:#FFAB70">2e7d32</span></span></code></pre>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>通过 <code>BufferQueue</code> 接收所有可见窗口的缓冲区</li>
+<li>使用 HWC（硬件合成器）合成硬件图层、GPU 做客户端合成</li>
+<li>管理 VSYNC 时序和帧调度</li>
+<li>支持多显示器（内屏、外屏、虚拟屏）</li>
+<li>对显示性能至关重要（画面卡顿 = 肉眼可见的闪烁）</li>
+</ul>
+<p><strong>源码位置：</strong> <code>frameworks/native/services/surfaceflinger/</code></p>
+<p>图形流水线在 <strong>第 13 章</strong> 讲解。</p>
+<h3 id="1811-windowmanagerservicewms">1.8.11 WindowManagerService（WMS）</h3>
+<p><strong>WindowManagerService</strong> 管理窗口层级——决定哪些窗口可见、它们的大小位置、Z 轴顺序（堆叠）、输入焦点、交转/动画。</p>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>管理所有显示器上的所有窗口</li>
+<li>根据显示大小、insets、系统栏决定窗口布局</li>
+<li>与 SurfaceFlinger 协同进行图层创建与销毁</li>
+<li>管理窗口交转与动画</li>
+<li>强制窗口策略（哪些窗口能置顶、焦点规则）</li>
+<li>与 ActivityTaskManagerService 紧密协作处理 Activity 窗口</li>
+</ul>
+<p><strong>源码位置：</strong> <code>frameworks/base/services/core/java/com/android/server/wm/</code></p>
+<h3 id="1812-activitymanagerserviceams-activitytaskmanagerserviceatms">1.8.12 ActivityManagerService（AMS）/ ActivityTaskManagerService（ATMS）</h3>
+<p><strong>ActivityManagerService</strong> 管理应用进程，包括进程生命周期（启动、停止、杀死）、OOM 调整（内存压力下杀哪些进程）、广播分发。</p>
+<p><strong>ActivityTaskManagerService</strong>（Android 10 从 AMS 拆分出来）管理 Activity、任务和 Activity 栈。这是用户可见的“任务管理”。它决定哪个 Activity 在前台、处理任务切换、管理最近任务列表。</p>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>AMS：进程生命周期、OOM adj、广播分发、内容提供者、服务绑定</li>
+<li>ATMS：Activity 生命周期、任务管理、最近任务、多窗口</li>
+<li>合起来，它们是 system_server 中最复杂的服务</li>
+<li>源码目录 <code>am/</code> 存放 AMS，<code>wm/</code> 存放 ATMS 和 WMS（体现 Activity 与窗口管理紧密相关）</li>
+</ul>
+<p><strong>源码位置：</strong></p>
+<ul>
+<li>AMS：<code>frameworks/base/services/core/java/com/android/server/am/</code></li>
+<li>ATMS：<code>frameworks/base/services/core/java/com/android/server/wm/</code></li>
+</ul>
+<p>Activity 与窗口管理在 <strong>第 22 章</strong> 讲解。</p>
+<h3 id="1813-packagemanagerservicepms">1.8.13 PackageManagerService（PMS）</h3>
+<p><strong>PackageManagerService</strong> 负责与 APK 包相关的一切：安装、卸载、包查询、权限管理、Intent 解析、APK 校验。</p>
+<p><strong>关键特性：</strong></p>
+<ul>
+<li>开机时扫描并索引所有已安装包</li>
+<li>处理 APK 安装（包括 split APK）</li>
+<li>把 Intent 解析到目标组件</li>
+<li>管理权限（安装时和运行时）</li>
+<li>强制包签名与校验</li>
+<li>维护包状态（启用/禁用组件、默认处理器）</li>
+<li>是 system_server 中最复杂的服务之一</li>
+</ul>
+<p><strong>源码位置：</strong> <code>frameworks/base/services/core/java/com/android/server/pm/</code></p>
+<hr>
+<h2 id="19-aosp-开发工具概览">1.9 AOSP 开发工具概览</h2>
+<p>在深入后续章节细节之前，先了解一下与 AOSP 打交道时每天会用到的基本工具。</p>
+<h3 id="191-源码管理">1.9.1 源码管理</h3>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>命令</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>repo</strong></td>
+<td><code>repo init</code>、<code>repo sync</code></td>
+<td>多仓库管理（封装 Git）</td>
+</tr>
+<tr>
+<td><strong>git</strong></td>
+<td><code>git log</code>、<code>git diff</code>、<code>git commit</code></td>
+<td>单个仓库的版本控制</td>
+</tr>
+<tr>
+<td><strong>Gerrit</strong></td>
+<td>Web UI</td>
+<td>AOSP 贡献的代码评审系统</td>
+</tr>
+</tbody>
+</table>
+<h3 id="192-编译工具">1.9.2 编译工具</h3>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>命令</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>lunch</strong></td>
+<td><code>lunch &lt;target&gt;</code></td>
+<td>选择编译目标（设备 + 变体）</td>
+</tr>
+<tr>
+<td><strong>m</strong></td>
+<td><code>m</code></td>
+<td>编译整个平台</td>
+</tr>
+<tr>
+<td><strong>mm</strong></td>
+<td><code>mm</code></td>
+<td>编译当前目录中的模块</td>
+</tr>
+<tr>
+<td><strong>mmm</strong></td>
+<td><code>mmm &lt;path&gt;</code></td>
+<td>编译指定目录中的模块</td>
+</tr>
+<tr>
+<td><strong>mma</strong></td>
+<td><code>mma</code></td>
+<td>编译并包含依赖</td>
+</tr>
+<tr>
+<td><strong>soong_ui</strong></td>
+<td>（内部）</td>
+<td>构建系统入口</td>
+</tr>
+<tr>
+<td><strong>blueprint</strong></td>
+<td>（内部）</td>
+<td><code>.bp</code> 文件解析器</td>
+</tr>
+</tbody>
+</table>
+<h3 id="193-调试与分析">1.9.3 调试与分析</h3>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>命令示例</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>adb</strong></td>
+<td><code>adb shell</code>、<code>adb logcat</code></td>
+<td>设备通信、日志</td>
+</tr>
+<tr>
+<td><strong>logcat</strong></td>
+<td><code>adb logcat -s TAG</code></td>
+<td>系统和应用日志查看器</td>
+</tr>
+<tr>
+<td><strong>dumpsys</strong></td>
+<td><code>adb shell dumpsys activity</code></td>
+<td>导出系统服务状态</td>
+</tr>
+<tr>
+<td><strong>am</strong></td>
+<td><code>adb shell am start -n com.pkg/.Activity</code></td>
+<td>Activity 管理器命令</td>
+</tr>
+<tr>
+<td><strong>pm</strong></td>
+<td><code>adb shell pm list packages</code></td>
+<td>包管理器命令</td>
+</tr>
+<tr>
+<td><strong>wm</strong></td>
+<td><code>adb shell wm size</code></td>
+<td>窗口管理器命令</td>
+</tr>
+<tr>
+<td><strong>settings</strong></td>
+<td><code>adb shell settings get system font_scale</code></td>
+<td>读写系统设置</td>
+</tr>
+<tr>
+<td><strong>cmd</strong></td>
+<td><code>adb shell cmd package list packages</code></td>
+<td>通用服务命令接口</td>
+</tr>
+<tr>
+<td><strong>Perfetto</strong></td>
+<td><code>perfetto --txt -c config.pbtxt -o trace</code></td>
+<td>全系统追踪（pbtxt 配置需要 <code>--txt</code>）</td>
+</tr>
+<tr>
+<td><strong>systrace</strong></td>
+<td><code>systrace.py --time=5 gfx view</code></td>
+<td>遗留系统追踪</td>
+</tr>
+<tr>
+<td><strong>simpleperf</strong></td>
+<td><code>simpleperf record -p &lt;pid&gt;</code></td>
+<td>CPU 性能剖析</td>
+</tr>
+<tr>
+<td><strong>LLDB</strong></td>
+<td><code>lldb</code></td>
+<td>原生代码调试器</td>
+</tr>
+<tr>
+<td><strong>Android Studio</strong></td>
+<td>IDE</td>
+<td>Java/Kotlin 调试、布局检查</td>
+</tr>
+</tbody>
+</table>
+<h3 id="194-设备工具">1.9.4 设备工具</h3>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>命令</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>fastboot</strong></td>
+<td><code>fastboot flash system system.img</code></td>
+<td>烧录分区镜像</td>
+</tr>
+<tr>
+<td><strong>adb sideload</strong></td>
+<td><code>adb sideload update.zip</code></td>
+<td>从 recovery 安装 OTA</td>
+</tr>
+<tr>
+<td><strong>m snod</strong></td>
+<td><code>m snod</code></td>
+<td>用已编译包重建系统镜像</td>
+</tr>
+<tr>
+<td><strong>emulator</strong></td>
+<td><code>emulator</code></td>
+<td>QEMU 模拟器</td>
+</tr>
+<tr>
+<td><strong>launch_cvd</strong></td>
+<td><code>launch_cvd</code></td>
+<td>Cuttlefish 虚拟设备</td>
+</tr>
+<tr>
+<td><strong>lshal</strong></td>
+<td><code>adb shell lshal</code></td>
+<td>列出 HAL 服务</td>
+</tr>
+<tr>
+<td><strong>service</strong></td>
+<td><code>adb shell service list</code></td>
+<td>列出 Binder 服务</td>
+</tr>
+</tbody>
+</table>
+<h3 id="195-dumpsys-命令你的最佳帮手">1.9.5 dumpsys 命令：你的最佳帮手</h3>
+<p><code>dumpsys</code> 命令值得特别关注，因为它是 AOSP 开发中单个最有用的诊断工具。它查询系统服务并打印其内部状态：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># 列出所有服务</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#79B8FF"> -l</span></span>
+<span class="line"><span style="color:#6A737D"># 导出某个服务（示例）</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> activity</span><span style="color:#6A737D">              # AMS 状态（进程、任务等）</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> activity</span><span style="color:#9ECBFF"> activities</span><span style="color:#6A737D">   # 仅 Activity 栈</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> activity</span><span style="color:#9ECBFF"> processes</span><span style="color:#6A737D">    # 带 OOM adj 的进程列表</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> window</span><span style="color:#6A737D">               # WMS 状态（窗口、显示器）</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> window</span><span style="color:#9ECBFF"> displays</span><span style="color:#6A737D">       # 显示配置</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> package</span><span style="color:#F97583"> &lt;</span><span style="color:#9ECBFF">pk</span><span style="color:#E1E4E8">g</span><span style="color:#F97583">&gt;</span><span style="color:#6A737D">        # 包详情</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> meminfo</span><span style="color:#6A737D">              # 各进程内存占用</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> battery</span><span style="color:#6A737D">              # 电池状态</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> alarm</span><span style="color:#6A737D">                # 闹钟调度</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> jobscheduler</span><span style="color:#6A737D">         # 已调度任务</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> notification</span><span style="color:#6A737D">         # 通知状态</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> audio</span><span style="color:#6A737D">                # 音频状态</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> SurfaceFlinger</span><span style="color:#6A737D">       # SurfaceFlinger 状态</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> input</span><span style="color:#6A737D">                # 输入状态（设备、分发）</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> connectivity</span><span style="color:#6A737D">         # 网络状态</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> power</span><span style="color:#6A737D">                # 电源状态（唤醒锁等）</span></span>
+<span class="line"><span style="color:#B392F0">adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#9ECBFF"> dumpsys</span><span style="color:#9ECBFF"> usagestats</span><span style="color:#6A737D">           # 应用使用统计</span></span></code></pre>
+<p>每个系统服务都实现一个 <code>dump()</code> 方法，把当前状态以人类可读文本输出。调试任何问题时，<code>dumpsys</code> 相关服务通常是要跑的第一条命令。</p>
+<hr>
+<h2 id="110-本书使用的约定">1.10 本书使用的约定</h2>
+<p>全书采用如下约定：</p>
+<h3 id="1101-源码路径">1.10.1 源码路径</h3>
+<p>所有源码路径都以 AOSP 根目录为相对路径。当我们写：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java</span></span></code></pre>
+<p>意思是文件位于：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>&lt;AOSP_ROOT&gt;/frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java</span></span></code></pre>
+<p>其中 <code>&lt;AOSP_ROOT&gt;</code> 是你运行 <code>repo init</code> 和 <code>repo sync</code> 的目录。本书所有路径都相对于该根目录。</p>
+<h3 id="1102-代码清单">1.10.2 代码清单</h3>
+<p>代码清单包含语言标识符，并在相关处给出源码文件路径：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D">// frameworks/base/core/java/android/app/Activity.java</span></span>
+<span class="line"><span style="color:#F97583">public</span><span style="color:#F97583"> void</span><span style="color:#B392F0"> startActivity</span><span style="color:#E1E4E8">(Intent intent) {</span></span>
+<span class="line"><span style="color:#79B8FF">    this</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">startActivity</span><span style="color:#E1E4E8">(intent, </span><span style="color:#79B8FF">null</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>当代码被省略时，用省略号（<code>...</code>）表示略去段落：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#F97583">public</span><span style="color:#F97583"> class</span><span style="color:#B392F0"> ActivityManagerService</span><span style="color:#F97583"> extends</span><span style="color:#B392F0"> IActivityManager.Stub</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D">    // ... hundreds of fields ...</span></span>
+<span class="line"><span style="color:#E1E4E8">    @</span><span style="color:#F97583">Override</span></span>
+<span class="line"><span style="color:#F97583">    public</span><span style="color:#F97583"> void</span><span style="color:#B392F0"> startActivity</span><span style="color:#E1E4E8">(...) {</span></span>
+<span class="line"><span style="color:#6A737D">        // ... implementation ...</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<h3 id="1103-shell-命令">1.10.3 Shell 命令</h3>
+<p>Shell 命令以 <code>$</code> 前缀表示用户命令，<code>#</code> 前缀表示 root 命令：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">$</span><span style="color:#9ECBFF"> adb</span><span style="color:#9ECBFF"> shell</span><span style="color:#6A737D">                      # 连接设备 shell</span></span>
+<span class="line"><span style="color:#B392F0">$</span><span style="color:#9ECBFF"> source</span><span style="color:#9ECBFF"> build/envsetup.sh</span><span style="color:#6A737D">       # 配置编译环境</span></span>
+<span class="line"><span style="color:#6A737D"># setenforce 0                   # 关闭 SELinux（需要 root）</span></span></code></pre>
+<h3 id="1104-mermaid-图表">1.10.4 Mermaid 图表</h3>
+<p>本书大量使用 Mermaid 图表来做架构可视化、时序图和流程图。这些图表可以被任何支持 Mermaid 的 Markdown 查看器渲染（包括 GitHub、GitLab 以及大多数现代文档工具）。</p>
+<h3 id="1105-术语">1.10.5 术语</h3>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AOSP</strong></td>
+<td>Android Open Source Project</td>
+</tr>
+<tr>
+<td><strong>Framework</strong></td>
+<td>system_server 中的 Java/Kotlin 层和 <code>android.*</code> API</td>
+</tr>
+<tr>
+<td><strong>Native</strong></td>
+<td>C/C++ 代码（相对于 Java/Kotlin）</td>
+</tr>
+<tr>
+<td><strong>HAL</strong></td>
+<td>Hardware Abstraction Layer</td>
+</tr>
+<tr>
+<td><strong>Service</strong></td>
+<td>运行在 system_server（Java）或独立守护进程（native）中的系统服务</td>
+</tr>
+<tr>
+<td><strong>Process</strong></td>
+<td>拥有自己 PID 和内存空间的 OS 级进程</td>
+</tr>
+<tr>
+<td><strong>Binder service</strong></td>
+<td>可通过 Binder IPC 访问的服务</td>
+</tr>
+<tr>
+<td><strong>Client</strong></td>
+<td>调用 Binder 服务的进程</td>
+</tr>
+<tr>
+<td><strong>Server</strong></td>
+<td>承载 Binder 服务实现的进程</td>
+</tr>
+<tr>
+<td><strong>SoC</strong></td>
+<td>System on Chip（例如高通骁龙、联发科天玑）</td>
+</tr>
+<tr>
+<td><strong>OEM</strong></td>
+<td>Original Equipment Manufacturer（设备制造商，例如三星、小米）</td>
+</tr>
+<tr>
+<td><strong>BSP</strong></td>
+<td>Board Support Package（针对特定 SoC 的内核 + 驱动）</td>
+</tr>
+<tr>
+<td><strong>CTS</strong></td>
+<td>Compatibility Test Suite</td>
+</tr>
+<tr>
+<td><strong>VTS</strong></td>
+<td>Vendor Test Suite</td>
+</tr>
+<tr>
+<td><strong>GMS</strong></td>
+<td>Google Mobile Services</td>
+</tr>
+<tr>
+<td><strong>CDD</strong></td>
+<td>Compatibility Definition Document</td>
+</tr>
+<tr>
+<td><strong>GKI</strong></td>
+<td>Generic Kernel Image</td>
+</tr>
+<tr>
+<td><strong>GSI</strong></td>
+<td>Generic System Image</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1106-配合-ai-助手使用本书">1.10.6 配合 AI 助手使用本书</h3>
+<p>每一章都是纯 Markdown，带明确的源码文件引用。这让本书特别容易被 AI 助手用作背景资料来推理 AOSP 代码。</p>
+<p>助手不需要爬遍整个站点。把它指向 <a href="https://aospbooks.github.io/aosp-internal-book/llms.txt">https://aospbooks.github.io/aosp-internal-book/llms.txt</a>。这是一个 <a href="https://llmstxt.org">llmstxt.org</a> 风格的索引。它按 Part 分组列出每一章和附录，带一行描述和已发布 URL。</p>
+<p>助手可以先读 <code>llms.txt</code>，再决定哪一章与你问的子系统相关，只抓取那一章。这既省 token，又能给出更精准的回答。</p>
+<p>实用工作流：</p>
+<ul>
+<li><strong>把 URL 丢进系统提示或项目上下文。</strong> 大多数编码助手（Claude Code、Cursor、Copilot Workspace、Aider）都接受任意 URL 作为背景。<code>llms.txt</code> 很小（约 15 KB），轻松放得下。</li>
+<li><strong>按节号引用章节。</strong> 像 <code>9.4.2</code> 这样的节号在编辑过程中保持稳定。当你想引用某个具体主题时，节号是稳定的句柄。</li>
+<li><strong>搭配 <code>cs.android.com</code>。</strong> 本书的源码路径和行号能直接在 Android Code Search 上解析。这让助手可以通过路径验证或扩展书中的任何论断。</li>
+</ul>
+<hr>
+<h2 id="111-延伸阅读">1.11 延伸阅读</h2>
+<ul>
+<li><strong>AOSP 源码</strong>：<a href="https://source.android.com/">https://source.android.com/</a></li>
+<li><strong>AOSP 代码搜索</strong>：<a href="https://cs.android.com/">https://cs.android.com/</a></li>
+<li><strong>AOSP Gerrit（代码评审）</strong>：<a href="https://android-review.googlesource.com/">https://android-review.googlesource.com/</a></li>
+<li><strong>AOSP 问题跟踪器</strong>：<a href="https://issuetracker.google.com/issues?q=componentid:192735">https://issuetracker.google.com/issues?q=componentid:192735</a></li>
+<li><strong>Android 架构总览</strong>：<a href="https://source.android.com/docs/core/architecture">https://source.android.com/docs/core/architecture</a></li>
+<li><strong>Project Treble</strong>：<a href="https://source.android.com/docs/core/architecture/treble">https://source.android.com/docs/core/architecture/treble</a></li>
+<li><strong>Project Mainline</strong>：<a href="https://source.android.com/docs/core/ota/modular-system">https://source.android.com/docs/core/ota/modular-system</a></li>
+<li><strong>GKI</strong>：<a href="https://source.android.com/docs/core/architecture/kernel/generic-kernel-image">https://source.android.com/docs/core/architecture/kernel/generic-kernel-image</a></li>
+<li><strong>CTS 文档</strong>：<a href="https://source.android.com/docs/compatibility/cts">https://source.android.com/docs/compatibility/cts</a></li>
+<li><strong>CDD</strong>：<a href="https://source.android.com/docs/compatibility/cdd">https://source.android.com/docs/compatibility/cdd</a></li>
+<li><strong>Android API 参考</strong>：<a href="https://developer.android.com/reference">https://developer.android.com/reference</a></li>
+<li><strong>Android 平台架构</strong>：<a href="https://developer.android.com/guide/platform">https://developer.android.com/guide/platform</a></li>
+</ul>
+<hr>
+<h2 id="112-总结">1.12 总结</h2>
+<p>本章奠定了使用 AOSP 所需的基础知识：</p>
+<ol>
+<li><strong>AOSP 是开源基础底座</strong>，Android 生态构建其上。Google 增加 GMS（闭源）。OEM 增加定制。社区构建替代发行版。理解你在哪一层工作至关重要。</li>
+<li><strong>Android 架构是分层栈</strong>，从 Linux 内核经过 HAL、原生服务、ART 运行时、框架服务（system_server）、公开 API 到应用。每一层都有明确职责和与相邻层定义良好的接口。</li>
+<li><strong>源码树庞大但有组织。</strong> 30+ 个顶层目录各司其职。包括：<code>art/</code> 放运行时、<code>bionic/</code> 放 C 库、<code>frameworks/</code> 放应用框架、<code>hardware/</code> 放 HAL 接口、<code>system/</code> 放核心系统组件。还有 <code>packages/</code> 放应用和模块、<code>build/</code> 放构建系统等。</li>
+<li><strong>生态是四方协作。</strong> Google 提供框架、CTS 和 Mainline。SoC 厂商提供内核、HAL 和驱动。OEM 提供定制和整机 bring-up。社区提供自定义 ROM、bug 报告和贡献。</li>
+<li><strong>Android 经历了巨大演进</strong>，跨越 15+ 年、37 个 API 级别。重大架构变迁包括从 Dalvik 到 ART，以及 vendor 分离的 Project Treble。还包括模块化更新的 Project Mainline 和内核标准化的 GKI。</li>
+<li><strong>开发者之旅</strong>从下载和编译源码开始，推进到理解架构，再进阶到修改、测试和为平台做贡献。</li>
+<li><strong>核心概念</strong>——Binder、HAL、AIDL、HIDL、APEX、Mainline、ART、Zygote、system_server、SurfaceFlinger、WMS、AMS、PMS——是 AOSP 开发的词汇表。后续每一章你都会遇到它们。</li>
+</ol>
+<p>下一章，我们将搭建完整的 AOSP 开发环境：安装依赖、下载源码、配置编译、在模拟器上跑起第一次编译。</p>
+</div></article></main></div><footer class="site-footer">&copy; 2026 qng-stack</footer><script type="module" src="/_astro/BlogPost.astro_astro_type_script_index_0_lang.Cz6GC1N3.js"></script></body></html>

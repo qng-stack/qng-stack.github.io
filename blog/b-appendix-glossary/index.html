@@ -1,0 +1,167 @@
+<!DOCTYPE html><html lang="zh-CN"><head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><script type="module" src="/_astro/BaseHead.astro_astro_type_script_index_0_lang.CIKiyBwV.js"></script><link rel="icon" href="/favicon.ico"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="qng-stack" href="https://qng-stack.github.io/rss.xml"><meta name="generator" content="Astro v7.4.5"><!-- Canonical URL --><link rel="canonical" href="https://qng-stack.github.io/blog/b-appendix-glossary/"><!-- Primary Meta Tags --><title>附录 B：术语表</title><meta name="description" content="AOSP 以及本书中反复出现的关键术语、缩写与子系统名称，按字母顺序排列。"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://qng-stack.github.io/blog/b-appendix-glossary/"><meta property="og:title" content="附录 B：术语表"><meta property="og:description" content="AOSP 以及本书中反复出现的关键术语、缩写与子系统名称，按字母顺序排列。"><meta property="og:image" content="https://qng-stack.github.io/_astro/blog-placeholder-1.Bx0Zcyzv.jpg"><!-- Twitter --><meta name="twitter:card" content="summary_large_image"><link rel="stylesheet" href="/_astro/Header.BiL--6dQ.css"></head><body><header class="site-header"><div class="shell header-inner"><div class="header-start"><button class="outline-toggle" type="button" aria-expanded="false" aria-controls="chapter-outline"><span class="sr-only">本章目录</span><span class="outline-toggle-icon" aria-hidden="true"></span></button><a class="brand" href="/">qng-stack</a></div><div class="nav-links"><a href="/">首页</a><a href="/about">关于</a><a class="github-link" href="https://github.com/qng-stack" target="_blank"><span class="sr-only">qng-stack 的 GitHub</span><svg viewBox="0 0 16 16" aria-hidden="true" width="18" height="18"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg></a></div></div><div class="outline-backdrop"></div></header><div class="chapter-spread"><main><article><p class="article-kicker"><time datetime="2026-11-09T17:35:50.000Z">2026年11月10日</time></p><h1 class="article-title">附录 B：术语表</h1><div class="prose"><h1 id="附录-b术语表">附录 B：术语表</h1>
+<p>AOSP 以及本书中反复出现的关键术语、缩写与子系统名称，按字母顺序排列。</p>
+<hr>
+<p><strong>ABI</strong>（应用二进制接口，Application Binary Interface）
+: 编译后的代码与操作系统之间的底层接口约定。它规定了某一架构（如 arm64、x86_64、riscv64）下的调用约定、数据布局与系统调用号。</p>
+<p><strong>ADB</strong>（Android 调试桥，Android Debug Bridge）
+: 通过 USB 或 TCP 与 Android 设备通信的命令行工具与守护进程。提供 shell 访问、文件传输、应用安装与调试能力。</p>
+<p><strong>AIDL</strong>（Android 接口定义语言，Android Interface Definition Language）
+: 用于定义进程间 IPC 接口约定的接口描述语言。从 Android 12 起，现代 AIDL 在 HAL 接口上取代 HIDL，并支持 Java、C++、NDK 与 Rust 后端。</p>
+<p><strong>AMS</strong>（ActivityManagerService）
+: 负责管理应用进程、执行权限校验、并与 ATMS 协同处理 activity 生命周期的系统服务。位于 <code>system_server</code> 中。</p>
+<p><strong>ANR</strong>（应用无响应，Application Not Responding）
+: 应用主线程阻塞过久时触发的系统对话框。时限为：输入事件 5 秒、前台广播接收器 10 秒、后台广播接收器 60 秒。由 AMS 监控并执行 ANR 超时判定。</p>
+<p><strong>AOT</strong>（提前编译，Ahead-Of-Time compilation）
+: 在执行之前把 DEX 字节码编译为原生机器码，由 <code>dex2oat</code> 完成。产出存于磁盘的 OAT 文件，以缩短冷启动时间。</p>
+<p><strong>APEX</strong>（Android Pony EXpress）
+: 用于可更新系统组件（Mainline 模块）的文件格式与安装机制。APEX 是一种类 zip 的容器，内含文件系统镜像、manifest 与签名，由 <code>apexd</code> 管理。</p>
+<p><strong>ART</strong>（Android 运行时，Android Runtime）
+: 执行 Android 应用的托管运行时。在 Android 5.0 取代 Dalvik。它结合了 AOT 编译、JIT 编译与解释器，并配有并发垃圾回收器。</p>
+<p><strong>ATMS</strong>（ActivityTaskManagerService）
+: 管理 activity 任务栈、返回栈导航与多窗口模式的系统服务。在 Android 10 从 AMS 中拆出，以把任务管理与进程管理分离。</p>
+<p><strong>AVB</strong>（Android 已验证启动，Android Verified Boot）
+: 一种信任链机制，用密码学签名校验各启动分区的完整性。又称 <code>vbmeta</code>；由 bootloader 与 <code>fs_mgr</code> 执行。</p>
+<p><strong>AVF</strong>（Android 虚拟化框架，Android Virtualization Framework）
+: 在 Android 上启用硬件隔离虚拟机的框架。由虚拟化服务、pKVM hypervisor 与 Microdroid 客户操作系统组成。在 Android 13 引入。</p>
+<p><strong>Binder</strong>
+: Android 的主要 IPC 机制。它由内核驱动（<code>/dev/binder</code>）与用户空间库组合而成，在进程间提供面向对象、同步的远程过程调用，并内置引用计数与死亡通知。</p>
+<p><strong>Bionic</strong>
+: Android 自行实现的 C 库，用来取代 glibc。包含 <code>libc</code>、<code>libm</code>、<code>libdl</code> 以及动态链接器（<code>linker64</code>）。针对体积、安全（支持 MTE）与 Android 专有能力（系统属性）做了优化。</p>
+<p><strong>BLAST</strong>
+: 一个 SurfaceFlinger 内部的代号。源码中只把它展开为 “Buffer State Layer” 这条路径，并没有官方的缩写全称。它是 SurfaceFlinger 中取代旧式 BufferQueue 模型的现代缓冲提交路径，把缓冲提交与 SurfaceFlinger 事务捆绑，实现原子化、同步的更新，经由 <code>BLASTBufferQueue</code> 完成。</p>
+<p><strong>Blueprint</strong>
+: Soong 使用的构建描述语言。<code>Android.bp</code> 文件用类 JSON 的声明式语法定义模块（库、二进制、APK、APEX 包）。</p>
+<p><strong>BufferHub</strong>（旧式/已移除）
+: 曾经用于进程间零拷贝共享缓冲的系统，与旧的 VR 及低延迟显示路径相关。在现代 AOSP 中实际上已被移除：不再保留 <code>libui</code> 头文件，VR 支持也已消失。此处列出它，只是因为较早的资料仍会提到。</p>
+<p><strong>BufferQueue</strong>
+: 用于在进程间共享图形缓冲的生产者-消费者队列。生产者（应用）出队/入队缓冲；消费者（SurfaceFlinger）获取/释放缓冲。正被 BLASTBufferQueue 取代。</p>
+<p><strong>CDM</strong>（CompanionDeviceManager）
+: 管理 Android 设备与配套设备（手表、耳机等）之间关联关系的系统服务，提供发现、配对与权限委派。</p>
+<p><strong>Choreographer</strong>
+: Java 侧的协调器，按显示 VSYNC 信号同步调度绘制、动画与输入回调。它是 Android UI 渲染循环的心跳。</p>
+<p><strong>CTS</strong>（兼容性测试套件，Compatibility Test Suite）
+: 设备厂商必须通过才能认证 Android 兼容性的大型测试套件。测试覆盖 API 行为、权限、安全与平台特性。</p>
+<p><strong>Cuttlefish</strong>
+: Google 的可配置虚拟 Android 设备，为云端测试与开发而设计。运行在带 KVM 的 Linux 上，提供的虚拟设备比传统模拟器更接近真实硬件。</p>
+<p><strong>DEX</strong>（Dalvik 可执行文件，Dalvik Executable）
+: Android 应用的字节码格式。<code>.dex</code> 文件以面向内存受限设备优化的寄存器式指令集，容纳编译后的 Java/Kotlin 代码。</p>
+<p><strong>DisplayContent</strong>
+: WMS 中代表单个逻辑显示全部窗口状态的容器。持有该显示专属的窗口层级树、策略与配置。</p>
+<p><strong>DMA-BUF</strong>
+: Linux 内核框架，用于在设备与用户空间之间共享缓冲。在 Android 图形栈中被大量用于 GPU、显示、相机与视频硬件之间的零拷贝共享。</p>
+<p><strong>DRM/KMS</strong>（直接渲染管理器 / 内核模式设置，Direct Rendering Manager / Kernel Mode Setting）
+: Linux 内核的图形子系统。KMS 负责显示模式设置与翻页；DRM 管理 GPU 命令提交。HWC HAL 通常封装 DRM/KMS。</p>
+<p><strong>EGL</strong>
+: OpenGL ES 与原生窗口系统之间的接口。负责管理显示连接、渲染上下文与表面。Android 的 EGL 实现位于 <code>libEGL.so</code>。</p>
+<p><strong>Fastboot</strong>
+: 用于向 Android 设备刷写固件镜像的协议与工具。在操作系统启动之前的 bootloader 中运行，提供对分区的底层访问。</p>
+<p><strong>GKI</strong>（通用内核镜像，Generic Kernel Image）
+: 由 Google 维护的内核二进制，为厂商内核模块提供稳定的 ABI（KMI）。属于 Project Treble 的内核模块化工作。</p>
+<p><strong>Goldfish</strong>
+: 传统 Android 模拟器的虚拟设备平台。得名于最初基于 QEMU 的虚拟硬件。在云端测试场景正逐步被 Cuttlefish 取代。</p>
+<p><strong>Gralloc</strong>（图形分配器，Graphics Allocator）
+: 负责在设备内存中分配图形缓冲的 HAL。它拆分为 <code>allocator</code>（分配）与 <code>mapper</code>（CPU 映射）两个接口。</p>
+<p><strong>GTS</strong>（Google 测试套件，Google Test Suite）
+: 由 Google 运行的专有测试套件，用于在已认证设备上验证 GMS（Google Mobile Services）集成。与开源的 CTS 不同。</p>
+<p><strong>HAL</strong>（硬件抽象层，Hardware Abstraction Layer）
+: Android 框架与硬件相关驱动代码之间的标准化接口。HAL 把厂商实现隔离在稳定接口（AIDL 或旧式 HIDL）之后。</p>
+<p><strong>HIDL</strong>（HAL 接口定义语言，HAL Interface Definition Language）
+: Project Treble（Android 8.0）为 HAL 引入的接口定义语言。从 Android 12 起，HAL 正逐步改用 AIDL。</p>
+<p><strong>HWC</strong>（硬件合成器，Hardware Composer）
+: 驱动显示合成的 HAL。SurfaceFlinger 把图层合成委派给 HWC，由它决定使用专用硬件叠加平面，还是回退到 GPU 合成。</p>
+<p><strong>HWUI</strong>
+: Android 的硬件加速 2D 渲染库。它通过由 Skia 支撑的显示列表架构，把 <code>Canvas</code> 绘制命令转换为 GPU 操作。运行在专用的 <code>RenderThread</code> 上。</p>
+<p><strong>IME</strong>（输入法编辑器，Input Method Editor）
+: 软件键盘与文本输入框架。IME 是一种特殊服务，为文本输入提供窗口，由 <code>InputMethodManagerService</code> 管理。</p>
+<p><strong>InputFlinger</strong>
+: 原生输入栈（<code>libinputflinger</code>）。它从内核（<code>/dev/input/</code>）读取输入事件，处理后通过 <code>InputDispatcher</code> 派发到正确的窗口。与 SurfaceFlinger 不同，它不是一个独立守护进程，而由 <code>InputManagerService</code> 承载在 <code>system_server</code> 内。</p>
+<p><strong>Intent</strong>
+: Android 用于向组件请求动作的消息传递对象。Intent 可以启动 activity、service 或广播事件，由 <code>PackageManagerService</code> 依据已注册的 intent filter 解析。</p>
+<p><strong>ION</strong>
+: 旧式的 Android 专有内存分配器，用于在硬件组件之间共享缓冲。在现代内核中已被上游的 DMA-BUF heaps 框架取代。
+<strong>JIT</strong>（即时编译，Just-In-Time compilation）
+: 在运行时把频繁执行的 DEX 字节码编译为原生机器码。ART 的 JIT 编译器利用剖析数据识别热点方法，在启动速度与峰值性能之间取得平衡。</p>
+<p><strong>JNI</strong>（Java 原生接口，Java Native Interface）
+: Java/Kotlin 托管代码与原生 C/C++ 代码相互调用的标准接口。ART 以快速路径优化实现 JNI，并负责托管栈与原生栈之间的切换。</p>
+<p><strong>Kleaf</strong>
+: 取代旧式 shell 脚本构建的、基于 Bazel 的内核构建系统。它提供封闭式（hermetic）构建、缓存，以及与 AOSP 构建系统更好的集成。</p>
+<p><strong>KMI</strong>（内核模块接口，Kernel Module Interface）
+: GKI 内核与厂商提供的内核模块之间的稳定 ABI。它让内核与厂商模块可以各自独立更新而不破坏兼容性。</p>
+<p><strong>LLNDK</strong>（LL-NDK）
+: 一组同时提供给平台分区与厂商分区的底层 NDK 库。包含 <code>libc</code>、<code>libm</code>、<code>liblog</code>、<code>libbinder_ndk</code> 等若干库。在各 Android 版本间保持稳定。</p>
+<p><strong>LMKD</strong>（低内存杀手守护进程，Low Memory Killer Daemon）
+: 监控内存压力（通过 PSI）并杀死后台进程以避免 OOM 的用户空间守护进程。它取代了旧式的内核内 lowmemorykiller。</p>
+<p><strong>Looper</strong>
+: <code>Handler</code> 与 <code>MessageQueue</code> 之下的原生事件循环机制。<code>Looper</code> 轮询文件描述符（包括 Binder）并派发消息。每个使用 <code>Handler</code> 的线程都有一个 <code>Looper</code>。</p>
+<p><strong>Mainline</strong>
+: Google 的一项计划：以 APEX 或 APK 模块的形式经由 Google Play 向核心操作系统组件交付更新，而不依赖整包 OTA。覆盖 Wi-Fi、蓝牙、媒体、DNS 等约 30 多个模块。</p>
+<p><strong>Microdroid</strong>
+: 在 pKVM 虚拟机内部使用的最小化 Android 客户操作系统。包含精简内核、init 与 payload 运行时，用于在 AVF 中运行隔离的工作负载。</p>
+<p><strong>MTE</strong>（内存标记扩展，Memory Tagging Extension）
+: ARM 的硬件特性，为内存分配附加元数据标记，以检测释放后再使用（use-after-free）与缓冲溢出类缺陷。Bionic 与内核在支持的硬件上启用了 MTE。</p>
+<p><strong>NDK</strong>（原生开发工具包，Native Development Kit）
+: 一组工具、头文件与库，让开发者可以用 C/C++ 编写 Android 应用中的部分代码。NDK 提供跨 Android 版本保证稳定的 API 表面。</p>
+<p><strong>NNAPI</strong>（神经网络 API，Neural Networks API）
+: Android 用于机器学习推理的硬件抽象 API。它通过 <code>neuralnetworks</code> HAL 把计算委派给加速器（GPU、DSP、NPU）。</p>
+<p><strong>OAT</strong>
+: <code>dex2oat</code> 产出的文件格式，内含 AOT 编译的原生机器码，以及引用 DEX 字节码的元数据（<code>OatDexFile</code> 头、类偏移、vmap 表）。自 Android O 起，DEX 字节码存放在配套的 VDEX 文件里而不再位于 OAT 内部。OAT 文件是一个由 ART 在运行时加载的 ELF 二进制。</p>
+<p><strong>OTA</strong>（空中升级，Over-The-Air update）
+: 以无线方式交付系统更新的机制。Android 支持 A/B（无缝）与 Virtual A/B 两种更新策略。Virtual A/B 构建在 dm-snapshot 之上。Virtual A/B 压缩（VABC）由用户空间的 <code>snapuserd</code> 守护进程经 dm-user 提供。</p>
+<p><strong>Parcel</strong>
+: Binder 用于跨进程边界封装数据的序列化容器。支持基本类型、<code>IBinder</code> 引用、文件描述符与 <code>Parcelable</code> 对象。</p>
+<p><strong>pKVM</strong>（受保护的内核虚拟机，Protected Kernel-based Virtual Machine）
+: 集成进 Android 内核的 hypervisor，提供硬件隔离的虚拟机。它是 AVF 的基础，在 ARM64 上运行于 EL2，以实施内存隔离。</p>
+<p><strong>PMS</strong>（PackageManagerService）
+: 负责安装、卸载与查询软件包的系统服务。它维护软件包数据库、解析 intent 并管理权限。</p>
+<p><strong>PSI</strong>（压力停顿信息，Pressure Stall Information）
+: Linux 内核机制，上报任务因等待 CPU、内存或 I/O 资源而停顿的时间占比。LMKD 依据 PSI 作出杀进程决策。</p>
+<p><strong>RenderEngine</strong>
+: SurfaceFlinger 的 GPU 合成后端。它用 Skia（GL 或 Vulkan）合成 HWC 无法以硬件处理的图层，取代了旧式基于 GLES 的 RenderEngine。</p>
+<p><strong>RenderThread</strong>
+: 每个 Android 进程中执行 GPU 绘制命令的专用线程。它把 GPU 工作与主（UI）线程解耦，使 UI 线程能在 GPU 尚未画完当前帧时就开始下一帧。</p>
+<p><strong>RRO</strong>（运行时资源叠加，Runtime Resource Overlay）
+: 一种在运行时把资源（布局、字符串、drawable）叠加到既有软件包上而不修改原始 APK 的机制。用于主题化与 OEM 定制。</p>
+<p><strong>SELinux</strong>（安全增强 Linux，Security-Enhanced Linux）
+: Android 上强制实施的强制访问控制（MAC）系统。每个进程与文件都有安全上下文；<code>sepolicy</code> 规则定义允许的交互。Android 以 enforcing 模式使用 SELinux。</p>
+<p><strong>Skia</strong>
+: Android 各处使用的 2D 图形库。提供 <code>Canvas</code> 绘制操作、文本渲染、图像解码与 PDF 生成。旧式的 Ganesh GPU 后端同时支持 OpenGL 与 Vulkan，Graphite 则是它的下一代替代品。</p>
+<p><strong>Soong</strong>
+: Android 的构建系统，处理 <code>Android.bp</code> 文件（Blueprint 语法）以生成 Ninja 构建规则。它在大多数模块上取代了旧式基于 Make 的构建。</p>
+<p><strong>SurfaceFlinger</strong>
+: Android 的系统合成器。从应用与系统 UI 接收缓冲，进行合成（经 HWC 和/或 GPU），并把最终帧送到显示。</p>
+<p><strong>SystemUI</strong>
+: 常驻运行的 Android 系统应用，提供状态栏、通知栏、快捷设置、锁屏、导航栏、音量对话框以及其他系统界面元素。</p>
+<p><strong>TEE</strong>（可信执行环境，Trusted Execution Environment）
+: 与主操作系统隔离的安全处理环境。Android 用 TEE（通常是 ARM TrustZone）承载 Keymaster/Keymint、Gatekeeper 与生物识别模板存储。</p>
+<p><strong>Tombstone</strong>
+: 原生进程崩溃时生成的崩溃转储文件。包含寄存器状态、回溯、内存映射及其他诊断信息。存放于 <code>/data/tombstones/</code>。</p>
+<p><strong>TradeFed</strong>（Trade Federation）
+: Android 的测试框架，用于运行 CTS、VTS 及其他测试套件。负责设备分配、测试执行、结果收集与报告。</p>
+<p><strong>Treble</strong>
+: Google 的 Android 架构计划（Android 8.0 起），把平台框架与厂商特有的 HAL 实现分离。通过解耦厂商分区，实现更快的系统更新。</p>
+<p><strong>Trusty</strong>
+: Google 的开源 TEE 操作系统。它运行在与 Android 并行的安全世界中，承载用于密钥管理、DRM 与安全 UI 的可信应用。</p>
+<p><strong>VDEX</strong>
+: 与 OAT 文件并存的文件格式，存放原始 DEX 字节码与校验元数据。使 ART 无需原始 APK 即可重新校验并重新优化 DEX 代码。</p>
+<p><strong>VDM</strong>（VirtualDeviceManager）
+: 创建并管理拥有独立显示、输入、传感器与音频的虚拟设备的系统服务。用于多设备体验与投屏。</p>
+<p><strong>VINTF</strong>（厂商接口，Vendor Interface）
+: 描述厂商分区与平台分区之间接口的兼容性框架。<code>VINTF</code> manifest 声明设备提供哪些 HAL、框架需要哪些 HAL。</p>
+<p><strong>VNDK</strong>（厂商 NDK，Vendor NDK）
+: 提供给厂商 HAL 实现使用的一组框架共享库。VNDK 快照确保厂商代码运行在已知的一套库版本之上。</p>
+<p><strong>VSYNC</strong>（垂直同步，Vertical Synchronization）
+: 显示刷新信号，用于在整个图形管线中同步渲染。Choreographer、SurfaceFlinger 与 HWC 都围绕 VSYNC 事件进行协调。</p>
+<p><strong>VTS</strong>（厂商测试套件，Vendor Test Suite）
+: 依据接口约定验证厂商 HAL 实现的测试套件。确保平台分区与厂商分区之间的 Treble 兼容性。</p>
+<p><strong>Vulkan</strong>
+: 低开销、跨平台的 3D 图形 API。Android 支持 Vulkan 作为 OpenGL ES 的替代方案，提供对 GPU 资源、命令缓冲与同步的显式控制。</p>
+<p><strong>WMS</strong>（WindowManagerService）
+: 管理窗口摆放、z 序、过渡与输入焦点的系统服务。它与 SurfaceFlinger 紧密配合，控制屏幕上可见的内容。</p>
+<p><strong>Zygote</strong>
+: 所有 Android 应用进程都从它 fork 出来的父进程。它预加载常用类与资源，使新应用进程借助写时复制（copy-on-write）的内存共享快速启动。</p>
+<hr>
+<blockquote>
+<p><strong>交叉引用</strong>：各术语在其条目所标注的主要主题领域对应章节中有详细讨论。关键源文件位置另见
+<strong>附录 A</strong>。</p>
+</blockquote>
+</div></article></main></div><footer class="site-footer">&copy; 2026 qng-stack</footer><script type="module" src="/_astro/BlogPost.astro_astro_type_script_index_0_lang.Cz6GC1N3.js"></script></body></html>

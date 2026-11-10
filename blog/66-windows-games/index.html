@@ -1,0 +1,679 @@
+<!DOCTYPE html><html lang="zh-CN"><head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><script type="module" src="/_astro/BaseHead.astro_astro_type_script_index_0_lang.CIKiyBwV.js"></script><link rel="icon" href="/favicon.ico"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="qng-stack" href="https://qng-stack.github.io/rss.xml"><meta name="generator" content="Astro v7.4.5"><!-- Canonical URL --><link rel="canonical" href="https://qng-stack.github.io/blog/66-windows-games/"><!-- Primary Meta Tags --><title>第 66 章：在 Android 上运行 Windows 游戏</title><meta name="description" content="一台现代 Android 手机带着足以跑桌面 PC 游戏的 ARM64 GPU。但游戏本身是 x86-64 的 Windows 二进制：它们期待 Win32 API、Wine 底下一套 glibc 风味的 Linux 内核 ABI，以及一个桌面图形驱动。而这些在原生、未 root 的 Android 设备上一概不存在。"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://qng-stack.github.io/blog/66-windows-games/"><meta property="og:title" content="第 66 章：在 Android 上运行 Windows 游戏"><meta property="og:description" content="一台现代 Android 手机带着足以跑桌面 PC 游戏的 ARM64 GPU。但游戏本身是 x86-64 的 Windows 二进制：它们期待 Win32 API、Wine 底下一套 glibc 风味的 Linux 内核 ABI，以及一个桌面图形驱动。而这些在原生、未 root 的 Android 设备上一概不存在。"><meta property="og:image" content="https://qng-stack.github.io/_astro/blog-placeholder-1.Bx0Zcyzv.jpg"><!-- Twitter --><meta name="twitter:card" content="summary_large_image"><link rel="stylesheet" href="/_astro/Header.BiL--6dQ.css"></head><body class="chapter-page"><header class="site-header"><div class="shell header-inner"><div class="header-start"><button class="outline-toggle" type="button" aria-expanded="false" aria-controls="chapter-outline"><span class="sr-only">本章目录</span><span class="outline-toggle-icon" aria-hidden="true"></span></button><a class="brand" href="/">qng-stack</a></div><div class="nav-links"><a href="/">首页</a><a href="/about">关于</a><a class="github-link" href="https://github.com/qng-stack" target="_blank"><span class="sr-only">qng-stack 的 GitHub</span><svg viewBox="0 0 16 16" aria-hidden="true" width="18" height="18"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg></a></div></div><div class="outline-backdrop"></div></header><div class="chapter-spread"><nav class="chapter-outline" id="chapter-outline" aria-label="本章标题"><p>本章</p><a href="#661-问题与分层蛋糕" data-depth="2">66.1 问题与分层蛋糕</a><a href="#6611-两个正交的翻译" data-depth="3">66.1.1 两个正交的翻译</a><a href="#6612-全栈一览" data-depth="3">66.1.2 全栈一览</a><a href="#6613-不-root不改内核" data-depth="3">66.1.3 不 root，不改内核</a><a href="#6614-用-aosp-术语说清未-root-应用的约束" data-depth="3">66.1.4 用 AOSP 术语说清未 root 应用的约束</a><a href="#662-gamenative集成式应用" data-depth="2">66.2 GameNative：集成式应用</a><a href="#6621-血统pluvia-与-winlator-的嫁接" data-depth="3">66.2.1 血统：Pluvia 与 Winlator 的嫁接</a><a href="#6622-应用架构" data-depth="3">66.2.2 应用架构</a><a href="#6623-容器模型" data-depth="3">66.2.3 容器模型</a><a href="#6624-默认栈" data-depth="3">66.2.4 默认栈</a><a href="#6625-打包各部件如何到达设备" data-depth="3">66.2.5 打包：各部件如何到达设备</a><a href="#6626-端到端启动时序" data-depth="3">66.2.6 端到端启动时序</a><a href="#6627-许可与-gpl-聚合问题" data-depth="3">66.2.7 许可与 GPL 聚合问题</a><a href="#663-rootfs应用内的-glibc-linux-用户环境" data-depth="2">66.3 rootfs：应用内的 glibc Linux 用户环境</a><a href="#6631-rootfs-里有什么" data-depth="3">66.3.1 rootfs 里有什么</a><a href="#6632-交付与解包" data-depth="3">66.3.2 交付与解包</a><a href="#6633-进入-rootfsproot" data-depth="3">66.3.3 进入 rootfs：PRoot</a><a href="#6634-glibc-对-bionic核心错配" data-depth="3">66.3.4 glibc 对 bionic：核心错配</a><a href="#6635-架在-ashmem-上的-system-v-共享内存" data-depth="3">66.3.5 架在 ashmem 上的 System V 共享内存</a><a href="#6636-bionic-wine-替代方案" data-depth="3">66.3.6 bionic-Wine 替代方案</a><a href="#664-bionic-重定向与-libc-边界" data-depth="2">66.4 bionic 重定向与 libc 边界</a><a href="#6641-为什么两个-libc-不能共处一个进程" data-depth="3">66.4.1 为什么两个 libc 不能共处一个进程</a><a href="#6642-链接器命名空间与-dlext" data-depth="3">66.4.2 链接器命名空间与 dlext</a><a href="#6643-wx-与-jit" data-depth="3">66.4.3 W^X 与 JIT</a><a href="#6644-路径重定向proot-对-libredirect" data-depth="3">66.4.4 路径重定向：PRoot 对 libredirect</a><a href="#6645-ipc-逃生口" data-depth="3">66.4.5 IPC 逃生口</a><a href="#因为边界是套接字两侧可以用不同的-c-库不同的指令集不同的内存模型--这些都不重要唯一的契约是线协议这与-binder-能跨不同运行时通信是同一个道理第-9-章它付出一次序列化与一次拷贝却彻底绕开-libc-问题这也是为什么性能关键但非最热的路径音频命令提交这样建而真正的热路径cpu-翻译没有" data-depth="2">因为边界是套接字，两侧可以用不同的 C 库、不同的指令集、不同的内存模型 —— 这些都不重要，唯一的契约是线协议。这与 Binder 能跨不同运行时通信是同一个道理（第 9 章）。它付出一次序列化与一次拷贝，却彻底绕开 libc 问题。这也是为什么性能关键但非最热的路径（音频、命令提交）这样建，而真正的热路径（CPU 翻译）没有。</a><a href="#665-fex-与-box64把-x86-64-翻成-aarch64" data-depth="2">66.5 FEX 与 Box64：把 x86-64 翻成 AArch64</a><a href="#6651-动态重编译器做什么" data-depth="3">66.5.1 动态重编译器做什么</a><a href="#6652-fexcore-流水线" data-depth="3">66.5.2 FEXCore 流水线</a><a href="#6653-tso-内存模型问题" data-depth="3">66.5.3 TSO 内存模型问题</a><a href="#6654-fex-thunk调用原生-arm64-图形" data-depth="3">66.5.4 FEX thunk：调用原生 ARM64 图形</a><a href="#6655-fex-的-rootfs-需求" data-depth="3">66.5.5 FEX 的 rootfs 需求</a><a href="#6656-box64包装原生库" data-depth="3">66.5.6 Box64：包装原生库</a><a href="#6657-fex-对-box64" data-depth="3">66.5.7 FEX 对 Box64</a><a href="#6658-arm64ec-与-wow64只模拟游戏" data-depth="3">66.5.8 ARM64EC 与 WoW64：只模拟游戏</a><a href="#回报很大windows-api-的工作图形翻译与音频通路全部作为原生-arm64-运行只有游戏自身的指令流被翻译这是-gamenative-的默认设计也是这套栈在手机上能快到可用的原因" data-depth="2">回报很大：Windows API 的工作、图形翻译与音频通路全部作为原生 ARM64 运行，只有游戏自身的指令流被翻译。这是 GameNative 的默认设计，也是这套栈在手机上能快到可用的原因。</a><a href="#666-wine实现-windows-api" data-depth="2">66.6 Wine：实现 Windows API</a><a href="#6661-不是模拟器" data-depth="3">66.6.1 不是模拟器</a><a href="#6662-peunix-分界" data-depth="3">66.6.2 PE/Unix 分界</a><a href="#6663-wineserver" data-depth="3">66.6.3 wineserver</a><a href="#6664-prefixc-盘与注册表" data-depth="3">66.6.4 prefix、C: 盘与注册表</a><a href="#6665-dll-覆盖dxvk-如何替换-wine-的-direct3d" data-depth="3">66.6.5 DLL 覆盖：DXVK 如何替换 Wine 的 Direct3D</a><a href="#6666-wine-与模拟器的交汇处" data-depth="3">66.6.6 Wine 与模拟器的交汇处</a><a href="#667-图形从-direct3d-到-adreno-gpu" data-depth="2">66.7 图形：从 Direct3D 到 Adreno GPU</a><a href="#6671-翻译链" data-depth="3">66.7.1 翻译链</a><a href="#6672-d3d-到-vulkandxvkvkd3d-与回退方案" data-depth="3">66.7.2 D3D 到 Vulkan：DXVK、VKD3D 与回退方案</a><a href="#6673-抵达真实-gputurnip-与-vortek" data-depth="3">66.7.3 抵达真实 GPU：Turnip 与 Vortek</a><a href="#6674-android-vulkan-loader" data-depth="3">66.7.4 Android Vulkan loader</a><a href="#6675-呈现应用内-surface" data-depth="3">66.7.5 呈现：应用内 Surface</a><a href="#6676-帧生成" data-depth="3">66.7.6 帧生成</a><a href="#作为可选的最后一道润色gamenative-可以插入一个执行帧生成的-vulkan-隐式层该层拦截-vkqueuepresentkhr在已渲染的帧之间插值出合成帧它是-vulkan-意义上的图层嵌入加载器的图层链--这说明图形栈的很大一部分是从标准-vulkan-扩展点搭起来的而不是靠定制钩子" data-depth="2">作为可选的最后一道润色，GameNative 可以插入一个执行帧生成的 Vulkan 隐式层：该层拦截 vkQueuePresentKHR，在已渲染的帧之间插值出合成帧。它是 Vulkan 意义上的图层，嵌入加载器的图层链 —— 这说明图形栈的很大一部分是从标准 Vulkan 扩展点搭起来的，而不是靠定制钩子。</a><a href="#668-音频从-wasapi-到-aaudio" data-depth="2">66.8 音频：从 WASAPI 到 AAudio</a><a href="#6681-wine-的音频后端" data-depth="3">66.8.1 Wine 的音频后端</a><a href="#6682-应用内的-pulseaudio-服务器" data-depth="3">66.8.2 应用内的 PulseAudio 服务器</a><a href="#6683-alsa-桥" data-depth="3">66.8.3 ALSA 桥</a><a href="#6684-经-aaudio-抵达扬声器" data-depth="3">66.8.4 经 AAudio 抵达扬声器</a><a href="#6685-延迟" data-depth="3">66.8.5 延迟</a><a href="#669-汇总追踪三条路径" data-depth="2">66.9 汇总：追踪三条路径</a><a href="#三个操作三条完全不同的路径而只有画在被模拟盒子之内的部分才真正被逐指令翻译整套栈的全部艺术就在于让那个盒子保持小" data-depth="2">三个操作、三条完全不同的路径，而只有画在“被模拟盒子”之内的部分才真正被逐指令翻译。整套栈的全部艺术，就在于让那个盒子保持小。</a><a href="#6610-android-17-为这套栈带来了什么变化" data-depth="2">66.10 Android 17 为这套栈带来了什么变化</a><a href="#66101-这套栈所依托的平台接口是稳定的" data-depth="3">66.10.1 这套栈所依托的平台接口是稳定的</a><a href="#66102-berberis-不是这套栈而-17-重组了它" data-depth="3">66.10.2 Berberis 不是这套栈，而 17 重组了它</a><a href="#66103-angle-在哪里适用在哪里不适用" data-depth="3">66.10.3 ANGLE 在哪里适用，在哪里不适用</a><a href="#6611-动手试试" data-depth="2">66.11 动手试试</a><a href="#6612-小结" data-depth="2">66.12 小结</a><a href="#关键源文件参考" data-depth="3">关键源文件参考</a></nav><main><article><p class="article-kicker"><time datetime="2026-11-09T17:13:31.000Z">2026年11月10日</time></p><h1 class="article-title">第 66 章：在 Android 上运行 Windows 游戏</h1><div class="prose"><h1 id="第-66-章在-android-上运行-windows-游戏">第 66 章：在 Android 上运行 Windows 游戏</h1>
+<p>一台现代 Android 手机带着足以跑桌面 PC 游戏的 ARM64 GPU。但游戏本身是 x86-64 的 Windows 二进制：它们期待 Win32 API、Wine 底下一套 glibc 风味的 Linux 内核 ABI，以及一个桌面图形驱动。而这些在原生、未 root 的 Android 设备上一概不存在。</p>
+<p><strong>GameNative</strong> 这类项目，以及它所构建其上的 <strong>Winlator</strong> 运行时，完全在用户空间里补上了这道鸿沟：不 root、不打内核补丁、不刷自定义 ROM。它们把一串翻译层叠在本书其余章节所剖析的同一套 AOSP 内部机制之上，每一层解决阻抗失配中的一个切片。</p>
+<p>本章以 GameNative 为实例，自上而下走完整套栈：从 Android 应用与它塞进 APK 里的 glibc 根文件系统开始，接着是 <code>bionic</code>/glibc 边界以及跨越该边界的各种重定向；然后是 x86-64 到 AArch64 的翻译器（<strong>FEX</strong> 与 <strong>Box64</strong>），以及作为 Windows API 层的 <strong>Wine</strong>；最后是抵达真实 Adreno GPU 的 Direct3D 到 Vulkan 图形链，以及收于 <strong>AAudio</strong> 的音频通路。</p>
+<p>每一层都是自成一体的技术，因此每一层都有自己的架构、自己的理由，以及自己在前面章节所述 Android 内部机制中的插入位置。</p>
+<p>关于源码引用有一点说明。Android 侧触点按本书其他地方的惯例，以 AOSP 树中的文件路径与行号引用；而翻译栈项目（GameNative、Winlator、Wine、FEX、Box64）是演进很快的外部仓库，因此只给仓库内相对路径、不给行号 —— 行号在墨迹干之前就会过期。</p>
+<hr>
+<h2 id="661-问题与分层蛋糕">66.1 问题与分层蛋糕</h2>
+<h3 id="6611-两个正交的翻译">66.1.1 两个正交的翻译</h3>
+<p>在 ARM 手机上跑 Windows 游戏不是一个问题，而是两个容易被混为一谈的无关问题：</p>
+<ol>
+<li>
+<p><strong>指令集翻译。</strong> 游戏是一串 x86-64 机器指令，ARM64 CPU 无法执行。必须有人把 x86-64 翻成 AArch64，或提前翻、或即时翻。这是 <strong>FEX</strong> 或 <strong>Box64</strong> 的活。它是<em>纯粹的 CPU 模拟</em>：不懂窗口、文件或套接字，只懂操作码、寄存器与标志位。</p>
+</li>
+<li>
+<p><strong>API 与 ABI 翻译。</strong> 游戏调用 Windows API：<code>CreateFileW</code>、<code>NtUserCreateWindowEx</code>、<code>D3D11CreateDevice</code>。这些函数在 Linux 上不存在，必须有人把 Windows API 实现在 POSIX/Linux 内核之上。这是 <strong>Wine</strong> 的活。它<em>不是</em>模拟器：完全不含指令翻译，只有用原生代码对 Windows 行为的重新实现。</p>
+</li>
+</ol>
+<p>把这两件事分开，是整个栈里最重要的一个架构思想。整个系统的性能取决于“尽量少模拟”——理想情况下只模拟游戏自己的代码；Wine、图形驱动与音频服务器则都可以作为原生 ARM64 运行。我们会反复回到这个主题，因为最新的设计（ARM64EC，见 66.5.8）恰恰是为了把“被模拟”的那个盒子缩到只剩游戏。</p>
+<h3 id="6612-全栈一览">66.1.2 全栈一览</h3>
+<p>从顶部的 Windows 游戏到底部的 Android 内核，各层大致是这样。</p>
+<h4 id="图android-上的-windows-游戏翻译栈">图：Android 上的 Windows 游戏翻译栈</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TD</span></span>
+<span class="line"><span style="color:#FFAB70">    GAME</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Windows 游戏&lt;br/&gt;x86-64 PE 二进制"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> Guest</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">客户世界</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">应用存储中的 rootfs</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        DXVK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"DXVK / VKD3D-Proton&lt;br/&gt;（Direct3D 到 Vulkan）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        WINE</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Wine / Proton&lt;br/&gt;（Win32 + NT API）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        EMU</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"FEX / Box64&lt;br/&gt;（x86-64 到 AArch64 JIT）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> App</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">GameNative 应用进程</span><span style="color:#E1E4E8">（</span><span style="color:#FFAB70">Android bionic</span><span style="color:#E1E4E8">）"]</span></span>
+<span class="line"><span style="color:#FFAB70">        XSERVER</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"应用内 X 服务器&lt;br/&gt;+ Vortek 渲染器"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        PULSE</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"PulseAudio 服务器"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        STORE</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Steam / Epic / GOG 客户端&lt;br/&gt;（Pluvia 血统）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> AOSP</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Android 平台"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        VKLOADER</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Vulkan loader&lt;br/&gt;libvulkan"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        AAUDIO</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"AAudio / AudioTrack"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        SURFACE</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ANativeWindow / SurfaceFlinger"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        DRIVER</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Adreno Vulkan 驱动"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">    GAME </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> WINE</span></span>
+<span class="line"><span style="color:#FFAB70">    GAME </span><span style="color:#F97583">-.-&gt;|</span><span style="color:#9ECBFF">"D3D 调用"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> DXVK</span></span>
+<span class="line"><span style="color:#FFAB70">    DXVK </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"Vulkan"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> XSERVER</span></span>
+<span class="line"><span style="color:#FFAB70">    WINE </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> EMU</span></span>
+<span class="line"><span style="color:#FFAB70">    WINE </span><span style="color:#F97583">-.-&gt;|</span><span style="color:#9ECBFF">"WASAPI 音频"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> PULSE</span></span>
+<span class="line"><span style="color:#FFAB70">    XSERVER </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> VKLOADER</span></span>
+<span class="line"><span style="color:#FFAB70">    VKLOADER </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> DRIVER</span></span>
+<span class="line"><span style="color:#FFAB70">    XSERVER </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> SURFACE</span></span>
+<span class="line"><span style="color:#FFAB70">    PULSE </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> AAUDIO</span></span>
+<span class="line"><span style="color:#FFAB70">    STORE </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"安装游戏"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> GAME</span></span></code></pre>
+<p>请把它读作三条带。<strong>客户</strong>带是一个跑在普通 Android 应用私有存储里的 Linux x86-64 世界。<strong>应用</strong>带是原生 ARM64 的 Android 代码，其中装着承载游戏帧的应用内 X 服务器、承载其音频的 PulseAudio 服务器，以及下载游戏的商店客户端。<strong>平台</strong>带是纯粹的 AOSP：第 13 章的 Vulkan loader 与 <code>ANativeWindow</code>、第 15 章的 AAudio，以及第 24 章的 SurfaceFlinger 合成器。</p>
+<p>关键在于，表示 Direct3D 与音频的两条虚线箭头<em>早早离开了模拟器</em>：游戏的 D3D 调用去了 DXVK，而在快速配置里 DXVK 作为原生 ARM64 代码运行并吐出 Vulkan —— 也就是说繁重的图形翻译本身并不被模拟。音频同理。只有从游戏进 Wine、以及从 Wine 进模拟器的那两条实线箭头，才代表 JIT 必须真正翻译的 x86-64 代码。</p>
+<h3 id="6613-不-root不改内核">66.1.3 不 root，不改内核</h3>
+<p>客户带里的一切都以普通已安装应用的权限运行：没有 <code>su</code>、没有 <code>insmod</code>、不改 SELinux 策略、不动系统镜像。这一约束让这些应用能在锁着 bootloader 的设备上从商店安装，也逼出了本章大部分工程巧思。桌面版 Wine 可以 <code>chroot</code> 进 rootfs、挂载文件系统，并直接 <code>dlopen</code> 系统的 glibc GPU 驱动；Android 应用一样都做不了。每缺一项能力，就换一个用户空间的替代品：</p>
+<table>
+<thead>
+<tr>
+<th>桌面能力</th>
+<th>在未 root 的 Android 上</th>
+<th>用户空间替代</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chroot</code> 进 rootfs</td>
+<td>需要 <code>CAP_SYS_ADMIN</code></td>
+<td><strong>PRoot</strong>（ptrace 路径改写）</td>
+</tr>
+<tr>
+<td>挂载 rootfs 镜像</td>
+<td>需要 root</td>
+<td>解包进应用私有存储</td>
+</tr>
+<tr>
+<td>System V 共享内存</td>
+<td>受内核限制</td>
+<td>ashmem/<code>memfd</code> 支撑的 shim</td>
+</tr>
+<tr>
+<td><code>dlopen</code> glibc GPU 驱动</td>
+<td>驱动是 <code>bionic</code> 库</td>
+<td>与原生渲染器 IPC，或用 thunk</td>
+</tr>
+<tr>
+<td>跑系统 PulseAudio</td>
+<td>无系统守护进程访问权</td>
+<td>在应用内自带一个 PulseAudio 服务器</td>
+</tr>
+</tbody>
+</table>
+<h3 id="6614-用-aosp-术语说清未-root-应用的约束">66.1.4 用 AOSP 术语说清未 root 应用的约束</h3>
+<p>三个 AOSP 机制决定了这套栈能做什么、不能做什么，三者都在前面章节中介绍过。</p>
+<p><strong>链接器命名空间（第 7 章）。</strong> 应用的原生库在隔离的链接器命名空间中加载，看不到任意的系统库。管辖这一点的 <code>android_dlopen_ext</code> 标志位于 <code>bionic/libc/include/android/dlext.h</code>。<code>ANDROID_DLEXT_USE_NAMESPACE</code>（<code>bionic/libc/include/android/dlext.h:115</code>）允许调用方为某个库指定目标命名空间，但该头文件把它标注为仅限内部使用 —— 因为命名空间没有 NDK API。</p>
+<p>公开的 <code>ANDROID_DLEXT_USE_LIBRARY_FD</code>（<code>bionic/libc/include/android/dlext.h:80</code>）允许调用方直接从文件描述符加载库，例如 APK 中以未压缩形式存放的 <code>.so</code>。Vulkan loader 自己在打开设备驱动时就用到了这个命名空间标志，我们会在 66.7.4 看到。</p>
+<p><strong>W^X 强制（第 7 章）。</strong> JIT 必须先写机器码再执行它。对于目标 API 26 及以上的应用，动态链接器拒绝加载任何同时可写且可执行的 ELF <em>load segment</em>。<code>bionic/linker/linker_phdr.cpp:1057</code> 会打出 <code>"has load segments that are both writable and executable"</code> 诊断，<code>bionic/linker/linker_phdr.cpp:1061</code> 记录 <code>W+E load segments</code> 警告。因此 FEX 或 Box64 这样的翻译器无法发布带 RWX 段的预置 <code>.so</code>。</p>
+<p>不过那道检查只覆盖链接器映射的 ELF 文件，匿名 JIT 映射不受其约束；SELinux 甚至给应用进程授予 <code>execmem</code>（<code>system/sepolicy/private/app.te:213</code>），所以应用可以映射匿名的 <code>PROT_WRITE | PROT_EXEC</code> 内存。但翻译器们仍然遵守加固惯例：先以可写映射 JIT 页、填入内容，再用 <code>mprotect</code> 翻成可执行 —— 任一时刻每页都是写异或执行。</p>
+<p><strong>应用数据目录的执行限制。</strong> 在近期 Android 上，从应用可写数据目录执行二进制受到越来越强的限制。翻译栈必须通过它自己掌控的加载器（PRoot，或某个重定向库）来运行客户端的可执行文件，而不能把应用数据目录下的路径直接交给内核并调用 <code>execve</code>。这是 GameNative 那个闭源 <code>libredirect.so</code> 的职责之一，66.4.4 会讲。</p>
+<hr>
+<h2 id="662-gamenative集成式应用">66.2 GameNative：集成式应用</h2>
+<p>GameNative 是一个在本机运行 Windows PC 游戏的 Android 应用，内置 Steam、Epic Games Store、GOG 与 Amazon Games 的商店集成。它是整套栈最完整的公开范例，因此作为本章的锚点。它采用 GPL-3.0 许可，包名为 <code>app.gamenative</code>。</p>
+<h3 id="6621-血统pluvia-与-winlator-的嫁接">66.2.1 血统：Pluvia 与 Winlator 的嫁接</h3>
+<p>最好把 GameNative 理解为两个上游代码库的嫁接，而不是单一分支：</p>
+<ol>
+<li>
+<p><strong>应用与 Steam 客户端层来自 Pluvia</strong> —— 一个轻量的非官方 Android Steam 客户端。它留在源码里的指纹很清楚：<code>Application</code> 子类是 <code>PluviaApp.kt</code>，Room 数据库是 <code>PluviaDatabase.kt</code>，Steam 连接使用 <strong>JavaSteam</strong> 库。Pluvia 提供账号登录、游戏库视图与 SteamPipe depot 下载器。</p>
+</li>
+<li>
+<p><strong>运行时与兼容层来自 Winlator。</strong> 整个 <code>com.winlator.*</code> Java 树被内置在 <code>app/src/main/java/com/winlator/</code> 之下，子包包括 <code>container</code>、<code>core</code>、<code>xserver</code>、<code>xenvironment</code>、<code>winhandler</code>、<code>box86_64</code>、<code>fexcore</code>、<code>inputcontrols</code> 与 <code>renderer</code>；<code>app/src/main/cpp/winlator/</code> 下的原生侧也来自 Winlator。</p>
+</li>
+</ol>
+<p>所以从代码来源讲，GameNative 是 <strong>Pluvia（商店应用）加上 Winlator（Wine 与模拟运行时）</strong>，由 GameNative 的 GPL-3.0 Kotlin 层统一起来。流行的一些文章说它只是“Winlator 的一个分支”，把这种双源结构折叠掉了；准确的说法是上面这句。本章余下部分依赖的是 Winlator 那一半，因为真正运行游戏的是它。</p>
+<h3 id="6622-应用架构">66.2.2 应用架构</h3>
+<p>面向 Android 的那一半是 Kotlin + Jetpack Compose UI + Dagger Hilt 依赖注入。对我们而言有三块：</p>
+<ul>
+<li><strong><code>SteamService</code></strong>（一个前台 <code>Service</code>）掌管 Steam 会话，Epic、GOG、Amazon 各自的对店服务与它并列。</li>
+<li><strong><code>XServerScreen</code></strong> 是游戏渲染进去的全屏 Compose 表面，由 <code>XServerViewModel</code> 驱动 —— 应用内 X 服务器、音频服务器与图形渲染器都在此拉起。</li>
+<li><strong>内置的 Winlator 运行时</strong>承担实际的容器、rootfs、Wine 与模拟器工作，由 <code>com.winlator.xenvironment</code> 包编排。</li>
+</ul>
+<h3 id="6623-容器模型">66.2.3 容器模型</h3>
+<p><strong>容器</strong>是一个游戏独占的 Windows 环境：一个 Wine prefix 加上它的配置（图形驱动、模拟器、音频驱动、DLL 覆盖、环境变量）。<code>com.winlator.container.Container</code> 与 <code>ContainerManager</code> 定义并管理它们，而默认值是对“GameNative 栈到底是什么”最清楚的一句话陈述。摘自 <code>app/src/main/java/com/winlator/container/Container.java</code>：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D">// GameNative: app/src/main/java/com/winlator/container/Container.java</span></span>
+<span class="line"><span style="color:#F97583">public</span><span style="color:#F97583"> static</span><span style="color:#F97583"> final</span><span style="color:#E1E4E8"> String DEFAULT_EMULATOR        </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "FEXCore"</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">public</span><span style="color:#F97583"> static</span><span style="color:#F97583"> final</span><span style="color:#E1E4E8"> String DEFAULT_AUDIO_DRIVER    </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "pulseaudio"</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">public</span><span style="color:#F97583"> static</span><span style="color:#F97583"> final</span><span style="color:#E1E4E8"> String DEFAULT_DXWRAPPER       </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "dxvk"</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#6A737D">// graphics driver default resolves to "vortek"</span></span></code></pre>
+<p>被钉住的组件版本就在旁边，在 <code>app/src/main/java/com/winlator/core/DefaultVersion.java</code>：Box64、Box86、FEXCore 的构建号、Turnip（Mesa 的 Adreno Vulkan 驱动）、DXVK、VKD3D 等等。默认 Wine 记录在 <code>WineInfo.java</code>。这两个文件一眼看尽整条默认流水线 —— 这就是为什么本章末尾的一个“动手试试”练习就是读它们。</p>
+<h3 id="6624-默认栈">66.2.4 默认栈</h3>
+<p>把容器默认值合起来看，一个新建的 GameNative 容器会跑：</p>
+<ul>
+<li><strong>Wine / Proton</strong>，以 <strong>ARM64EC</strong> 配置充当 Windows API 层（66.6）；<strong>FEXCore</strong> 翻译游戏的 x86-64 代码；一个 WoW64 辅助件翻译任何 32 位代码（66.5.8）。</li>
+<li><strong>DXVK</strong> 把 Direct3D 9/10/11 翻成 Vulkan，<strong>VKD3D-Proton</strong> 负责 Direct3D 12（66.7.2）。</li>
+<li><strong>Vortek</strong> 作为抵达设备 Adreno 驱动的 Vulkan 路径（66.7.3），<strong>Turnip</strong>（Mesa）作为备选。</li>
+<li><strong>PulseAudio</strong> 作为音频服务器（66.8）。</li>
+</ul>
+<p>Box64 加经典 glibc 启动路径也一并打包，作为非 ARM64EC Wine 构建的替代路线；由不同的启动器组件选择该路径（66.5.6）。</p>
+<h3 id="6625-打包各部件如何到达设备">66.2.5 打包：各部件如何到达设备</h3>
+<p>GameNative 在一个应用里塞进了数量惊人的预置原生软件，通过三种不同的交付机制。</p>
+<ol>
+<li>
+<p><strong>Android 进程原生库</strong>随 <code>jniLibs/arm64-v8a/</code> 发布，由平台的包管理器解到应用的 <code>nativeLibraryDir</code>。这些库加载进 <em>Android</em>（bionic）进程，包括 PulseAudio 服务器库（<code>libpulse.so</code> 及其同伴）、原生图形渲染器（<code>libvortekrenderer.so</code>、<code>libvirglrenderer.so</code>）、应用内 X 服务器（<code>libwinlator.so</code>），以及闭源的 <code>libsteambootstrap.so</code>。</p>
+</li>
+<li>
+<p><strong>客户侧组件</strong>以压缩 tar 包形式放在 <code>assets/</code>（Zstandard 的 <code>.tzst</code> 与 xz 的 <code>.txz</code>），运行时由 <code>com.winlator.core.TarCompressorUtils</code> 解进 rootfs。Wine、FEX、Box64、DXVK、VKD3D、Vulkan 驱动与 Windows DLL 组件都以这种方式到达；解包后，它们的 ELF 解释器与 RPATH 会被一个内置的 <code>patchelf</code> 打补丁。</p>
+</li>
+<li>
+<p><strong>体积大或可选的负载</strong>按需下载。Ubuntu rootfs 作为一个独立的 Android <strong>动态功能模块</strong>（<code>ubuntufs/</code>，<code>dist:on-demand</code>）交付；图形驱动、额外的 DXVK 构建与 Proton 容器模板则按 <code>assets/*_download.json</code> 清单从 GameNative 的下载服务器取。这样基础 APK 保持可安装，而数 GB 的 Linux 用户环境只在首次运行游戏时才到位。</p>
+</li>
+</ol>
+<h3 id="6626-端到端启动时序">66.2.6 端到端启动时序</h3>
+<h4 id="图在-gamenative-中启动一个游戏">图：在 GameNative 中启动一个游戏</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">sequenceDiagram</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> U</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> 用户</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> SS</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> SteamService</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> CM</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> ContainerManager</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> IFS</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> ImageFsInstaller</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> XE</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> XEnvironment</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> PL</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> ProgramLauncher</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> W</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> Wine </span><span style="color:#E1E4E8">+ FEX</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> GPU</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> Vortek </span><span style="color:#E1E4E8">+ Adreno</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">    U</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">SS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 选择游戏，开始</span></span>
+<span class="line"><span style="color:#FFAB70">    SS</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">SS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 认证，下载 depot</span></span>
+<span class="line"><span style="color:#FFAB70">    SS</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">CM</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 打开或创建容器</span></span>
+<span class="line"><span style="color:#FFAB70">    CM</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">IFS</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 确保 rootfs（imagefs）已安装</span></span>
+<span class="line"><span style="color:#FFAB70">    IFS</span><span style="color:#F97583">--&gt;&gt;</span><span style="color:#FFAB70">CM</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> Wine 与各组件已解包</span></span>
+<span class="line"><span style="color:#FFAB70">    CM</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">XE</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 拉起环境组件</span></span>
+<span class="line"><span style="color:#FFAB70">    XE</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">XE</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 启动 X 服务器、PulseAudio、Vortek</span></span>
+<span class="line"><span style="color:#FFAB70">    XE</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">PL</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 启动客户端程序</span></span>
+<span class="line"><span style="color:#FFAB70">    PL</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">W</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 经 PRoot 或 bionic exec 进入 Wine</span></span>
+<span class="line"><span style="color:#FFAB70">    W</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">W</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 加载游戏 PE，开始模拟 x86-64</span></span>
+<span class="line"><span style="color:#FFAB70">    W</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">GPU</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> D3D 转 Vulkan 的帧</span></span>
+<span class="line"><span style="color:#FFAB70">    GPU</span><span style="color:#F97583">--&gt;&gt;</span><span style="color:#FFAB70">U</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 合成到应用 Surface</span></span></code></pre>
+<p><code>XEnvironment</code> 对象持有一个有序的<strong>组件</strong>列表，每个组件是 <code>com.winlator.xenvironment.components</code> 里启动某一子系统的小类。最前面的组件启动 X 服务器与 <code>PulseAudioComponent</code>；接下来的启动图形渲染器（<code>VortekRendererComponent</code> 或某个 VirGL 渲染器）以及一个 System V 共享内存组件；最后一个组件是程序启动器，它在模拟器下派生出 Wine。这个启动器要么是 <code>BionicProgramLauncherComponent</code>（默认的 ARM64EC/FEX 路径），要么是 <code>GuestProgramLauncherComponent</code>（经典的 glibc/Box64 路径）。</p>
+<h3 id="6627-许可与-gpl-聚合问题">66.2.7 许可与 GPL 聚合问题</h3>
+<p>GameNative 是 GPL-3.0，内置的 Winlator 代码也是。打包的运行时大多带自己的上游许可，多为宽松许可或 LGPL：Wine 与 PulseAudio 是 LGPL-2.1，Mesa（Turnip、Zink）大体是 MIT，DXVK 是 zlib 许可，Box64 与 FEX 是 MIT/BSD 风格。项目的 <code>THIRD_PARTY_NOTICES</code> 文件对 copyleft 组件做了一份概括性的书面源码提供承诺。</p>
+<p>有两个组件刻意闭源，而它们在法律上最有意思：</p>
+<ul>
+<li><strong><code>libredirect.so</code></strong>（随 <code>assets/redirect.tzst</code> 发布）只通过 <code>LD_PRELOAD</code> 加载进 Wine/Proton 子进程，从不进入 Android 应用自身的地址空间。它改写了旧的包标识符，并使进程启动适配近期 Android 对“从数据目录执行”的限制。</li>
+<li><strong><code>libsteambootstrap.so</code></strong> 是一个 JNI 垫片，驱动一个真正在进程内的 Steam 客户端，用于成就、云存档与覆盖层。</li>
+</ul>
+<p>维护者陈述的立场是：这些作为独立的程序/子进程运行，只通过操作系统接口通信，因此在 GPL-3.0 第 5 条下属于单纯的“聚合”，而不是 GPL 应用的衍生作品。那是项目方的论点，不是已裁决的事实。闭源的 <code>LD_PRELOAD</code> 与 JNI 垫片在和 GPL-3.0 应用一起分发时能否经得起审视，确实是一个未定的 GPL 问题。应用去掉这两个库也能构建并运行，只是兼容性下降 —— 这也是维护者“可分离性”论点的一部分。</p>
+<hr>
+<h2 id="663-rootfs应用内的-glibc-linux-用户环境">66.3 rootfs：应用内的 glibc Linux 用户环境</h2>
+<h3 id="6631-rootfs-里有什么">66.3.1 rootfs 里有什么</h3>
+<p>Wine、模拟器的客户库与游戏都期待一个按常规布局的 Linux 文件系统：<code>/usr/lib</code>、<code>/bin</code>、一个 <code>ld-linux</code> 动态加载器，以及最重要的一个 <strong>glibc</strong> C 库。Android 一样都不给应用 —— 它给的是 <code>bionic</code> 和一个应用私有数据目录。于是这套栈直接塞进一整套小型 Linux 发行版（在 Winlator 里历史上称为 <strong>imagefs</strong>），并把它解到应用的私有存储中。</p>
+<p>rootfs 基于 <strong>Ubuntu</strong>（最初的 Winlator 用 Focal Fossa，20.04）。里面是一套 glibc 用户环境、<code>/opt</code> 下的 Wine 安装，以及每个容器的 <strong>Wine prefix</strong>（位于 <code>/home/xuser/.wine</code>）。路径常量定义在 <code>com.winlator.xenvironment.ImageFs</code>。</p>
+<h3 id="6632-交付与解包">66.3.2 交付与解包</h3>
+<p>用户环境以压缩形式交付、首次使用时解包，从不用挂载（应用无法挂载）。相关代码在两个类里：<code>ImageFsInstaller</code> 把 Wine tar 包解到 <code>&lt;rootfs&gt;/opt/&lt;version&gt;</code>，<code>TarCompressorUtils</code> 处理 GameNative 用到的 Zstandard <code>.tzst</code> 与 xz <code>.txz</code> 两种格式。解包之后，ELF 二进制会被 <code>patchelf</code> 修整，使其解释器与库搜索路径指向 rootfs 内部，而不是指向一个并不存在的系统。</p>
+<p>体量正是 rootfs 走按需动态功能模块交付的原因（66.2.5）。一套完整的 Ubuntu 加 Wine 用户环境有数百 MB 到数 GB，绝无可能放进基础 APK。</p>
+<h3 id="6633-进入-rootfsproot">66.3.3 进入 rootfs：PRoot</h3>
+<p>桌面环境会 <code>chroot</code> 进 rootfs，未 root 的应用不能。经典 Winlator 的答案是 <strong>PRoot</strong> —— 一个完全建立在 Linux <code>ptrace</code> 系统调用之上的、用户空间版的 <code>chroot</code> 与 bind mount。</p>
+<p>PRoot 把客户程序作为被跟踪的子进程启动。每当子进程发起一个带路径的系统调用，PRoot 就在内核边界截住它，<strong>改写被跟踪进程内存中的路径字符串</strong>，让比如 <code>/usr/lib/...</code> 变成 <code>&lt;app data&gt;/imagefs/usr/lib/...</code>，然后放内核继续。客户以为自己活在 <code>/</code>，但 PRoot 在飞行中重映射了每个路径。同一个把戏会在 <code>execve</code> 上重演，使子进程仍被限制住；<code>--bind=/dev</code>、<code>--bind=/proc</code> 这类 bind mount 也用同样的方式实现 —— 重映射相关前缀。</p>
+<h4 id="图proot-如何用-ptrace-重映射客户路径">图：PRoot 如何用 ptrace 重映射客户路径</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">sequenceDiagram</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> G</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> 客户</span><span style="color:#E1E4E8">（Wine/</span><span style="color:#F97583">box</span><span style="color:#E1E4E8">64）</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> K</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> Linux 内核</span></span>
+<span class="line"><span style="color:#F97583">    participant</span><span style="color:#FFAB70"> P</span><span style="color:#F97583"> as</span><span style="color:#9ECBFF"> PRoot 跟踪器</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">    G</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">K</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> openat(AT_FDCWD, "/usr/lib/libc.so")</span></span>
+<span class="line"><span style="color:#FFAB70">    K</span><span style="color:#F97583">--&gt;&gt;</span><span style="color:#FFAB70">P</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> ptrace 停止（syscall-enter）</span></span>
+<span class="line"><span style="color:#FFAB70">    P</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">P</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 把路径改写为&lt;br/&gt;/data/.../imagefs/usr/lib/libc.so</span></span>
+<span class="line"><span style="color:#FFAB70">    P</span><span style="color:#F97583">-&gt;&gt;</span><span style="color:#FFAB70">K</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> ptrace 继续</span></span>
+<span class="line"><span style="color:#FFAB70">    K</span><span style="color:#F97583">--&gt;&gt;</span><span style="color:#FFAB70">G</span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> 指向应用存储中真实文件的 fd</span></span></code></pre>
+<p>这个代价是走上无 root 之路的入场费：每个带路径的系统调用都要往 PRoot 进程走一趟 <code>ptrace</code> 的停-继续往返。这项开销正是较新的 <strong>bionic</strong> 设计（66.3.6）试图彻底去掉 PRoot 的主要原因。</p>
+<h3 id="6634-glibc-对-bionic核心错配">66.3.4 glibc 对 bionic：核心错配</h3>
+<p>rootfs 给了 Wine 一个 glibc 世界，这正是 Wine 想要的。但它同时制造了整套栈的定义性问题：<strong>进程里现在装着 glibc，而每个 Android 原生库（包括 GPU 驱动）都是对着 <code>bionic</code> 构建的。</strong> 你没法简单地把一个 <code>bionic</code> 的 <code>.so</code> <code>dlopen</code> 进 glibc 进程 —— 两个 C 库在 TLS 布局、动态加载器内部结构、<code>errno</code>、<code>pthread_t</code>、栈金丝雀上都各说各话。把一个 libc 的共享对象加载进另一个 libc 的进程，会破坏状态并崩溃。</p>
+<p>这就是“bionic 重定向”要解决的问题，重要到值得单独一节（66.4）。现在先记住两种答案的形状：第一种是保留 glibc 世界，通过<strong>进程间通信</strong>而非链接来触达 Android 服务 —— PulseAudio 服务器、Vortek 渲染器与 SysV-SHM 服务器都是经套接字到达的独立端点；第二种是放弃 glibc，让 Wine 直接跑在 <code>bionic</code> 上（较新的分支）。</p>
+<h3 id="6635-架在-ashmem-上的-system-v-共享内存">66.3.5 架在 ashmem 上的 System V 共享内存</h3>
+<p>bionic 重定向最干净的具体例子是 System V 共享内存。X11、DXVK 等组件用 <code>shmget</code>/<code>shmat</code> 在进程间共享大缓冲。Android 内核对 System V SHM API 有限制，因此 Winlator 的 glibc rootfs 自带一个小 <strong>shim 库</strong> <code>libandroid-sysvshm.so</code>，由启动器组件用 <code>LD_PRELOAD</code> 注入客户进程。它拦截 <code>shmget</code>/<code>shmat</code>/<code>shmdt</code> 这一族，并在 Android 的匿名共享内存之上重新实现。Android 侧一个小服务器（<code>com.winlator.sysvshm</code>）充当中间人。</p>
+<p>Android 侧最自然的原语是 <code>ASharedMemory_create</code>（<code>frameworks/native/include/android/sharedmem.h:78</code>），这个 NDK 入口返回一块匿名、引用计数的共享内存区域的文件描述符；其底层由 <code>memfd_create</code>（<code>bionic/libc/include/sys/mman.h:183</code>，API 30 起可用）或更老的 ashmem 驱动支撑。重定向把客户内的一个 System V <code>shmget</code> 调用，变成宿主上一个 <code>ASharedMemory</code> 式的 fd，再经套接字传回。客户继续用它当初被写出来的 System V API，宿主则用一个内核真正允许的 Android 原语满足它。</p>
+<h3 id="6636-bionic-wine-替代方案">66.3.6 bionic-Wine 替代方案</h3>
+<p>最新的 Winlator 分支、以及 GameNative 的默认路径，走的是另一条路：为 <strong><code>bionic</code></strong> 构建 Wine，并丢掉 PRoot。如果 Wine 本身就跑在 <code>bionic</code> 上，与 Android GPU 驱动就不存在 libc 错配，也没有每次系统调用的 <code>ptrace</code> 税。代价是 Wine 原先依赖 glibc 的一切都必须改由 <code>bionic</code> 提供 —— 这就是这条路要依赖 ARM64EC Wine 构建（66.5.8）和一组重定向库的原因：这些库替代 PRoot 来修正路径与行为差异。接下来就讲它们。</p>
+<hr>
+<h2 id="664-bionic-重定向与-libc-边界">66.4 bionic 重定向与 libc 边界</h2>
+<p>“bionic 重定向”是对这一类技术的统称：它们让一套围绕 glibc 风味 Linux 软件搭起来的栈，能与一套围绕 <code>bionic</code> 搭起来的 Android 系统协作。这个说法底下藏着几个不同的问题，各有各的解法。</p>
+<h3 id="6641-为什么两个-libc-不能共处一个进程">66.4.1 为什么两个 libc 不能共处一个进程</h3>
+<p>这里精确陈述核心约束，因为其余一切都由它推出来。一个 Linux 进程恰好有一个动态加载器和一个 C 库；这个库提供加载器的内部状态、TLS 块、<code>malloc</code> 与系统调用包装。glibc 与 <code>bionic</code> 是内部布局互不兼容的两个实现。</p>
+<p>glibc 进程的线程有 glibc 的 <code>pthread</code> 结构与 glibc 的 TLS 模型；一个按 <code>bionic</code> 偏移去找自己线程控制块的 <code>bionic</code> <code>.so</code> 会读到垃圾。没有任何开关能让两者共存。二者之间的边界必须由<em>某种</em>不需要链接的机制来跨越 —— 这套栈里恰好有三种这样的机制：进程间通信、ABI thunk，以及整个进程统一选用一个 libc。</p>
+<h3 id="6642-链接器命名空间与-dlext">66.4.2 链接器命名空间与 dlext</h3>
+<p>即使栈里跑的是原生 <code>bionic</code> 代码，它仍受第 7 章的链接器命名空间隔离约束：应用原生库加载进一个受限命名空间，看不到大多数系统库。驱动加载路径用 <code>android_dlopen_ext</code> 配合 <code>ANDROID_DLEXT_USE_NAMESPACE</code>（<code>bionic/libc/include/android/dlext.h:115</code>）指向特定命名空间。<strong>adrenotools</strong> 这类自定义驱动加载器（用来侧载比设备自带更新的一份 Turnip 构建）依赖的正是这套机制：让选定的 <code>.so</code> 加载进一个能触达 GPU 内核接口的命名空间。<code>ANDROID_DLEXT_USE_LIBRARY_FD</code> 标志（<code>bionic/libc/include/android/dlext.h:80</code>）是它的搭档，可直接从文件描述符加载驱动。</p>
+<h3 id="6643-wx-与-jit">66.4.3 W^X 与 JIT</h3>
+<p>翻译器是 JIT，66.1.4 的 JIT 纪律适用。Android 上每个翻译器都遵循同一模式：先用 <code>PROT_READ | PROT_WRITE</code> 映射代码缓冲、往里写 AArch64 指令，然后清该范围的指令缓存，最后在跳进去之前对缓冲调用 <code>mprotect</code> 改成 <code>PROT_READ | PROT_EXEC</code>。一页永不同时可写且可执行。</p>
+<p>这是翻译器自身的加固模式，而不是在遵守链接器对 W+E 的拒绝（<code>bionic/linker/linker_phdr.cpp:1057</code>）—— 那道拒绝只针对 ELF load segment，根本看不到这些匿名代码缓冲。某些设备与 Android 版本会进一步限制从应用数据执行内存，那里翻译器必须把自己的代码页分配为它拥有的匿名内存，而不能映射数据目录中的文件。</p>
+<h3 id="6644-路径重定向proot-对-libredirect">66.4.4 路径重定向：PRoot 对 libredirect</h3>
+<p>PRoot（66.3.3）是路径重定向的一种形式：用 <code>ptrace</code> 在内核 ABI 上改写路径。它通用但慢。bionic 路径则用一个预加载库替代它 —— GameNative 的 <code>libredirect.so</code>，经 <code>LD_PRELOAD</code> 注入 Wine 子进程。该库不通过 <code>ptrace</code> 拦截每个系统调用，而是拦截那些带路径的 libc 函数并在进程内改写其参数，没有跟踪器往返。</p>
+<p>这个库还让进程启动适配近期 Android 对“从应用数据目录执行”的限制，顶替未 root 应用不被允许使用的内核机制。取舍是通用性换速度：预加载库只能抓到经由它所拦截函数发起的调用，而 PRoot 在内核边界抓到一切；但预加载方式避开了主导 PRoot 开销的每系统调用 <code>ptrace</code> 成本。</p>
+<h3 id="6645-ipc-逃生口">66.4.5 IPC 逃生口</h3>
+<p>最稳妥的重定向，是完全不在进程内跨越 libc 边界。这套栈里有三个服务以独立端点形式住在 Android（<code>bionic</code>）侧，由客户经 Unix 域套接字访问：</p>
+<ul>
+<li><strong>PulseAudio 服务器</strong> —— 客户内的 Wine 音频后端作为普通 PulseAudio 客户端连上去（66.8）；</li>
+<li><strong>Vortek Vulkan 渲染器</strong> —— 客户只持有一个薄薄的 Vulkan ICD，该 ICD 把命令经套接字序列化给原生渲染器（66.7.3）；</li>
+<li><strong>System V SHM 服务器</strong>（66.3.5）。</li>
+</ul>
+<h2 id="因为边界是套接字两侧可以用不同的-c-库不同的指令集不同的内存模型--这些都不重要唯一的契约是线协议这与-binder-能跨不同运行时通信是同一个道理第-9-章它付出一次序列化与一次拷贝却彻底绕开-libc-问题这也是为什么性能关键但非最热的路径音频命令提交这样建而真正的热路径cpu-翻译没有">因为边界是套接字，两侧可以用不同的 C 库、不同的指令集、不同的内存模型 —— 这些都不重要，唯一的契约是线协议。这与 Binder 能跨不同运行时通信是同一个道理（第 9 章）。它付出一次序列化与一次拷贝，却彻底绕开 libc 问题。这也是为什么性能关键但非最热的路径（音频、命令提交）这样建，而真正的热路径（CPU 翻译）没有。</h2>
+<h2 id="665-fex-与-box64把-x86-64-翻成-aarch64">66.5 FEX 与 Box64：把 x86-64 翻成 AArch64</h2>
+<p>这一层做的是 66.1.1 里那项真正的指令集模拟。两个项目主导局面，GameNative 两者都带：<strong>FEX</strong>（默认，通过其 FEXCore 引擎）与 <strong>Box64</strong>。它们用相反的哲学解决同一个问题，理解这处差异，就解释了用户遇到的“兼容性对速度”取舍的大部分。</p>
+<p>本章与第 19 章互补。那一章讲的是 Android <em>自身的</em>、插入 Native Bridge 的进程内二进制翻译器：一个是 <strong>Berberis</strong>，在 x86_64 设备上跑 riscv64 应用代码的 AOSP 翻译器（它的 CPU 模拟核在 Android 17 中被归并到 <code>frameworks/libs/binary_translation/cpu_emulation/</code> 之下）；另一个是历史上的闭源 <strong>Houdini</strong>，在 Intel x86 上跑 ARM 应用代码。两者都在 ART 下运行<em>客户 Android APK</em> 的原生代码，方向与这里的“x86-64 跑在 AArch64 上”相反，且都不参与这套栈。</p>
+<p>FEX 与 Box64 是同一个 dynarec 思想作用于整个 Linux/Windows x86-64 <em>程序</em>：它们跑在普通应用进程内，不是 Native Bridge 插件；它们把 x86-64 翻成 AArch64 —— 一个没有任何 AOSP 自带翻译器覆盖的方向。</p>
+<h3 id="6651-动态重编译器做什么">66.5.1 动态重编译器做什么</h3>
+<p>动态重编译器（dynarec）是针对外部机器码的 JIT。它读入一块 x86-64 指令，一次性翻成 AArch64 指令，把结果缓存起来，此后每次客户执行流回到该地址就跳到缓存里的译文。译文把客户的寄存器放进宿主寄存器、把客户的内存当作普通宿主内存，只在块边界回落到分派器，以决定接下来跑什么。</p>
+<p>dynarec 通常比解释器快五到十倍，因为逐指令的解码成本只在翻译时付一次，而不是每次执行都付。</p>
+<p>有三件事让 x86 到 ARM 特别难，每一件都是 FEX 与 Box64 投入工程精力的地方：</p>
+<ol>
+<li><strong>标志位。</strong> 几乎每条 x86 算术指令都更新 EFLAGS。每次运算后在 ARM 上算出那些标志位代价高得离谱，于是一个好的 dynarec 会推迟并省略标志位计算 —— 只有在真有东西读它们时才具现化。</li>
+<li><strong>向量指令。</strong> SSE、AVX 与 x87 浮点必须映射到 ARM 的 NEON 向量寄存器（宿主支持时还有 SVE），这需要对 NaN 处理与舍入格外小心。</li>
+<li><strong>内存模型。</strong> x86 是强内存模型（全存储序 Total Store Ordering），ARM 较弱。在此保持正确性既微妙又昂贵，值得单独一小节（66.5.3）。</li>
+</ol>
+<h3 id="6652-fexcore-流水线">66.5.2 FEXCore 流水线</h3>
+<p>FEX 是面向 AArch64 宿主的用户空间 x86 与 x86-64 模拟器，其模拟引擎是一个叫 <strong>FEXCore</strong> 的库，翻译流水线是干净的四级设计：</p>
+<h4 id="图fexcore-翻译流水线">图：FEXCore 翻译流水线</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> LR</span></span>
+<span class="line"><span style="color:#FFAB70">    X86</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"x86-64 指令流"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> DEC</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"前端解码器&lt;br/&gt;前缀、REX、VEX/EVEX"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    DEC </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> DISP</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"OpcodeDispatcher&lt;br/&gt;x86 语义到 IR"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    DISP </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> IR</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"SSA IR"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    IR </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> PASS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"PassManager&lt;br/&gt;优化 pass"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    PASS </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> JIT</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Arm64 JIT 发射器"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    JIT </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> HOST</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"缓存中的原生&lt;br/&gt;AArch64 代码"</span><span style="color:#F97583">]</span></span></code></pre>
+<p>对照 FEX 源码树逐级走一遍：</p>
+<ul>
+<li><strong>前端解码器</strong>读取原始字节流并找出指令边界，处理 x86 的 legacy 前缀、REX 前缀，以及 AVX 使用的 VEX/EVEX 编码。</li>
+<li><strong><code>OpcodeDispatcher</code></strong>（<code>FEXCore/Source/Interface/Core/OpcodeDispatcher.cpp</code>，向量与 x87 处理拆到 <code>OpcodeDispatcher/Vector.cpp</code> 与 <code>OpcodeDispatcher/X87.cpp</code>）把每条解码后的指令翻成 FEX 自己的 SSA 形式中间表示。IR 操作码本身定义在 <code>FEXCore/Source/Interface/IR/IR.json</code>。</li>
+<li><strong><code>PassManager</code></strong>（<code>FEXCore/Source/Interface/IR/PassManager.cpp</code>）在 IR 上跑优化 pass，对性能最重要的几个是寄存器分配、冗余标志位消除，以及一个 x87 栈优化 pass：寄存器分配把 IR 值映射到 ARM 寄存器；冗余标志位消除丢掉从不被读取的 EFLAGS 更新。</li>
+<li><strong>JIT 后端</strong>（<code>FEXCore/Source/Interface/Core/JIT/JIT.cpp</code>）从优化后的 IR 向代码缓存发射原生 AArch64 指令。FEX 使用自研的 ARM64 发射器而不是现成汇编器，以保持代码生成快而紧凑。</li>
+</ul>
+<p>FEX 支持 MMX、SSE 到 SSE4、x87 以及 AVX/AVX2。它翻译多块区域而非单个基本块，并通过查找缓存在各缓存译文之间分派。FEX 处理自修改代码：它检测客户对含已翻译代码的页面的写入，并使受影响的缓存块失效。</p>
+<h3 id="6653-tso-内存模型问题">66.5.3 TSO 内存模型问题</h3>
+<p>这是整个模拟层里最重要的性能微妙之处。x86 保证全存储序：一个核的存储在程序序上对其他核可见。ARM 不保证；除非你插入屏障或使用 acquire/release 指令，它允许存储被重排。一个为 x86 强序编写的小多线程游戏，若其内存操作被朴素地翻成普通 ARM load/store，就会竞态并崩溃。</p>
+<p>FEX 默认正确的答案是模拟 TSO：它使用 ARM 的 acquire/release load/store 指令（<code>FEAT_LRCPC</code> 扩展）与原子指令（<code>FEAT_LSE2</code>，用于 x86 允许而 ARM 通常禁止的非对齐原子）。这种模拟很贵 —— 在弱模型上忠实复现 x86 序，在受影响的访存流量上可能带来约 10 倍的减速，代价在向量密集的游戏代码中感受最明显。</p>
+<p>泄压阀是<strong>硬件 TSO</strong>。某些 ARM 核可以切到硬件全存储序模式 —— Apple Silicon 就是这么做的（这也是 Rosetta 2 快的原因）。在宿主 CPU 暴露该模式的地方，FEX 会请求它并放宽软件模拟，换来大幅收益。FEX 还提供一些可调项，可对向量访问或栈内存（线程私有、安全）关闭 TSO 模拟，这些可调项用一点稳定性换速度。</p>
+<p>对手机而言的实务结论是：骁龙芯片具体的内存序能力会实质影响模拟跑多快，这与原始主频无关。</p>
+<h3 id="6654-fex-thunk调用原生-arm64-图形">66.5.4 FEX thunk：调用原生 ARM64 图形</h3>
+<p>如果 FEX 要翻译游戏进程执行的<em>每一条</em>指令 —— 包括整个 Vulkan 驱动 —— 性能就没救了。避开这一点的杠杆是 <strong>thunk</strong>，也叫库转发：thunk 让被模拟的 x86 客户代码直接调用 <strong>原生 AArch64</strong> 宿主库，于是 GPU 驱动这类重型库以原生代码运行，而不是被翻译的代码。</p>
+<p>设计是双向的。客户侧，FEX 提供一个小的 x86 桩库，呈现正常的客户 ABI（例如一个客户版 <code>libvulkan.so</code>）；它不含驱动，而是把每次调用转发过边界。宿主侧，一个原生 ARM64 thunk 库接收转发的调用并调用真正的宿主库。FEX 源码为关键图形库带了两半：Vulkan 的 <code>ThunkLibs/libvulkan/Guest.cpp</code> 与 <code>ThunkLibs/libvulkan/Host.cpp</code>，以及 OpenGL 的 <code>ThunkLibs/libGL/</code>。</p>
+<h4 id="图一次跨模拟边界的-thunk-vulkan-调用">图：一次跨模拟边界的 thunk Vulkan 调用</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> LR</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> GuestSide</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">被模拟的 x86-64</span><span style="color:#E1E4E8">（</span><span style="color:#FFAB70">FEX</span><span style="color:#E1E4E8">）"]</span></span>
+<span class="line"><span style="color:#FFAB70">        APP</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"游戏 / DXVK"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> GTHUNK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"客户 libvulkan thunk&lt;br/&gt;x86-64 桩"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> HostSide</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"原生 AArch64"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        HTHUNK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"宿主 vulkan thunk"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> REAL</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"真实 Vulkan 驱动"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    GTHUNK </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"编组参数，&lt;br/&gt;跨 ABI"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> HTHUNK</span></span></code></pre>
+<p>难处在于编组。客户与宿主在 32 位情形的指针大小、结构体布局、调用约定上都不一致；回调（宿主库将要回调的函数指针）必须反向跨边界做 trampoline。FEX 的 thunk 两个方向的函数指针都处理，并在边界处转换数据结构布局，由一个 <code>ThunksDB.json</code> 配置：把每个客户库映射到它的宿主 overlay。thunk 是基于 FEX 的图形能接近原生速度的最大原因 —— 只有游戏的绘制调用<em>设置</em>被模拟，驱动的工作以原生方式运行。</p>
+<h3 id="6655-fex-的-rootfs-需求">66.5.5 FEX 的 rootfs 需求</h3>
+<p>当 FEX 作为独立 Linux 模拟器运行时，它模拟的是一个完整的 x86-64 <em>进程</em>，因而需要一个 x86-64 根文件系统来提供客户 glibc 与基础库。桌面 Linux 上，<code>FEXRootFSFetcher</code> 正是为此下载 SquashFS 或 EroFS 镜像。这是“全部模拟”模型，也是 Box64 与之差异的主轴 —— Box64 包装宿主库，不模拟完整客户用户环境。</p>
+<p>不过，在 GameNative 的默认 ARM64EC 配置中，FEX 根本不是作为 Linux 模拟器运行，而是作为纯 CPU 模块插进 Wine（66.5.8）。由 Wine 服务 Windows 系统调用，而不是客户 glibc，所以独立的 x86 rootfs 不再需要了。FEX 的 rootfs 需求因此是“全部模拟”路径的属性，而不是 ARM64EC 默认的属性 —— ARM64EC 卸掉了这个需求，这是它的具体收益之一。</p>
+<h3 id="6656-box64包装原生库">66.5.6 Box64：包装原生库</h3>
+<p>Box64 出自 ptitSeb，是核心工作相同但系统库哲学不同的 dynarec。Box64 不从一个 rootfs 模拟 x86-64 的 glibc、GL 与 Vulkan，而是在检测到客户即将调用这些知名库时，<strong>替换为宿主的原生 ARM64 实现</strong>：它包装每次调用来转换调用约定。手写包装器位于 Box64 源码的 <code>src/wrapped/</code> 下，例如 Vulkan 的 <code>src/wrapped/wrappedvulkan.c</code>、C 库的 <code>src/wrapped/wrappedlibc.c</code>。</p>
+<p>结果是对它所包装的库，Box64 不需要完整的 x86 rootfs —— 它借用宿主的。这使它比 FEX 更轻，也是经典 Winlator 的历史默认，那里的启动链字面上就是 <code>proot</code> 然后 <code>box64</code> 然后 <code>wine</code>。GameNative 的 <code>GuestProgramLauncherComponent</code> 为 glibc 路径构建的正是 <code>box64 &lt;guest exe&gt;</code> 这条命令。取舍是：包装的正确性只等于包装器的正确性；当某个被包装库的行为偏离客户预期时，它可能以全模拟方案不会出现的方式出错。</p>
+<p>32 位故事是对称的：Box64 处理 x86-64，它的兄弟 <strong>Box86</strong> 处理 32 位 x86。对没有 32 位 ARM 环境的宿主，Box64 有一个实验性的 <code>BOX32</code> 模式，在 64 位环境内模拟一个 32 位环境。Box64 自己的 <code>docs/WINE.md</code> 列出了 Wine 各变体（x86、x86-64、x86-64 WoW64、ARM64 WoW64）与各自所需 Box 组合的矩阵 —— 关于模拟器与 Wine 如何拼在一起，它是最好的单一首要参考。</p>
+<h3 id="6657-fex-对-box64">66.5.7 FEX 对 Box64</h3>
+<h4 id="图两种模拟哲学">图：两种模拟哲学</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> FEXapproach</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">FEX</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">模拟进程</span><span style="color:#E1E4E8">，</span><span style="color:#FFAB70">thunk 热库</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        F1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"x86-64 rootfs&lt;br/&gt;（客户 glibc）"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> F2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"FEXCore JIT"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        F2 </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"thunk"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> F3</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"原生 ARM64&lt;br/&gt;Vulkan / GL"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> BOXapproach</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">Box64</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">模拟应用</span><span style="color:#E1E4E8">，</span><span style="color:#FFAB70">包装系统库</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        B1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"客户 x86-64 应用"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> B2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Box64 dynarec"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        B2 </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"wrap"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> B3</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"宿主 ARM64&lt;br/&gt;libc / GL / Vulkan"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span></code></pre>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>FEX</th>
+<th>Box64</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>系统库</td>
+<td>从 x86-64 rootfs 模拟</td>
+<td>包装到宿主原生 ARM64</td>
+</tr>
+<tr>
+<td>磁盘占用</td>
+<td>较重（完整 rootfs）</td>
+<td>较轻（借用宿主库）</td>
+</tr>
+<tr>
+<td>原生库逃生</td>
+<td>thunk（GL、Vulkan）</td>
+<td>包装器（libc、GL、Vulkan 等）</td>
+</tr>
+<tr>
+<td>32 位代码</td>
+<td>同一核心；WoW64/ARM64EC</td>
+<td>独立的 Box86，或 BOX32</td>
+</tr>
+<tr>
+<td>准确性取向</td>
+<td>完整 IR 重编译，严谨的 TSO</td>
+<td>务实；取决于包装器保真度</td>
+</tr>
+<tr>
+<td>在 GameNative 中的角色</td>
+<td>默认（FEXCore）</td>
+<td>打包的替代项</td>
+</tr>
+</tbody>
+</table>
+<p>两者都不普适更好。FEX 的全模拟准确性对重度 mod 或怪异作品更有帮助；Box64 更轻的占用与成熟的包装器让它长期是 Winlator 默认。GameNative 两者都带，由容器自行选择。</p>
+<h3 id="6658-arm64ec-与-wow64只模拟游戏">66.5.8 ARM64EC 与 WoW64：只模拟游戏</h3>
+<p>近期最重要的转变是架构性的而非渐进性的：不再让 Wine 自己也被模拟器跑一遍。在“全部模拟”模型里，JIT 翻译游戏<em>以及</em>整个 Wine <em>以及</em> Wine 之下所有 x86 Linux 库 —— 模拟器处在每条指令的热路径上。<strong>ARM64EC</strong> 模型反过来，为 ARM64 原生构建 Wine，只模拟游戏的 x86-64 代码。</p>
+<p>ARM64EC（“Emulation Compatible”，模拟兼容）是微软的一套 ABI，在 Wine 中重新实现：原生 ARM64 代码的布局使其能与被模拟的 x86-64 代码互相调用。Wine 的系统 DLL 按此 ABI 编译，于是被模拟的游戏一旦调用 Windows API，执行流就转入<em>原生</em> ARM64 的 Wine 代码，而不是更多模拟。模拟器被缩成一个 CPU 核，在 ABI 边界上作为可加载模块插进 Wine。</p>
+<p>在这种配置里，模拟器作为 Windows DLL 发布、由 Wine 加载：FEX 对 64 位代码发布为 <code>libarm64ecfex.dll</code>；32 位 WoW64 路径用的是 <code>libwow64fex.dll</code>（FEX）或 <code>wowbox64.dll</code>（Box64）。GameNative 在 <code>BionicProgramLauncherComponent</code> 里根据所配置的 Wine 构建是否为 ARM64EC 在这些之间选择。</p>
+<h4 id="图用-arm64ec-缩小被模拟区域">图：用 ARM64EC 缩小被模拟区域</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> Everything</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"全部模拟"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        E1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"游戏（x86-64）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        E2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Wine（x86-64）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        E3</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Linux 库（x86-64）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#FFAB70"> EC</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ARM64EC 混合"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        H1</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"游戏（x86-64）&lt;br/&gt;被模拟"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        H2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Wine（ARM64EC）&lt;br/&gt;原生"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        H3</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Vulkan / 音频（ARM64）&lt;br/&gt;原生"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    Everything </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"只剩游戏仍被模拟"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> EC</span></span></code></pre>
+<h2 id="回报很大windows-api-的工作图形翻译与音频通路全部作为原生-arm64-运行只有游戏自身的指令流被翻译这是-gamenative-的默认设计也是这套栈在手机上能快到可用的原因">回报很大：Windows API 的工作、图形翻译与音频通路全部作为原生 ARM64 运行，只有游戏自身的指令流被翻译。这是 GameNative 的默认设计，也是这套栈在手机上能快到可用的原因。</h2>
+<h2 id="666-wine实现-windows-api">66.6 Wine：实现 Windows API</h2>
+<p>Wine 是让游戏以为自己跑在 Windows 上的那一层。模拟器管指令，Wine 管语义。它在 Linux 内核之上重新实现 Windows API，为游戏对该 API 发起的每一次调用提供服务。</p>
+<h3 id="6661-不是模拟器">66.6.1 不是模拟器</h3>
+<p>这个名字是递归缩写，“Wine Is Not an Emulator”（Wine 不是模拟器）。在 ARM Android 上，这一区分不是学究气，而是架构本身。Wine 完全不含指令翻译：它取来一个 Windows PE 二进制，加载进 Linux 进程，用与 Linux 对话的原生代码去应答该二进制的 Windows API 与 NT 系统调用。</p>
+<p>在 x86-64 Linux 上那些原生代码直接运行；在 ARM Android 上，Wine <em>自身</em>要么被模拟（全部模拟模型），要么被编译成原生 ARM64EC（混合模型）。两种情形里 x86 到 ARM 的翻译都不由 Wine 做 —— 那永远是 FEX 或 Box64。两层正交，正如 66.1.1 所述。</p>
+<h3 id="6662-peunix-分界">66.6.2 PE/Unix 分界</h3>
+<p>现代 Wine 围绕 Windows PE 代码与 Unix 后端之间的一道硬边界来组织。Wine 的内置 DLL（<code>ntdll</code>、<code>kernel32</code>、<code>kernelbase</code>、<code>user32</code>、<code>gdi32</code>）被编译成真正的 PE 文件，所以从游戏的角度看，它调用的就是普通 Windows DLL。那些必须触达宿主 OS 的 DLL 被拆成 PE 部分与 Unix 部分。</p>
+<p>典型例子是 <code>ntdll</code>。PE 侧（<code>dlls/ntdll/</code>）构建 <code>ntdll.dll</code>；Unix 侧（<code>dlls/ntdll/unix/</code>）构建 <code>ntdll.so</code> —— 一个启动时被 <code>dlopen</code> 的 ELF 库，关键文件是 <code>dlls/ntdll/unix/loader.c</code>、<code>dlls/ntdll/unix/virtual.c</code> 与 <code>dlls/ntdll/unix/signal_x86_64.c</code>。两半之间的契约声明在 <code>dlls/ntdll/unixlib.h</code>。</p>
+<p>进程启动时首先是一个完全普通的 Linux 进程：一个小加载器 <code>dlopen</code> 了 <code>ntdll.so</code>，该库构建 Windows 的进程控制结构（PEB 与 TEB）、映射 PE 的 <code>ntdll.dll</code> 与初始可执行文件、连接 wineserver，最后跳进 PE 侧的初始化。此后，控制流“就像在 Windows 上一样”运行。</p>
+<h4 id="图wine-的-pe-与-unix-两半及系统调用边界">图：Wine 的 PE 与 Unix 两半及系统调用边界</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TD</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> PE</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">PE 世界</span><span style="color:#E1E4E8">（</span><span style="color:#FFAB70">Windows 二进制</span><span style="color:#E1E4E8">）"]</span></span>
+<span class="line"><span style="color:#FFAB70">        GAME</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Game.exe"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        K32</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"kernel32.dll / user32.dll"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        NTPE</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ntdll.dll（PE）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> UNIX</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">Unix 世界</span><span style="color:#E1E4E8">（</span><span style="color:#FFAB70">ELF</span><span style="color:#E1E4E8">）"]</span></span>
+<span class="line"><span style="color:#FFAB70">        NTSO</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ntdll.so"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        SERVER</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"wineserver 客户端"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    GAME </span><span style="color:#F97583">--</span><span style="color:#9ECBFF">&gt; K32 </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> NTPE</span></span>
+<span class="line"><span style="color:#FFAB70">    NTPE </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"__wine_syscall_dispatcher"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> NTSO</span></span>
+<span class="line"><span style="color:#FFAB70">    NTPE </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"WINE_UNIX_CALL"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> NTSO</span></span>
+<span class="line"><span style="color:#FFAB70">    NTSO </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> SERVER</span></span>
+<span class="line"><span style="color:#FFAB70">    NTSO </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> KERNEL</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Linux 内核"</span><span style="color:#F97583">]</span></span></code></pre>
+<p>跨边界的有两个机制。NT 系统调用（<code>NtCreateFile</code>、<code>NtUserCreateWindowEx</code>）汇入一个在 <code>dlls/ntdll/unix/signal_x86_64.c</code> 中设置的 <code>__wine_syscall_dispatcher</code>：分派器保存 CPU 状态、切到 Unix 栈、索引系统调用表、调用 Unix 实现。带 Unix 后端但绕过 NT 表的 DLL 则改用 <code>WINE_UNIX_CALL</code>。Wine 让 Windows API 调用经由一个显式、类似 NT 的系统调用边界 —— 这正是 66.5.8 的 ARM64EC 与 WoW64 转换得以成立的原因：边界本来就在那儿，等着挂钩。</p>
+<h3 id="6663-wineserver">66.6.3 wineserver</h3>
+<p>wineserver 是一个独立守护进程，大致提供 Windows 上内核所提供的那些服务。共用同一 prefix 的每个 Wine 进程，都通过 wineserver 共享 NT 在内核空间保存的东西：句柄与对象命名空间、同步对象（事件、互斥量、信号量）、进程与线程、窗口管理状态，以及注册表。</p>
+<p>客户端经 <code>AF_UNIX</code> 套接字与它通信，通过 <code>wine_server_call</code> 编组请求；服务器的请求处理器在 <code>server/request.c</code>。该套接字位于按 prefix 划分的目录中、以 prefix 的设备与 inode 为键，因此每个 prefix 有自己的服务器。一个特别重要的细节是：该套接字用标准的 <code>SCM_RIGHTS</code> 辅助数据在进程间传<strong>文件描述符</strong>，于是一个 Windows <code>HANDLE</code> 可以由服务器交出的真实 Linux fd 支撑。</p>
+<p>性能上的注意事项在手机上很重要。游戏不停地同步线程，而经典“每次都问 wineserver”的模型让每次同步都变成一趟套接字往返。Wine 逐步把同步移出服务器：<strong>esync</strong>（基于 eventfd）、<strong>fsync</strong>（基于 futex），以及最近的 <strong>ntsync</strong> —— 一个暴露 <code>/dev/ntsync</code>、在内核里建模 NT 同步原语的 Linux 内核驱动。</p>
+<p>更快的路径能否用，取决于宿主内核。Android 内核可能根本不暴露 <code>/dev/ntsync</code>，那种情况下这套栈回落到 futex 上的 fsync，而 Android 是有 futex 的。</p>
+<h3 id="6664-prefixc-盘与注册表">66.6.4 prefix、C: 盘与注册表</h3>
+<p>一个 <strong>Wine prefix</strong>（即 <code>WINEPREFIX</code>，这里是 rootfs 内的 <code>/home/xuser/.wine</code>）是一份自成一体的虚拟 Windows 安装：有自己的 C: 盘、自己的注册表、自己的 wineserver。其中 <code>drive_c/windows/system32</code> 放 64 位系统 DLL，<code>drive_c/windows/syswow64</code> 放 32 位的（Windows 那套反直觉命名被保留下来）；<code>dosdevices/</code> 放把盘符映射到宿主路径的符号链接。注册表在 prefix 根目录以文本 <code>.reg</code> 文件保存（HKLM 的 <code>system.reg</code>、HKCU 的 <code>user.reg</code>），由 wineserver 实时服务。</p>
+<p>这套布局正是容器可移植、可丢弃的原因：它只是一棵目录树。GameNative 的按游戏容器就是按游戏的 prefix，两个 DLL 或注册表需求冲突的游戏因此得以隔离。</p>
+<h3 id="6665-dll-覆盖dxvk-如何替换-wine-的-direct3d">66.6.5 DLL 覆盖：DXVK 如何替换 Wine 的 Direct3D</h3>
+<p>Wine 逐个 DLL 决定用自己内置的实现，还是用放进 prefix 的一个<strong>原生</strong> DLL。选择由 <code>WINEDLLOVERRIDES</code> 环境变量与 <code>HKCU\Software\Wine\DllOverrides</code> 下的注册表项驱动。</p>
+<p>整条图形快路径就是靠这一个机制装上的。DXVK 与 VKD3D-Proton 发布的 PE DLL 名字与 Wine 内置 Direct3D DLL 完全一样（<code>d3d9.dll</code>、<code>d3d11.dll</code>、<code>dxgi.dll</code>、<code>d3d12.dll</code>），安装器把它们拷进 prefix 的 <code>system32</code>/<code>syswow64</code>，并把这些名字设为 <code>native</code>。于是游戏下次调用 <code>D3D11CreateDevice</code> 时，Wine 的加载器把 <code>d3d11.dll</code> 解析到 DXVK 的文件，而不是自己那个基于 <code>wined3d</code> 的内置实现 —— Direct3D 这时被翻成 Vulkan（66.7），而不是 OpenGL。</p>
+<h3 id="6666-wine-与模拟器的交汇处">66.6.6 Wine 与模拟器的交汇处</h3>
+<p>本节把 66.5 与 66.6 绑在一起。在 ARM64EC 配置中，Wine 是原生 ARM64EC，其 DLL 在系统调用边界转进原生代码；模拟器（<code>libarm64ecfex.dll</code> 或 WoW64 辅助件）只在运行游戏的 x86-64 指令流时被调用。在全部模拟配置中，整个 Wine 都是 x86-64，跑在 Box64 或 FEX 之上、对着 rootfs 的 glibc。</p>
+<p>两种配置呈现给游戏的都是同一个 Windows，区别只在于游戏之下有多大一部分进程被模拟、多大一部分是原生。这是帧率最大的单一决定因素。</p>
+<hr>
+<h2 id="667-图形从-direct3d-到-adreno-gpu">66.7 图形：从 Direct3D 到 Adreno GPU</h2>
+<p>图形是这套栈要么成功、要么肉眼可见地失败的地方，也是本书中最长的翻译链：一个 x86-64 游戏发出的 Direct3D 调用，最终变成由手机 Adreno 驱动执行、由 SurfaceFlinger 合成的 Vulkan 命令。这条链上每一环都是独立的技术。</p>
+<h3 id="6671-翻译链">66.7.1 翻译链</h3>
+<h4 id="图完整的-direct3d-到显示链">图：完整的 Direct3D 到显示链</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TD</span></span>
+<span class="line"><span style="color:#FFAB70">    GAME</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"游戏：Direct3D 9/11/12 调用"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    DXVK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"DXVK / VKD3D-Proton&lt;br/&gt;（D3D 到 Vulkan）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    GUESTVK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"客户 Vulkan ICD&lt;br/&gt;（thunk 或 Vortek 客户端）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    BRIDGE</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"跨边界&lt;br/&gt;（thunk / IPC / wrap）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    HOSTVK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Android Vulkan loader&lt;br/&gt;libvulkan"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    DRIVER</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Adreno Vulkan 驱动&lt;br/&gt;（或 Turnip）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    SURFACE</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ANativeWindow&lt;br/&gt;到 SurfaceFlinger"</span><span style="color:#F97583">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">    GAME </span><span style="color:#F97583">--</span><span style="color:#9ECBFF">&gt; DXVK </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> GUESTVK </span><span style="color:#F97583">--</span><span style="color:#9ECBFF">&gt; BRIDGE </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> HOSTVK </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> DRIVER</span></span>
+<span class="line"><span style="color:#FFAB70">    DRIVER </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> SURFACE</span></span></code></pre>
+<p>这条链被 66.4 的 libc 边界分成两半：边界之上是 Windows/客户世界，Direct3D 变成 Vulkan；边界之下是 Android 侧，Vulkan 抵达真实驱动、帧抵达显示。有意思的工程全在边界如何跨越上。</p>
+<h3 id="6672-d3d-到-vulkandxvkvkd3d-与回退方案">66.7.2 D3D 到 Vulkan：DXVK、VKD3D 与回退方案</h3>
+<p>几个翻译器覆盖 Direct3D 的各代版本，全部作为 Wine DLL 覆盖安装（66.6.5）：</p>
+<ul>
+<li><strong>DXVK</strong> 把 Direct3D 9/10/11 翻成 Vulkan，发布 <code>d3d9.dll</code>、<code>d3d11.dll</code>、<code>dxgi.dll</code> 等相关 DLL，是 GameNative 容器中的默认 <code>DEFAULT_DXWRAPPER</code>。</li>
+<li><strong>VKD3D-Proton</strong> 把 Direct3D 12 翻成 Vulkan，发布 <code>d3d12.dll</code> 与 <code>d3d12core.dll</code>，是 WineHQ 自家 vkd3d 的 Valve 调优分支，为游戏性能优化。</li>
+<li><strong>D8VK</strong> 把 DXVK 延伸到 Direct3D 8。</li>
+<li><strong>wined3d</strong> 是 Wine 的内置回退，把 Direct3D 翻成 OpenGL 而非 Vulkan，更慢，只在游戏与 DXVK 不兼容时使用。</li>
+<li><strong>cnc-ddraw</strong> 处理老式 DirectDraw 作品。</li>
+</ul>
+<p>关键架构点在于：在 ARM64EC 下这些翻译器是原生 ARM64 代码（66.5.8），只有游戏的 D3D <em>调用</em>源自被模拟的代码；把一帧的绘制调用变成 Vulkan 命令缓冲这件重活以原生方式运行。这就是手机上 DXVK 远快于“在完全模拟的 x86 Wine 里翻译 Direct3D”这一替代方案的原因。</p>
+<h3 id="6673-抵达真实-gputurnip-与-vortek">66.7.3 抵达真实 GPU：Turnip 与 Vortek</h3>
+<p>Vulkan 命令现在必须到达真正的 Adreno GPU。有两条策略，而这一选择是图形设计中最重要的分叉。</p>
+<p><strong>Turnip</strong> 是 Mesa 面向 Adreno GPU 的开源 Vulkan 驱动。这套栈打包了一份 Turnip，也可以通过 adrenotools 侧载更新的构建（66.4.2），因此客户拥有一个真实、完整的 Vulkan 实现，直接与 Adreno 内核接口对话。</p>
+<p>Turnip 之所以存在，是因为手机上随附的 Vulkan 驱动面对 Wine 与 DXVK 产生的非常规负载常常不完整或有 bug；一份已知良好的 Mesa 驱动绕开该问题。在 FEX 世界，客户经 <strong>thunk</strong> 机制（66.5.4）抵达 Turnip：一个客户 <code>libvulkan</code> 桩把调用转给原生 Turnip。</p>
+<p><strong>Vortek</strong> 是 Winlator 自己的 Vulkan 兼容层，走 66.4.5 的 IPC 路线、不用 thunk。它是客户端/服务器设计：客户链接一个薄薄的 Vortek Vulkan <strong>ICD</strong>，该 ICD 从 <code>assets/.../vortek-*</code> 压缩包发布进 rootfs。</p>
+<p>ICD 把每次 Vulkan 调用序列化成命令流，经 Unix 套接字发给一个<strong>原生 Android 服务器</strong>；该服务器就是预置的 <code>libvortekrenderer.so</code>，由 <code>VortekRendererComponent</code> 驱动。服务器对着设备的真实 Vulkan 驱动重放这些命令，途中还能修补 SPIR-V 着色器、解码宿主驱动不支持的纹理格式、模拟某些特性。</p>
+<p>Vortek 正是 GameNative 的默认图形驱动，原因就在于套接字边界让它对 glibc/<code>bionic</code> 错配天然免疫 —— 客户与宿主驱动从不共享地址空间。</p>
+<h4 id="图turnipthunk对-vortekipc抵达-gpu">图：Turnip（thunk）对 Vortek（IPC）抵达 GPU</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TB</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> TurnipPath</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">Turnip</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">经 thunk 的进程内原生驱动</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        TG</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"客户 Vulkan（DXVK）"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;|</span><span style="color:#9ECBFF">"thunk"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> TN</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Turnip（Mesa）原生"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        TN </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> TK</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Adreno 内核 DRM"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> VortekPath</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">Vortek</span><span style="color:#E1E4E8">：</span><span style="color:#FFAB70">经套接字序列化</span><span style="color:#E1E4E8">"]</span></span>
+<span class="line"><span style="color:#FFAB70">        VG</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"客户 Vortek ICD"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;|</span><span style="color:#9ECBFF">"命令流&lt;br/&gt;经 Unix 套接字"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> VS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"原生 Vortek 服务器"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        VS </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> VD</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"设备 Vulkan 驱动"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        VD </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> VK2</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Adreno 内核 DRM"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span></code></pre>
+<p>还有若干条路径用于非 Vulkan 或低端情形。<strong>Zink</strong> 是 Mesa 的 OpenGL-on-Vulkan；<strong>VirGL</strong> 是带自己客户端/服务器的 virtio-gpu 虚拟 3D 渲染器；<strong>llvmpipe</strong> 是最后手段的纯 CPU 软件光栅化器。</p>
+<p>Zink 值得多说一句，因为它是某个 AOSP 组件的客户侧镜像：客户可能需要 OpenGL 而宿主只有好的 Vulkan 驱动，于是 Zink 把 GL 重新表达为 Vulkan。Android 自己的 <strong>ANGLE</strong>（<code>external/angle/</code>）对调用 OpenGL ES 的原生应用做的正是这件事（第 13 章）。</p>
+<p>在多数设备上 ANGLE 并不是平台的默认 GLES 驱动 —— EGL 加载器自己就这么注明（<code>frameworks/native/opengl/libs/EGL/Loader.cpp:555</code>）；它是按应用或全系统选择的。Windows 游戏这套栈不走 ANGLE，因为客户在 rootfs 内部自己做 GL 到 Vulkan 的翻译（Zink，或 <code>wined3d</code> 的 GL 输出），再经 Vulkan loader 抵达设备 —— 这种平行是概念上的，不是共享的代码路径。</p>
+<h3 id="6674-android-vulkan-loader">66.7.4 Android Vulkan loader</h3>
+<p>不论用哪条客户路径，链的底部都是第 13 章那个 AOSP Vulkan loader。加载器在 <code>frameworks/native/vulkan/libvulkan/driver.cpp</code> 中发现在并加载设备的 Vulkan 驱动。<code>LoadDriver</code> 例程（<code>frameworks/native/vulkan/libvulkan/driver.cpp:153</code>）通过两条分支之一打开 HAL 驱动（<code>vulkan.&lt;board&gt;.so</code>）：当提供了驱动命名空间（可更新、经 Play 交付的驱动路径）时，它用 <code>android_dlopen_ext</code> 配合 <code>ANDROID_DLEXT_USE_NAMESPACE</code>（<code>frameworks/native/vulkan/libvulkan/driver.cpp:171</code>）—— 就是 66.4.2 那个命名空间标志；普通的内置驱动则从 sphal 命名空间用 <code>android_load_sphal_library</code>（<code>frameworks/native/vulkan/libvulkan/driver.cpp:178</code>）打开。</p>
+<p>像 Vortek 服务器或 thunk 后的 Turnip 这样的原生渲染器，最终不过是这个加载器和这个驱动的又一个客户端 —— 这就是整座大厦在完全不改平台的前提下能工作的原因：GPU 是通过任何 Android 游戏都在用的同一个公开 Vulkan 接口抵达的。</p>
+<h3 id="6675-呈现应用内-surface">66.7.5 呈现：应用内 Surface</h3>
+<p>渲染好的帧必须变成屏幕上的像素。游戏拿不到真正的 X 显示，也拿不到真正的窗口系统，它拿到的是 GameNative 的<strong>应用内 X 服务器</strong>：一个在应用内实现的小型 X11 服务器（<code>com.winlator.xserver</code>，原生代码在 <code>app/src/main/cpp/winlator/</code>）。它接收游戏的输出与游戏绘制的窗口，其内容用 Vulkan 绘制并呈现到一个 Android <strong>Surface</strong>。</p>
+<p>最后这一步使用第 13 章的原生窗口 API：帧经 <code>ANativeWindow</code> 到达合成器。CPU 访问路径用的是 <code>ANativeWindow_lock</code>（<code>frameworks/native/libs/nativewindow/include/android/native_window.h:179</code>）与 <code>ANativeWindow_unlockAndPost</code>（<code>frameworks/native/libs/nativewindow/include/android/native_window.h:188</code>）；零拷贝 GPU 路径把一个 <code>AHardwareBuffer</code>（<code>frameworks/native/libs/nativewindow/include/android/hardware_buffer.h:479</code>，经 <code>AHardwareBuffer_allocate</code>）绑定为 Vulkan swapchain 图像，GPU 于是直接渲染进一块 SurfaceFlinger 能扫描输出的缓冲。从 SurfaceFlinger 往前（第 24 章），游戏的帧就只是又一个被合成到显示屏的图层。</p>
+<h3 id="6676-帧生成">66.7.6 帧生成</h3>
+<h2 id="作为可选的最后一道润色gamenative-可以插入一个执行帧生成的-vulkan-隐式层该层拦截-vkqueuepresentkhr在已渲染的帧之间插值出合成帧它是-vulkan-意义上的图层嵌入加载器的图层链--这说明图形栈的很大一部分是从标准-vulkan-扩展点搭起来的而不是靠定制钩子">作为可选的最后一道润色，GameNative 可以插入一个执行帧生成的 Vulkan 隐式层：该层拦截 <code>vkQueuePresentKHR</code>，在已渲染的帧之间插值出合成帧。它是 Vulkan 意义上的图层，嵌入加载器的图层链 —— 这说明图形栈的很大一部分是从标准 Vulkan 扩展点搭起来的，而不是靠定制钩子。</h2>
+<h2 id="668-音频从-wasapi-到-aaudio">66.8 音频：从 WASAPI 到 AAudio</h2>
+<p>音频链比图形短，但跨越的是同一个 libc 边界。66.4.5 的 IPC 模式解决了它：真正的音频服务器跑在 Android 侧，客户作为客户端连上去。</p>
+<h3 id="6681-wine-的音频后端">66.8.1 Wine 的音频后端</h3>
+<p>Windows 游戏通过若干前端 API 之一发声：现代的 WASAPI（经 <code>mmdevapi</code>）、传统的 DirectSound，或旧的 <code>winmm</code>/<code>waveOut</code>。Wine 把它们全都叠到一个运行时选定的后端驱动上。这里重要的是 <code>winepulse.drv</code>，它面向 <strong>PulseAudio</strong>；替代项是 <code>winealsa.drv</code>（ALSA）与 <code>wineoss.drv</code>（OSS）。在现代 Wine 里，每个后端都是一个仅 Unix 的库，例如由 <code>dlls/winepulse.drv/pulse.c</code> 构建的 <code>winepulse.so</code>，它调用宿主的 PulseAudio 客户端库。</p>
+<p>PE 那一半住在 <code>mmdevapi</code> 自己里：它用 <code>__wine_load_unix_lib</code> 加载后端，并经 <code>__wine_unix_call</code> 调进去（<code>dlls/mmdevapi/main.c</code>）。</p>
+<p>在 ARM64EC 配置下，后端及其客户端库是原生 ARM64，因此混音与传输不被模拟 —— 只有游戏对前端 API 的调用跨过模拟器。</p>
+<h3 id="6682-应用内的-pulseaudio-服务器">66.8.2 应用内的 PulseAudio 服务器</h3>
+<p>未 root 的应用没有系统 PulseAudio 守护进程可用，于是这套栈自带一个。GameNative 的 <code>PulseAudioComponent</code> 从打包的原生库启动一个 PulseAudio 服务器（<code>jniLibs/</code> 中的 <code>libpulse.so</code> 以及 <code>libpulsecommon</code>/<code>libpulsecore</code> 这些 PulseAudio 13 库）。Wine 的 <code>winepulse.drv</code> 连上这个服务器，方式与连桌面 PulseAudio 完全一样 —— 走 PulseAudio 正常的套接字协议。契约是 PulseAudio 线协议，于是客户侧（glibc，可能被模拟）与服务器侧（<code>bionic</code>，原生）跨 libc 边界互通，而不共享地址空间。</p>
+<h4 id="图从游戏到扬声器的音频通路">图：从游戏到扬声器的音频通路</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> LR</span></span>
+<span class="line"><span style="color:#FFAB70">    GAME</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"游戏：WASAPI / DirectSound"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> WP</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"winepulse.drv"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    WP </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"PulseAudio 协议&lt;br/&gt;经套接字"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> PA</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"PulseAudio 服务器&lt;br/&gt;（应用内，原生）"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    PA </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> AA</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"AAudio / AudioTrack"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    AA </span><span style="color:#F97583">--&gt;</span><span style="color:#FFAB70"> HAL</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Audio HAL 到扬声器"</span><span style="color:#F97583">]</span></span></code></pre>
+<h3 id="6683-alsa-桥">66.8.3 ALSA 桥</h3>
+<p>Winlator 还提供一条更底层的 ALSA 路线。rootfs 带一个自定义 ALSA PCM 插件（Winlator 的 <code>android_alsa</code>，<code>module_pcm_android_aserver.c</code>），暴露一个“android aserver” PCM 设备；Android 侧由 <code>com.winlator.alsaserver</code> 实现服务器端点，一个原生客户端（<code>app/src/main/cpp/winlator/</code> 中的音频代码）把 PCM 帧送到应用。无论音频走 PulseAudio 路线还是 ALSA 路线，结构完全相同：一个客户音频 API、一个套接字、一个原生 Android 端点。</p>
+<h3 id="6684-经-aaudio-抵达扬声器">66.8.4 经 AAudio 抵达扬声器</h3>
+<p>Android 端点最终把解码后的 PCM 写入一个 Android 音频流，最自然的 API 是第 15 章的 <strong>AAudio</strong>。流由 <code>AAudio_createStreamBuilder</code>（<code>frameworks/av/media/libaaudio/include/aaudio/AAudio.h:1216</code>）创建，然后配置、打开，用 <code>AAudioStream_write</code> 喂数据，此后帧经音频 HAL 流向扬声器。（更老或受 <code>targetSdk</code> 约束的构建可能改用 <code>AudioTrack</code> 或 OpenSL ES，但 AAudio 是现代的低延迟路径。）</p>
+<p>因此音频链的终点，与任何原生 Android 游戏的音频终点，是同一个 AOSP 子系统。</p>
+<h3 id="6685-延迟">66.8.5 延迟</h3>
+<p>音频穿过一个客户 API、一个套接字和一个服务器，代价是延迟。这套栈为此做了调优：PulseAudio 配置了刻意偏大的缓冲，各容器把 <code>PULSE_LATENCY_MSEC</code> 设在一百多毫秒的量级。这是用响应性换播放无杂音，以抵抗模拟与 IPC 引入的抖动。</p>
+<p>这是务实的选择。经过这么多层，完美的紧音频延迟不可能达到；对多数游戏而言，稳定播放比几十毫秒的滞后更重要。</p>
+<hr>
+<h2 id="669-汇总追踪三条路径">66.9 汇总：追踪三条路径</h2>
+<p>要把整章收拢，最清楚的办法是跟着三个不同的操作从游戏一路下到 Android 平台，注意每一个在层间走的是不同路线。</p>
+<h4 id="图三个操作三条穿越栈的路线">图：三个操作，三条穿越栈的路线</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#F97583">graph</span><span style="color:#B392F0"> TD</span></span>
+<span class="line"><span style="color:#F97583">    subgraph</span><span style="color:#B392F0"> G</span><span style="color:#E1E4E8">["</span><span style="color:#FFAB70">Windows 游戏</span><span style="color:#E1E4E8">（</span><span style="color:#FFAB70">被模拟的 x86-64</span><span style="color:#E1E4E8">）"]</span></span>
+<span class="line"><span style="color:#FFAB70">        D3D</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"D3D11 绘制调用"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        FILE</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"CreateFile 调用"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">        SND</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"WASAPI 写入"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#F97583">    end</span></span>
+<span class="line"><span style="color:#FFAB70">    D3D </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"原生 ARM64"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> DXVKn</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"DXVK 转 Vulkan"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> GPUn</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"Vortek / Turnip 到 Adreno"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    FILE </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"NT 系统调用"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> NTDLL</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"ntdll 系统调用分派器"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> WS</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"wineserver + Linux fd"</span><span style="color:#F97583">]</span></span>
+<span class="line"><span style="color:#FFAB70">    SND </span><span style="color:#F97583">--&gt;|</span><span style="color:#9ECBFF">"原生 ARM64"</span><span style="color:#F97583">|</span><span style="color:#FFAB70"> PULSEn</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"winepulse 到 PulseAudio"</span><span style="color:#F97583">]</span><span style="color:#F97583"> --&gt;</span><span style="color:#FFAB70"> AAUDIOn</span><span style="color:#F97583">[</span><span style="color:#9ECBFF">"AAudio"</span><span style="color:#F97583">]</span></span></code></pre>
+<ol>
+<li>
+<p><strong>一次 Direct3D 11 绘制调用。</strong> 游戏的 <code>ID3D11DeviceContext::Draw</code> 是一次 x86-64 调用（被模拟），它进入 DXVK —— 在 ARM64EC 下是原生的，构建 Vulkan 命令缓冲；随后调用经 thunk（Turnip）或套接字（Vortek）跨过 libc 边界抵达 Adreno 驱动，由 SurfaceFlinger 合成结果。这几乎全都不被模拟，只有最初那个调用点被模拟。</p>
+</li>
+<li>
+<p><strong>一次 <code>CreateFile</code> 调用。</strong> 游戏请求打开一个文件，这是 Windows API 调用，会变成 NT 系统调用：调用经 Wine 的 <code>__wine_syscall_dispatcher</code> 汇入 <code>ntdll.so</code>，该库自己把 NT 路径翻成 Unix 路径（<code>nt_to_unix_file_name</code>，<code>dlls/ntdll/unix/file.c</code>），再以一个 <code>create_file</code> 请求把该 Unix 路径发给 wineserver。</p>
+<p>服务器打开文件并返回一个 Windows <code>HANDLE</code>；需要时，底层 Linux fd 经 <code>SCM_RIGHTS</code> 从服务器取回。途中 PRoot 或 <code>libredirect</code> 把路径重映射进 rootfs，Linux 的 <code>openat</code> 最终落在应用私有存储里。不涉及 GPU、不涉及音频，机制与路径 1 完全不同。</p>
+</li>
+<li>
+<p><strong>一次音频缓冲写入。</strong> 游戏的 WASAPI 写入进入 <code>winepulse.drv</code>（ARM64EC 下原生），驱动经 PulseAudio 套接字把 PCM 送到应用内服务器，服务器把它写进 AAudio 流，抵达扬声器。</p>
+</li>
+</ol>
+<h2 id="三个操作三条完全不同的路径而只有画在被模拟盒子之内的部分才真正被逐指令翻译整套栈的全部艺术就在于让那个盒子保持小">三个操作、三条完全不同的路径，而只有画在“被模拟盒子”之内的部分才真正被逐指令翻译。整套栈的全部艺术，就在于让那个盒子保持小。</h2>
+<h2 id="6610-android-17-为这套栈带来了什么变化">66.10 Android 17 为这套栈带来了什么变化</h2>
+<p>本章没有任何翻译项目随 AOSP 发布，所以 Android 17 并没有“加入”一个 Windows 游戏运行时。17 做的是挪动这套栈所站的<em>平台地板</em>。有三处变化值得钉住，因为它们各自在帮助或约束上方某一层。</p>
+<h3 id="66101-这套栈所依托的平台接口是稳定的">66.10.1 这套栈所依托的平台接口是稳定的</h3>
+<p>整个设计能成立，是因为它只碰公开、稳定的 AOSP 表面。这些表面是：</p>
+<ul>
+<li>Vulkan loader（<code>frameworks/native/vulkan/libvulkan/driver.cpp</code>）</li>
+<li>原生窗口 API（<code>frameworks/native/libs/nativewindow/include/android/native_window.h</code>）</li>
+<li><code>AHardwareBuffer</code></li>
+<li>AAudio（<code>frameworks/av/media/libaaudio/include/aaudio/AAudio.h</code>）</li>
+<li><code>ASharedMemory</code>（<code>frameworks/native/include/android/sharedmem.h</code>）</li>
+<li><code>android_dlopen_ext</code> 的扩展标志（<code>bionic/libc/include/android/dlext.h</code> —— 实践中稳定，尽管命名空间标志本身被标注为仅限内部使用）</li>
+<li>链接器的 W^X 规则（<code>bionic/linker/linker_phdr.cpp</code>）</li>
+</ul>
+<p>在 Android 17 中，这些全部在场，契约与前面各节所依赖的一致。这正是 Winlator 这类应用能跨版本持续工作、无需平台补丁的原因：这套栈在底部什么也没发明，因此它继承该版本公开 Vulkan、音频与链接器表面所提供的一切。</p>
+<h3 id="66102-berberis-不是这套栈而-17-重组了它">66.10.2 Berberis 不是这套栈，而 17 重组了它</h3>
+<p>很容易以为 Android 自己的二进制翻译器必然参与其中 —— 并没有。Android 17 重组了 <strong>Berberis</strong>（第 19 章）：其 CPU 模拟核的每个模块都被归并到新的 <code>frameworks/libs/binary_translation/cpu_emulation/</code> 目录下，三层引擎（<code>cpu_emulation/interpreter/</code>、<code>cpu_emulation/lite_translator/</code>、<code>cpu_emulation/heavy_optimizer/</code>）与层分派器（<code>cpu_emulation/translator/</code>）如今是它下面的同级目录。</p>
+<p>但 Berberis 翻译的是 <strong>riscv64 客户代码到 x86_64 宿主</strong>（<code>frameworks/libs/binary_translation/README.md</code>），并通过 Native Bridge 插进 ART（<code>frameworks/libs/binary_translation/native_bridge/</code>）。对 PC 游戏而言这是错的方向（riscv64 到 x86_64，而非 x86-64 到 AArch64），也是错的集成点（ART 内的 APK 代码，而非整个 Windows 进程）。</p>
+<p>17 的这次重组真实存在，也对第 19 章有意义，但它在本章里什么也没改变：这里的 x86-64 到 AArch64 翻译仍完全由 FEX 与 Box64 完成，没有任何 AOSP 自带翻译器与之竞争。</p>
+<h3 id="66103-angle-在哪里适用在哪里不适用">66.10.3 ANGLE 在哪里适用，在哪里不适用</h3>
+<p>Android 的 GLES-on-Vulkan 翻译器 <strong>ANGLE</strong>（<code>external/angle/</code>，第 13 章）是平台自己对“在只有 Vulkan 驱动的环境里表达 OpenGL ES”的答案，它在概念上与客户内部的 Zink 与 <code>wined3d</code>-to-GL 路径重叠。把 ANGLE 说成 Android 17 上的“默认”很诱人，但 EGL 加载器自己的注释明说它不是多数设备上的默认 GLES 驱动（<code>frameworks/native/opengl/libs/EGL/Loader.cpp:555</code>），而是按应用选择或经系统配置启用。</p>
+<p>对这套栈而言，实务结论没有变化：客户自己做 GL 或 D3D 到 Vulkan 的翻译，并经 Vulkan loader 抵达 GPU，所以设备的 ANGLE 设置既不帮也不碍一个 Windows 游戏。两者是同一个形状的问题在 libc 边界两侧的平行解法，而不是共享路径。</p>
+<hr>
+<h2 id="6611-动手试试">66.11 动手试试</h2>
+<p>这些练习需要一份 GameNative 源码检出，以及一台装了 Winlator 类应用的设备或模拟器。读源码只需要一次 clone；设备上的步骤假定你已合法安装了此类应用，并拥有一个自己的游戏。</p>
+<ol>
+<li>
+<p><strong>从默认值把整套栈读出来。</strong> Clone GameNative，打开 <code>app/src/main/java/com/winlator/container/Container.java</code> 与 <code>app/src/main/java/com/winlator/core/DefaultVersion.java</code>。记下默认的模拟器、图形驱动、音频驱动与 DX wrapper，记下 Wine、DXVK、VKD3D、Turnip 的钉住版本。你刚刚用两个文件重建了整条默认流水线。</p>
+</li>
+<li>
+<p><strong>找到启动命令。</strong> 读 <code>app/src/main/java/com/winlator/xenvironment/components/GuestProgramLauncherComponent.java</code>，找到它拼接 <code>box64 &lt;guest exe&gt;</code> 命令的位置。再读 <code>BionicProgramLauncherComponent.java</code>，找到它按“Wine 构建是否为 ARM64EC”分支的位置，比较两条启动路径。</p>
+</li>
+<li>
+<p><strong>检查打包的组件。</strong> 列出 <code>app/src/main/assets/</code>，找出 FEX、Box64、DXVK 与 Vulkan 驱动的 <code>.tzst</code>/<code>.txz</code> 压缩包，找出按需取回其余组件的 <code>*_download.json</code> 清单，记下哪些在 APK 内、哪些要下载。</p>
+</li>
+<li>
+<p><strong>在设备上观察进程。</strong> 在应用里运行一个游戏，用 <code>adb shell ps -A</code> 找在应用 UID 下运行的 Wine、wineserver、PulseAudio 与 X 服务器进程；再对 Wine 进程运行 <code>adb shell cat /proc/&lt;pid&gt;/maps</code>，观察 JIT 的匿名可执行映射与 rootfs 库。</p>
+</li>
+<li>
+<p><strong>看见那些套接字。</strong> 对 Wine 进程运行 <code>adb shell ls -l /proc/&lt;pid&gt;/fd</code>，找出把它连到 wineserver、Vulkan 渲染器与 PulseAudio 的 Unix 域套接字 —— 这些就是 66.4.5 的边界跨越被具象化出来的样子。</p>
+</li>
+<li>
+<p><strong>探索 prefix。</strong> 在应用数据目录中找到该容器的 Wine prefix，查看 <code>drive_c/windows/system32</code> 里覆盖了 Wine 内置 Direct3D 的 DXVK DLL，查看 <code>user.reg</code> 中把这些 DLL 放进去的 <code>Software\Wine\DllOverrides</code> 条目。</p>
+</li>
+<li>
+<p><strong>确认 AOSP 触点。</strong> 在一份 AOSP 检出中打开 <code>frameworks/native/vulkan/libvulkan/driver.cpp</code> 的 <code>LoadDriver</code> 函数（第 153 行），找到它的两条分支：带 <code>android_dlopen_ext</code> 与 <code>ANDROID_DLEXT_USE_NAMESPACE</code> 的分支用于更新过的驱动，带 <code>android_load_sphal_library</code> 的分支用于内置驱动。整条图形栈最终汇入的，就是这个加载器。</p>
+</li>
+</ol>
+<hr>
+<h2 id="6612-小结">66.12 小结</h2>
+<p>一个 Windows 游戏在未 root 的 ARM Android 手机上运行，靠的是一串单一职责的翻译层，每一层填补 Windows x86-64 游戏与本书其余章节所讲 AOSP 内部机制之间的一道鸿沟。</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>它解决的问题</th>
+<th>关键技术</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GameNative 应用</td>
+<td>编排、商店、打包</td>
+<td>Pluvia + Winlator 嫁接，GPL-3.0</td>
+</tr>
+<tr>
+<td>rootfs（imagefs）</td>
+<td>一个无 root 的 glibc Linux 用户环境</td>
+<td>解到应用存储的 Ubuntu 树，经 PRoot 或 bionic 加载器进入</td>
+</tr>
+<tr>
+<td>bionic 重定向</td>
+<td>在 <code>bionic</code> 系统上跑 glibc 软件</td>
+<td>路径改写、SysV-SHM 架在 ashmem 上、IPC 服务器</td>
+</tr>
+<tr>
+<td>FEX / Box64</td>
+<td>AArch64 上的 x86-64 指令</td>
+<td>dynarec、TSO 模拟、thunk 对包装库</td>
+</tr>
+<tr>
+<td>ARM64EC / WoW64</td>
+<td>只模拟游戏</td>
+<td>原生 ARM64 Wine，模拟器作为 DLL</td>
+</tr>
+<tr>
+<td>Wine</td>
+<td>Linux 上的 Windows API</td>
+<td>PE/Unix 分界、wineserver、DLL 覆盖</td>
+</tr>
+<tr>
+<td>DXVK / VKD3D</td>
+<td>Vulkan GPU 上的 Direct3D</td>
+<td>D3D 到 Vulkan，作为原生 DLL 覆盖安装</td>
+</tr>
+<tr>
+<td>Turnip / Vortek</td>
+<td>Vulkan 到真实 Adreno GPU</td>
+<td>经 thunk 的 Mesa 驱动，或经套接字的客户端/服务器</td>
+</tr>
+<tr>
+<td>PulseAudio</td>
+<td>Windows 音频到扬声器</td>
+<td>应用内音频服务器，经 AAudio 输出</td>
+</tr>
+</tbody>
+</table>
+<p>反复出现的几课：</p>
+<ol>
+<li>
+<p><strong>两个正交的翻译。</strong> 指令集翻译（FEX/Box64）与 Windows API 翻译（Wine）是完全分开的两个问题。把它们混为一谈，是对这些应用工作原理最常见的误解。</p>
+</li>
+<li>
+<p><strong>能少模拟就少模拟。</strong> 这套栈里每一分性能收益，都来自离开“被模拟盒子”的工作：主要情形是 GPU 驱动的 thunk 与包装器、原生 ARM64 的 DXVK，以及最重要的 ARM64EC —— 它只让游戏自己的代码保持被模拟。</p>
+</li>
+<li>
+<p><strong>libc 边界是难的部分。</strong> glibc 与 <code>bionic</code> 无法共处一个进程。跨边界的三条路（IPC、ABI thunk，或在 <code>bionic</code> 上原生执行）塑造了这套栈里的每一个设计决定。</p>
+</li>
+<li>
+<p><strong>底下全是标准 AOSP。</strong> Vulkan loader、<code>ANativeWindow</code>、<code>AHardwareBuffer</code>、AAudio、链接器命名空间、<code>ASharedMemory</code> 与 W^X 规则，就是任何 Android 应用都在用的平台接口。这套翻译栈在底部什么也没发明，它的天才之处是从高悬其上的一个 Windows 游戏抵达那些公开接口。</p>
+</li>
+</ol>
+<h3 id="关键源文件参考">关键源文件参考</h3>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bionic/libc/include/android/dlext.h:115</code></td>
+<td><code>ANDROID_DLEXT_USE_NAMESPACE</code>，把驱动加载进选定的链接器命名空间</td>
+</tr>
+<tr>
+<td><code>bionic/libc/include/android/dlext.h:80</code></td>
+<td><code>ANDROID_DLEXT_USE_LIBRARY_FD</code>，从 fd 加载库</td>
+</tr>
+<tr>
+<td><code>bionic/linker/linker_phdr.cpp:1057</code></td>
+<td>拒绝同时可写且可执行的 ELF 段（W^X）</td>
+</tr>
+<tr>
+<td><code>bionic/libc/include/sys/mman.h:183</code></td>
+<td><code>memfd_create</code>，匿名共享内存的底层支撑</td>
+</tr>
+<tr>
+<td><code>frameworks/native/include/android/sharedmem.h:78</code></td>
+<td><code>ASharedMemory_create</code>，SysV-SHM 重定向的宿主侧</td>
+</tr>
+<tr>
+<td><code>frameworks/native/vulkan/libvulkan/driver.cpp:153</code></td>
+<td><code>LoadDriver</code>，发现并打开设备 Vulkan 驱动</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/nativewindow/include/android/native_window.h:179</code></td>
+<td><code>ANativeWindow_lock</code>，CPU 呈现路径</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/nativewindow/include/android/native_window.h:188</code></td>
+<td><code>ANativeWindow_unlockAndPost</code>，把帧提交给合成器</td>
+</tr>
+<tr>
+<td><code>frameworks/native/libs/nativewindow/include/android/hardware_buffer.h:479</code></td>
+<td><code>AHardwareBuffer_allocate</code>，零拷贝 GPU 呈现缓冲</td>
+</tr>
+<tr>
+<td><code>frameworks/av/media/libaaudio/include/aaudio/AAudio.h:1216</code></td>
+<td><code>AAudio_createStreamBuilder</code>，音频路径的 Android 出口</td>
+</tr>
+</tbody>
+</table>
+</div></article></main></div><footer class="site-footer">&copy; 2026 qng-stack</footer><script type="module" src="/_astro/BlogPost.astro_astro_type_script_index_0_lang.Cz6GC1N3.js"></script></body></html>
